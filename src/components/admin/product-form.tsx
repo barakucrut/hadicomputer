@@ -21,6 +21,7 @@ import { Select } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { HugeIconTrash } from "@/components/admin/ui/huge-icons";
+import { useToast, setFlashMessage } from "@/components/admin/ui/toast";
 import Link from "next/link";
 
 interface ProductFormProps {
@@ -30,6 +31,7 @@ interface ProductFormProps {
 
 export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
   const router = useRouter();
+  const toast = useToast();
   const [categories, setCategories] = React.useState<any[]>([]);
   const [brands, setBrands] = React.useState<any[]>([]);
   const [saving, setSaving] = React.useState(false);
@@ -230,9 +232,11 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
         throw new Error(data.error || "Gagal menyimpan produk");
       }
 
+      setFlashMessage(isEdit ? "Produk berhasil diperbarui!" : "Perangkat baru berhasil ditambahkan!");
       router.push("/admin/produk");
       router.refresh();
     } catch (err: any) {
+      toast.error(err.message || "Gagal menyimpan produk");
       setError(err.message || "Gagal menyimpan produk");
     } finally {
       setSaving(false);

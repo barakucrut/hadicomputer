@@ -569,6 +569,88 @@
   color: #991b1b !important;
 }
 
+/* ==========================================================
+   TOP-SCREEN FLASH NOTIFICATIONS (5s DURATION)
+   ========================================================== */
+.admin-flash-container {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+  max-width: 90vw;
+  width: auto;
+}
+
+.admin-flash-message {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  box-shadow: 0 10px 30px -4px rgba(0, 0, 0, 0.16), 0 4px 12px -2px rgba(0, 0, 0, 0.08);
+  animation: flashSlideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.2s ease;
+}
+
+@keyframes flashSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.admin-flash-success {
+  background-color: #ecfdf5 !important;
+  border: 1px solid #6ee7b7 !important;
+  color: #065f46 !important;
+}
+
+.admin-flash-success svg {
+  color: #059669 !important;
+  flex-shrink: 0;
+}
+
+.admin-flash-error {
+  background-color: #fef2f2 !important;
+  border: 1px solid #fca5a5 !important;
+  color: #991b1b !important;
+}
+
+.admin-flash-error svg {
+  color: #dc2626 !important;
+  flex-shrink: 0;
+}
+
+.admin-flash-close {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  margin-left: 8px;
+  display: flex;
+  align-items: center;
+  color: inherit;
+  opacity: 0.65;
+  transition: opacity 0.15s ease;
+}
+.admin-flash-close:hover {
+  opacity: 1;
+}
+
 /* Floating Toast Notification */
 .admin-toast-fixed {
   position: fixed;

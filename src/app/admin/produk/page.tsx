@@ -27,6 +27,7 @@ import { DualRangeSlider } from "@/components/ui";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { AdminPagination } from "@/components/admin/ui/pagination";
 import { ConfirmDialog } from "@/components/admin/ui/confirm-dialog";
+import { useToast } from "@/components/admin/ui/toast";
 import {
   Table,
   TableBody,
@@ -43,6 +44,7 @@ const SLIDER_STEP = 500000;
 
 export default function AdminProductsPage() {
   const router = useRouter();
+  const toast = useToast();
   const [products, setProducts] = React.useState<any[]>([]);
   const [pagination, setPagination] = React.useState({
     total: 0,
@@ -241,9 +243,12 @@ export default function AdminProductsPage() {
       const res = await fetch(`/api/admin/products/${deleteTarget.id}`, { method: "DELETE" });
       if (res.ok) {
         fetchProducts();
+        toast.success(`Produk "${deleteTarget.name}" berhasil dihapus!`);
+      } else {
+        toast.error("Gagal menghapus produk.");
       }
     } catch (err) {
-      console.error(err);
+      toast.error("Terjadi kesalahan saat menghapus produk.");
     } finally {
       setDeleting(false);
       setDeleteTarget(null);
@@ -268,9 +273,12 @@ export default function AdminProductsPage() {
         setProducts((prev) =>
           prev.map((item) => (item.id === p.id ? { ...item, availability: nextStatus } : item))
         );
+        toast.success(`Status ${p.name} diubah menjadi ${nextStatus}!`);
+      } else {
+        toast.error("Gagal mengubah status ketersediaan.");
       }
     } catch (err) {
-      console.error(err);
+      toast.error("Terjadi kesalahan saat mengubah status.");
     }
   }
 

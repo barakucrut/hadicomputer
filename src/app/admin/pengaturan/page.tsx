@@ -3,8 +3,6 @@
 import * as React from "react";
 import {
   Save,
-  CheckCircle,
-  AlertCircle,
   Phone,
   MapPin,
   Globe,
@@ -14,7 +12,6 @@ import {
   EyeOff,
 } from "lucide-react";
 import { Button } from "@/components/admin/ui/button";
-import { Badge } from "@/components/admin/ui/badge";
 import {
   Card,
   CardContent,
@@ -24,8 +21,10 @@ import {
 } from "@/components/admin/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/admin/ui/toast";
 
 export default function AdminSettingsPage() {
+  const toast = useToast();
   const [settings, setSettings] = React.useState<any>({
     storeName: "Hadi Computer",
     tagline: "Pusat Laptop & Komputer Terpercaya",
@@ -44,7 +43,6 @@ export default function AdminSettingsPage() {
 
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
-  const [savedSuccess, setSavedSuccess] = React.useState(false);
 
   // Password change state
   const [currentPassword, setCurrentPassword] = React.useState("");
@@ -53,8 +51,6 @@ export default function AdminSettingsPage() {
   const [showCurrentPassword, setShowCurrentPassword] = React.useState(false);
   const [showNewPassword, setShowNewPassword] = React.useState(false);
   const [passwordSaving, setPasswordSaving] = React.useState(false);
-  const [passwordSuccess, setPasswordSuccess] = React.useState<string | null>(null);
-  const [passwordError, setPasswordError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     fetch("/api/admin/settings")
@@ -69,7 +65,6 @@ export default function AdminSettingsPage() {
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
-    setSavedSuccess(false);
 
     try {
       const res = await fetch("/api/admin/settings", {
@@ -78,11 +73,12 @@ export default function AdminSettingsPage() {
         body: JSON.stringify(settings),
       });
       if (res.ok) {
-        setSavedSuccess(true);
-        setTimeout(() => setSavedSuccess(false), 3000);
+        toast.success("Pengaturan toko berhasil diperbarui!");
+      } else {
+        toast.error("Gagal menyimpan pengaturan toko.");
       }
     } catch (err) {
-      console.error(err);
+      toast.error("Terjadi kesalahan saat menyimpan pengaturan toko.");
     } finally {
       setSaving(false);
     }
@@ -90,21 +86,19 @@ export default function AdminSettingsPage() {
 
   async function handleChangePassword(e: React.FormEvent) {
     e.preventDefault();
-    setPasswordError(null);
-    setPasswordSuccess(null);
 
     if (!currentPassword || !newPassword || !confirmPassword) {
-      setPasswordError("Semua kolom password wajib diisi.");
+      toast.error("Semua kolom password wajib diisi.");
       return;
     }
 
     if (newPassword.length < 6) {
-      setPasswordError("Password baru minimal 6 karakter.");
+      toast.error("Password baru minimal 6 karakter.");
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setPasswordError("Konfirmasi password baru tidak sesuai.");
+      toast.error("Konfirmasi password baru tidak sesuai.");
       return;
     }
 
@@ -125,13 +119,12 @@ export default function AdminSettingsPage() {
         throw new Error(data.error || "Gagal mengubah password.");
       }
 
-      setPasswordSuccess("Password berhasil diperbarui!");
+      toast.success("Password admin berhasil diperbarui!");
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-      setTimeout(() => setPasswordSuccess(null), 5000);
     } catch (err: any) {
-      setPasswordError(err.message || "Terjadi kesalahan saat mengubah password.");
+      toast.error(err.message || "Terjadi kesalahan saat mengubah password.");
     } finally {
       setPasswordSaving(false);
     }
@@ -143,7 +136,7 @@ export default function AdminSettingsPage() {
 
   return (
     <div className="space-y-10 max-w-4xl pb-16">
-      {/* 1. Pengaturan Toko */}
+      {/* 1. Pengaturan Toko Form */}
       <form onSubmit={handleSave} className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
@@ -152,29 +145,10 @@ export default function AdminSettingsPage() {
               Konfigurasi profil toko, nomor resmi WhatsApp, alamat fisik, dan link media sosial.
             </p>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            {savedSuccess && (
-              <Badge
-                variant="success"
-                style={{
-                  padding: "6px 12px",
-                  fontSize: "12px",
-                  textTransform: "none",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  animation: "adminAlertSlideIn 0.2s ease-out",
-                }}
-              >
-                <CheckCircle size={14} style={{ color: "#15803d" }} />
-                <span>Pengaturan berhasil disimpan!</span>
-              </Badge>
-            )}
-            <Button type="submit" disabled={saving} className="flex items-center gap-2">
-              <Save size={16} />
-              <span>{saving ? "Menyimpan..." : "Simpan Pengaturan"}</span>
-            </Button>
-          </div>
+          <Button type="submit" disabled={saving} className="flex items-center gap-2">
+            <Save size={16} />
+            <span>{saving ? "Menyimpan..." : "Simpan Pengaturan"}</span>
+          </Button>
         </div>
 
         {/* 1.1 Kontak WhatsApp */}
@@ -305,10 +279,25 @@ export default function AdminSettingsPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Button Simpan Pengaturan di bawah Akun Media Sosial Resmi */}
+        <div style={{ display: "flex", justifyContent: "flex-end", paddingTop: "8px" }}>
+          <Button type="submit" disabled={saving} className="flex items-center gap-2">
+            <Save size={16} />
+            <span>{saving ? "Menyimpan..." : "Simpan Pengaturan"}</span>
+          </Button>
+        </div>
       </form>
 
-      {/* 2. Keamanan Akun & Ganti Password */}
-      <div className="pt-6 border-t border-[#e5e7eb] space-y-6">
+      {/* 2. Keamanan Akun & Ganti Password (Diberi Jarak Bernapas yang Lapang) */}
+      <div
+        style={{
+          marginTop: "56px",
+          paddingTop: "40px",
+          borderTop: "1px solid #e5e7eb",
+        }}
+        className="space-y-6"
+      >
         <div>
           <h2 className="text-2xl font-black text-[#111413] tracking-tight">Keamanan Akun</h2>
           <p className="text-sm text-[#525854] mt-1">
@@ -328,20 +317,6 @@ export default function AdminSettingsPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleChangePassword} className="space-y-4 max-w-xl">
-              {passwordSuccess && (
-                <div className="admin-alert admin-alert-success" role="status">
-                  <CheckCircle size={16} />
-                  <span>{passwordSuccess}</span>
-                </div>
-              )}
-
-              {passwordError && (
-                <div className="admin-alert admin-alert-error" role="alert">
-                  <AlertCircle size={16} />
-                  <span>{passwordError}</span>
-                </div>
-              )}
-
               <div>
                 <Label htmlFor="curr-pass">Password Saat Ini (Lama) *</Label>
                 <div style={{ position: "relative" }}>
@@ -441,21 +416,6 @@ export default function AdminSettingsPage() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Floating Success Toasts */}
-      {savedSuccess && (
-        <div className="admin-toast-fixed" role="status">
-          <CheckCircle size={18} style={{ color: "#10b981", flexShrink: 0 }} />
-          <span>Pengaturan toko berhasil diperbarui!</span>
-        </div>
-      )}
-
-      {passwordSuccess && (
-        <div className="admin-toast-fixed" role="status">
-          <CheckCircle size={18} style={{ color: "#10b981", flexShrink: 0 }} />
-          <span>Password berhasil diperbarui!</span>
-        </div>
-      )}
     </div>
   );
 }

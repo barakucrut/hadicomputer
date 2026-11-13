@@ -17,6 +17,7 @@ import {
   Menu,
   X,
 } from "lucide-react";
+import { ToastProvider } from "@/components/admin/ui/toast";
 import "@/app/admin.css";
 
 interface AdminShellProps {
@@ -31,7 +32,7 @@ export function AdminShell({ children, user }: AdminShellProps) {
 
   // If on login page, don't show admin shell
   if (pathname === "/admin/login") {
-    return <>{children}</>;
+    return <ToastProvider>{children}</ToastProvider>;
   }
 
   const navItems = [
@@ -55,7 +56,8 @@ export function AdminShell({ children, user }: AdminShellProps) {
   }
 
   return (
-    <div className="admin-shell-root">
+    <ToastProvider>
+      <div className="admin-shell-root">
       {/* Mobile Drawer Backdrop */}
       {mobileMenuOpen && (
         <div
@@ -278,5 +280,6 @@ export function AdminShell({ children, user }: AdminShellProps) {
         <main className="admin-main-content">{children}</main>
       </div>
     </div>
+    </ToastProvider>
   );
 }

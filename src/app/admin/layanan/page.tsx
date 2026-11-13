@@ -14,8 +14,10 @@ import {
 } from "@/components/admin/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/admin/ui/toast";
 
 export default function AdminServicesPage() {
+  const toast = useToast();
   const [services, setServices] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [editingService, setEditingService] = React.useState<any | null>(null);
@@ -54,9 +56,12 @@ export default function AdminServicesPage() {
       if (res.ok) {
         setDialogOpen(false);
         fetchServices();
+        toast.success(`Informasi layanan "${editingService.title}" berhasil diperbarui!`);
+      } else {
+        toast.error("Gagal menyimpan informasi layanan.");
       }
     } catch (err) {
-      console.error(err);
+      toast.error("Terjadi kesalahan saat menyimpan layanan.");
     }
   }
 

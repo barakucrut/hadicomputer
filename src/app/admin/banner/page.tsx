@@ -33,8 +33,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/admin/ui/toast";
 
 export default function AdminBannersPage() {
+  const toast = useToast();
   const [banners, setBanners] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [viewMode, setViewMode] = React.useState<"list" | "editor">("list");
@@ -109,9 +111,12 @@ export default function AdminBannersPage() {
       const res = await fetch(`/api/admin/banners?id=${deleteTarget.id}`, { method: "DELETE" });
       if (res.ok) {
         setBanners((prev) => prev.filter((b) => b.id !== deleteTarget.id));
+        toast.success(`Banner "${deleteTarget.title}" berhasil dihapus!`);
+      } else {
+        toast.error("Gagal menghapus banner.");
       }
     } catch (err) {
-      console.error(err);
+      toast.error("Terjadi kesalahan saat menghapus banner.");
     } finally {
       setDeleting(false);
       setDeleteTarget(null);
@@ -221,7 +226,7 @@ export default function AdminBannersPage() {
 
   async function handleSaveBanner() {
     if (!editingBanner || !editingBanner.title) {
-      alert("Judul banner wajib diisi.");
+      toast.error("Judul banner wajib diisi.");
       return;
     }
 
@@ -238,13 +243,14 @@ export default function AdminBannersPage() {
       });
 
       if (res.ok) {
+        toast.success(isNew ? "Banner baru berhasil dibuat!" : "Banner berhasil diperbarui!");
         await fetchBanners();
         setViewMode("list");
       } else {
-        alert("Gagal menyimpan banner");
+        toast.error("Gagal menyimpan banner.");
       }
     } catch (err) {
-      alert("Terjadi kesalahan saat menyimpan banner");
+      toast.error("Terjadi kesalahan saat menyimpan banner.");
     } finally {
       setSaving(false);
     }

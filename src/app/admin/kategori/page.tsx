@@ -29,8 +29,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CategoryIcon } from "@/components/ui";
 import { IconPicker } from "@/components/admin/ui/icon-picker";
+import { useToast } from "@/components/admin/ui/toast";
 
 export default function AdminCategoriesBrandsPage() {
+  const toast = useToast();
   const [categories, setCategories] = React.useState<any[]>([]);
   const [brands, setBrands] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -127,9 +129,14 @@ export default function AdminCategoriesBrandsPage() {
       if (res.ok) {
         setDialogOpen(false);
         fetchData();
+        toast.success(
+          `${dialogMode === "cat" ? "Kategori" : "Merek"} "${name}" berhasil disimpan!`
+        );
+      } else {
+        toast.error(`Gagal menyimpan ${dialogMode === "cat" ? "kategori" : "merek"}.`);
       }
     } catch (err) {
-      console.error(err);
+      toast.error("Terjadi kesalahan saat menyimpan data.");
     }
   }
 
@@ -146,9 +153,16 @@ export default function AdminCategoriesBrandsPage() {
         : `/api/admin/brands?id=${deleteTarget.id}`;
     try {
       const res = await fetch(endpoint, { method: "DELETE" });
-      if (res.ok) fetchData();
+      if (res.ok) {
+        fetchData();
+        toast.success(
+          `${deleteTarget.mode === "cat" ? "Kategori" : "Merek"} "${deleteTarget.name}" berhasil dihapus!`
+        );
+      } else {
+        toast.error("Gagal menghapus data.");
+      }
     } catch (err) {
-      console.error(err);
+      toast.error("Terjadi kesalahan saat menghapus data.");
     } finally {
       setDeleting(false);
       setDeleteTarget(null);
