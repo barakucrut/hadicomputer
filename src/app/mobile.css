@@ -1,0 +1,497 @@
+/* Responsive variants are hidden from the focus order on the other layout. */
+.home-categories-mobile,
+.hero-copy .hero-mobile-copy,
+.product-mobile-only,
+.button.mobile-floating-whatsapp {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .topbar {
+    height: 34px;
+  }
+  .topbar .container {
+    justify-content: flex-end;
+  }
+  .topbar .container > span:first-child {
+    display: none;
+  }
+  .topbar-hours {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: #fce8e8;
+    color: #981923;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.4;
+    white-space: nowrap;
+  }
+  .topbar-hours::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .header-main {
+    gap: 8px;
+    padding-block: 10px;
+  }
+  .header-main .logo {
+    width: 112px;
+    height: 40px;
+  }
+  .header-main .logo img {
+    width: 127px;
+    top: -22px;
+    left: -7px;
+  }
+  .header-search {
+    height: 46px;
+    padding-inline: 12px 0;
+    gap: 10px;
+  }
+  .header-search input {
+    font-size: 13px;
+    min-width: 0;
+  }
+  .header-search button {
+    flex: 0 0 44px;
+    height: 44px;
+    border-inline-start: 1px solid #ececea;
+    border-radius: 0 6px 6px 0;
+    color: #981923;
+  }
+  .mobile-menu-button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .site-header[data-home="true"] .nav-border {
+    display: none;
+  }
+  .mobile-navigation a {
+    min-height: 44px;
+    align-items: center;
+    font-size: 14px;
+  }
+
+  .home-categories-mobile {
+    display: block;
+  }
+  .home-categories-desktop {
+    display: none;
+  }
+  .home-hero-wrap {
+    padding-top: 12px;
+  }
+  .home-page .hero,
+  .home-page .hero-slides {
+    height: 430px;
+    min-height: 430px;
+  }
+  .home-page .hero-copy {
+    padding: 24px 20px 0;
+  }
+  .hero-copy .hero-desktop-copy {
+    display: none;
+  }
+  .hero-copy .hero-mobile-copy {
+    display: block;
+  }
+  .home-page .hero-copy h1 {
+    font-size: clamp(27px, 7.6vw, 34px);
+    line-height: 1.16;
+    letter-spacing: -0.045em;
+    margin-bottom: 10px;
+  }
+  .home-page .hero-copy .eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    margin-bottom: 12px;
+  }
+  .home-page .hero-copy p {
+    font-size: 13px;
+    line-height: 1.55;
+    max-width: 300px;
+    margin-bottom: 14px;
+  }
+  .home-page .hero-copy .button {
+    min-height: 44px;
+    font-size: 12px;
+    padding: 10px 14px;
+  }
+  .home-page .hero-art {
+    height: 53%;
+  }
+  .home-page .hero-art img {
+    object-position: center 60%;
+  }
+  .home-page .hero-controls {
+    left: 12px;
+    right: 12px;
+    bottom: 10px;
+    gap: 8px;
+    padding: 0 4px;
+    border-radius: 9px;
+    background: #ffffffed;
+    color: #252b27;
+  }
+  .home-page .hero-controls .slide-count {
+    display: none;
+  }
+  .home-page .slide-progress {
+    gap: 0;
+  }
+  .home-page .slide-progress button {
+    width: 44px;
+    height: 44px;
+    padding: 0 6px;
+  }
+  .home-page .slide-progress button span {
+    width: 100%;
+    background: #ced2cc;
+  }
+  .home-page .slide-progress button.active span {
+    background: var(--red);
+  }
+  .home-page .slide-arrows {
+    gap: 0;
+  }
+  .home-page .slide-arrows .icon-button {
+    width: 44px;
+    height: 44px;
+    color: #252b27;
+    background: transparent;
+    border: 0;
+  }
+  .home-page .value-strip {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding-block: 18px;
+  }
+  .home-page .value-strip > div:nth-child(n + 3) {
+    display: none;
+  }
+  .home-page .value-strip strong {
+    font-size: 11px;
+    line-height: 1.5;
+  }
+  .home-page .value-strip span {
+    display: none;
+  }
+  .home-page .value-strip > div {
+    gap: 7px;
+    align-items: center;
+  }
+  .home-page .value-strip svg {
+    flex-shrink: 0;
+  }
+
+  .home-page .section {
+    padding-block: 28px;
+  }
+  .home-page .category-section {
+    padding-top: 12px;
+  }
+  .home-page .section-heading {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    margin-bottom: 16px;
+  }
+  .home-page .section-heading > div {
+    width: 100%;
+  }
+  .home-page .section-heading h2 {
+    font-size: 24px;
+    line-height: 1.25;
+    max-width: 100%;
+  }
+  .home-page .section-heading p {
+    font-size: 13px;
+    line-height: 1.65;
+    max-width: 100%;
+    margin-top: 8px;
+  }
+  .home-page .section-heading .eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+  .home-page .section-heading > .text-link {
+    min-height: 44px;
+    margin-top: 0;
+    font-size: 13px;
+    gap: 8px;
+  }
+  .home-page .category-card {
+    min-width: 0;
+    min-height: 100px;
+    padding: 14px 4px;
+    gap: 9px;
+  }
+  .home-page .category-card p {
+    display: none;
+  }
+  .home-page .category-card h3 {
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .home-page .product-grid {
+    gap: 12px 10px;
+  }
+  .home-page .product-card {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    border-radius: 10px;
+  }
+  .home-page .product-desktop-only {
+    display: none;
+  }
+  .home-page .product-mobile-only {
+    display: flex;
+  }
+  .home-page .product-image {
+    aspect-ratio: 1.1;
+    flex-shrink: 0;
+  }
+  .home-page .product-image img {
+    padding: 29px 10px 8px;
+  }
+  .home-page .product-badges {
+    top: 8px;
+    left: 8px;
+    right: 8px;
+  }
+  .home-page .product-badges .badge {
+    font-size: 10px;
+    padding: 3px 6px;
+  }
+  .home-page .badge-discount {
+    display: none;
+  }
+  .home-page .product-info {
+    padding: 11px 10px;
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .home-page .product-brand {
+    font-size: 10px;
+    margin-bottom: 4px;
+  }
+  .home-page .product-info h3 {
+    font-size: 13px;
+    line-height: 1.45;
+    height: 38px;
+    overflow: hidden;
+  }
+  .home-page .product-summary {
+    font-size: 11px;
+    line-height: 1.5;
+    margin-top: 6px;
+    color: #666e64;
+  }
+  .home-page .product-price-wrap {
+    margin-top: 10px;
+    gap: 4px;
+  }
+  .home-page .price-strike-row {
+    gap: 4px;
+  }
+  .home-page
+    .latest-section
+    .product-grid:has(.price-strike-row)
+    .product-price-wrap:not(:has(.price-strike-row)) {
+    padding-top: 21px;
+  }
+  .home-page .price-normal {
+    font-size: 10px;
+  }
+  .home-page .discount-badge {
+    font-size: 10px;
+    padding: 2px 4px;
+  }
+  .home-page .product-price {
+    font-size: 16px;
+    letter-spacing: -0.04em;
+    line-height: 1.5;
+  }
+  .home-page .product-price.contact-price {
+    font-size: 12px;
+    line-height: 24px;
+  }
+  .home-page .product-bonus-tag {
+    display: flex;
+    max-width: 100%;
+    padding: 4px 5px;
+    font-size: 10px;
+    line-height: 1.5;
+  }
+  .home-page .product-bonus-tag span {
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .home-page .stock {
+    font-size: 10px;
+    line-height: 1.5;
+    margin-top: auto;
+    padding-top: 8px;
+    flex-wrap: wrap;
+  }
+  .home-page .variant-count {
+    font-size: 10px;
+  }
+  .home-page .filter-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    gap: 6px;
+    scrollbar-width: thin;
+  }
+  .home-page .filter-tabs button {
+    min-height: 44px;
+    flex-shrink: 0;
+    font-size: 12px;
+  }
+  .home-page .bestsellers-section {
+    display: none;
+  }
+
+  .home-page .need-card {
+    padding: 18px 16px;
+    grid-template-columns: 32px 1fr;
+    gap: 0 12px;
+  }
+  .home-page .need-card h3 {
+    font-size: 15px;
+    padding-right: 16px;
+  }
+  .home-page .need-card p {
+    font-size: 12px;
+    line-height: 1.6;
+    padding-right: 0;
+  }
+  .home-page .need-link {
+    margin-top: 10px;
+    font-size: 11px;
+  }
+  .home-page .gaming-panel {
+    min-height: 390px;
+  }
+  .home-page .gaming-copy {
+    padding: 24px 20px;
+  }
+  .home-page .gaming-copy h2 {
+    font-size: 27px;
+  }
+  .home-page .gaming-copy .eyebrow {
+    font-size: 10px;
+  }
+  .home-page .gaming-copy .button {
+    min-height: 44px;
+  }
+  .home-page .campaign-note {
+    left: 20px;
+    right: 20px;
+    font-size: 10px;
+    line-height: 1.6;
+  }
+  .home-page .service-card {
+    padding: 22px 18px;
+    gap: 14px;
+  }
+  .home-page .service-card p {
+    max-width: none;
+    font-size: 13px;
+    line-height: 1.65;
+  }
+  .home-page .service-card .text-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    margin-top: 4px;
+  }
+  .home-page .store-illustration {
+    min-height: 125px;
+  }
+  .home-page .store-copy h2 {
+    font-size: 25px;
+  }
+  .home-page .store-copy p {
+    font-size: 13px;
+    line-height: 1.65;
+  }
+  .home-page .store-copy .small-note {
+    line-height: 1.7;
+  }
+  .home-page .store-copy .text-link {
+    min-height: 44px;
+  }
+
+  .button.mobile-floating-whatsapp {
+    display: inline-flex;
+    position: fixed;
+    z-index: 45;
+    right: 16px;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    width: 54px;
+    height: 54px;
+    min-height: 54px;
+    padding: 0;
+    border-radius: 50%;
+    background: #157a43;
+    color: white;
+    box-shadow: 0 4px 18px #14342233;
+  }
+  .mobile-floating-whatsapp svg {
+    width: 25px;
+    height: 25px;
+  }
+  .mobile-floating-whatsapp span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  body:has(.home-page) .site-footer {
+    padding-top: 30px;
+    padding-bottom: 76px;
+  }
+  body:has(.home-page) .footer-grid {
+    gap: 24px 16px;
+  }
+  body:has(.home-page) .footer-grid h3 {
+    margin-bottom: 8px;
+    line-height: 1.6;
+  }
+  body:has(.home-page) .footer-grid > div:not(:first-child) > a {
+    min-height: 44px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+  }
+  body:has(.home-page) .footer-grid p {
+    line-height: 1.8;
+  }
+}
+
+@media (max-width: 359px) {
+  .home-page .hero-controls {
+    left: 8px;
+    right: 8px;
+    gap: 0;
+  }
+}

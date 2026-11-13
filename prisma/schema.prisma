@@ -1,0 +1,274 @@
+datasource db {
+  provider = "mysql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ----------------------------------------------------
+// 1. AUTENTIKASI ADMIN / OWNER
+// ----------------------------------------------------
+model AdminUser {
+  id           String    @id @default(cuid())
+  email        String    @unique @db.VarChar(191)
+  passwordHash String    @db.VarChar(255)
+  name         String    @db.VarChar(100)
+  role         String    @default("OWNER") @db.VarChar(30)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("admin_users")
+}
+
+// ----------------------------------------------------
+// 2. KATEGORI & MEREK
+// ----------------------------------------------------
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @db.VarChar(100)
+  slug        String    @unique @db.VarChar(100)
+  icon        String?   @db.VarChar(50) // e.g. "laptop", "monitor", "cpu"
+  description String?   @db.Text
+  sortOrder   Int       @default(0)
+  isActive    Boolean   @default(true)
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("categories")
+}
+
+model Brand {
+  id        String    @id @default(cuid())
+  name      String    @db.VarChar(100)
+  slug      String    @unique @db.VarChar(100)
+  logoUrl   String?   @db.VarChar(255)
+  sortOrder Int       @default(0)
+  isActive  Boolean   @default(true)
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("brands")
+}
+
+// ----------------------------------------------------
+// 3. PRODUK & DETAIL KATALOG
+// ----------------------------------------------------
+enum ProductCondition {
+  BARU
+  BEKAS
+}
+
+enum AvailabilityStatus {
+  TERSEDIA
+  PREORDER
+  HABIS
+}
+
+enum PublicationStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model Product {
+  id                String             @id @default(cuid())
+  code              String             @unique @db.VarChar(50)
+  slug              String             @unique @db.VarChar(150)
+  name              String             @db.VarChar(200)
+  summary           String             @db.VarChar(255)
+  description       String             @db.Text
+  condition         ProductCondition   @default(BARU)
+  basePrice         BigInt?            // null = Hubungi Owner untuk Harga
+  originalPrice     BigInt?            // Harga coret untuk diskon/hemat
+  availability      AvailabilityStatus @default(TERSEDIA)
+  warranty          String             @default("Garansi Toko 1 Bulan") @db.VarChar(100)
+  bonus             String?            @db.VarChar(255)
+  
+  // Tagging & Kurasi Tampilan Beranda
+  isFeatured        Boolean            @default(false)
+  isBestSeller      Boolean            @default(false)
+  isPromo           Boolean            @default(false)
+  isNewArrival      Boolean            @default(false)
+  needs             Json?
+  
+  // Status Publikasi
+  publicationStatus PublicationStatus  @default(PUBLISHED)
+  
+  // Relasi
+  categoryId        String
+  category          Category           @relation(fields: [categoryId], references: [id])
+  brandId           String
+  brand             Brand              @relation(fields: [brandId], references: [id])
+  
+  variants          ProductVariant[]
+  images            ProductImage[]
+  specs             ProductSpec[]
+  inquiryLogs       InquiryLog[]
+
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@index([categoryId])
+  @@index([brandId])
+  @@index([publicationStatus, availability])
+  @@map("products")
+}
+
+model ProductVariant {
+  id            String             @id @default(cuid())
+  productId     String
+  product       Product            @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name          String             @db.VarChar(100)
+  price         BigInt?
+  originalPrice BigInt?
+  availability  AvailabilityStatus @default(TERSEDIA)
+  isDefault     Boolean            @default(false)
+  sortOrder     Int                @default(0)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  @@index([productId])
+  @@map("product_variants")
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String   @db.VarChar(255)
+  altText   String?  @db.VarChar(150)
+  isPrimary Boolean  @default(false)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+  @@map("product_images")
+}
+
+model ProductSpec {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  key       String   @db.VarChar(100)
+  value     String   @db.VarChar(255)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+  @@map("product_specs")
+}
+
+// ----------------------------------------------------
+// 4. BANNER HERO & INTERACTIVE HOTSPOTS
+// ----------------------------------------------------
+model Banner {
+  id        String          @id @default(cuid())
+  title     String          @db.VarChar(150)
+  subtitle  String?         @db.VarChar(255)
+  badgeText String?         @db.VarChar(100)
+  ctaLabel  String?         @db.VarChar(50)
+  ctaUrl    String?         @db.VarChar(255)
+  imageUrl  String          @db.VarChar(255)
+  imageAlt  String          @db.VarChar(150)
+  bgTheme   String          @default("dark") @db.VarChar(20)
+  sortOrder Int             @default(0)
+  isActive  Boolean         @default(true)
+  hotspots  BannerHotspot[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@map("banners")
+}
+
+model BannerHotspot {
+  id        String   @id @default(cuid())
+  bannerId  String
+  banner    Banner   @relation(fields: [bannerId], references: [id], onDelete: Cascade)
+  label     String   @db.VarChar(100)
+  xPercent  Float
+  yPercent  Float
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([bannerId])
+  @@map("banner_hotspots")
+}
+
+// ----------------------------------------------------
+// 5. LAYANAN & SERVIS
+// ----------------------------------------------------
+model Service {
+  id                 String       @id @default(cuid())
+  title              String       @db.VarChar(150)
+  slug               String       @unique @db.VarChar(150)
+  summary            String       @db.VarChar(255)
+  description        String       @db.Text
+  estimatedTime      String       @db.VarChar(100)
+  priceInfo          String       @db.VarChar(100)
+  ctaWhatsappText    String       @db.VarChar(255)
+  iconName           String?      @db.VarChar(50)
+  imageUrl           String?      @db.VarChar(255)
+  isActive           Boolean      @default(true)
+  sortOrder          Int          @default(0)
+  inquiryLogs        InquiryLog[]
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  @@map("services")
+}
+
+// ----------------------------------------------------
+// 6. PENGATURAN TOKO (SINGLETON RECORD)
+// ----------------------------------------------------
+model StoreSetting {
+  id                         String   @id @default("default")
+  storeName                  String   @default("Hadi Computer") @db.VarChar(100)
+  tagline                    String   @default("Pusat Laptop & Komputer Terpercaya") @db.VarChar(200)
+  whatsappNumber             String   @default("6285769000007") @db.VarChar(30)
+  whatsappDefaultTemplate    String   @db.Text
+  address                    String   @db.Text
+  mapsEmbedUrl               String?  @db.Text
+  openHours                  String   @default("Senin - Sabtu: 09.00 - 20.00 WIB") @db.VarChar(200)
+  socialInstagram            String?  @db.VarChar(100)
+  socialTiktok               String?  @db.VarChar(100)
+  socialFacebook             String?  @db.VarChar(100)
+  announcementText           String?  @db.VarChar(255)
+  isAnnouncementActive       Boolean  @default(false)
+  updatedAt                  DateTime @updatedAt
+
+  @@map("store_settings")
+}
+
+// ----------------------------------------------------
+// 7. TRACKING INTERAKSI & LEAD WHATSAPP
+// ----------------------------------------------------
+enum InquiryType {
+  PRODUCT
+  SERVICE
+  GENERAL
+}
+
+model InquiryLog {
+  id             String      @id @default(cuid())
+  inquiryType    InquiryType @default(PRODUCT)
+  productId      String?
+  product        Product?    @relation(fields: [productId], references: [id], onDelete: SetNull)
+  serviceId      String?
+  service        Service?    @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  variantName    String?     @db.VarChar(100)
+  priceAtInquiry BigInt?
+  visitorIp      String?     @db.VarChar(50)
+  userAgent      String?     @db.VarChar(255)
+  referrer       String?     @db.VarChar(255)
+  createdAt      DateTime    @default(now())
+
+  @@index([inquiryType])
+  @@index([productId])
+  @@index([serviceId])
+  @@index([createdAt])
+  @@map("inquiry_logs")
+}
