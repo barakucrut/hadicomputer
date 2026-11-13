@@ -10,7 +10,6 @@ import {
   Save,
   ArrowLeft,
   Check,
-  AlertCircle,
   Star,
 } from "lucide-react";
 import { Button } from "@/components/admin/ui/button";
@@ -35,7 +34,6 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
   const [categories, setCategories] = React.useState<any[]>([]);
   const [brands, setBrands] = React.useState<any[]>([]);
   const [saving, setSaving] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
 
   // Form states
   const [name, setName] = React.useState(initialData?.name || "");
@@ -187,12 +185,11 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name || !code || !categoryId || !brandId) {
-      setError("Nama, kode unit, kategori, dan merek wajib diisi.");
+      toast.error("Nama, kode unit, kategori, dan merek wajib diisi.");
       return;
     }
 
     setSaving(true);
-    setError(null);
 
     const payload = {
       name,
@@ -237,7 +234,6 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
       router.refresh();
     } catch (err: any) {
       toast.error(err.message || "Gagal menyimpan produk");
-      setError(err.message || "Gagal menyimpan produk");
     } finally {
       setSaving(false);
     }
@@ -279,13 +275,6 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
           </span>
         </Button>
       </div>
-
-      {error && (
-        <div className="p-4 rounded-lg bg-[#fee2e2] border border-[#fecaca] text-[#b91c1c] text-sm flex items-center gap-2">
-          <AlertCircle size={18} className="shrink-0" />
-          <span>{error}</span>
-        </div>
-      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column (2 Cols): Core Info, Specs, Variants */}
