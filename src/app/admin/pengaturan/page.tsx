@@ -14,6 +14,7 @@ import {
   EyeOff,
 } from "lucide-react";
 import { Button } from "@/components/admin/ui/button";
+import { Badge } from "@/components/admin/ui/badge";
 import {
   Card,
   CardContent,
@@ -151,18 +152,30 @@ export default function AdminSettingsPage() {
               Konfigurasi profil toko, nomor resmi WhatsApp, alamat fisik, dan link media sosial.
             </p>
           </div>
-          <Button type="submit" disabled={saving} className="flex items-center gap-2">
-            <Save size={16} />
-            <span>{saving ? "Menyimpan..." : "Simpan Pengaturan"}</span>
-          </Button>
-        </div>
-
-        {savedSuccess && (
-          <div className="p-4 rounded-lg bg-[#dcfce7] border border-[#bbf7d0] text-[#15803d] text-sm flex items-center gap-2">
-            <CheckCircle size={18} className="shrink-0" />
-            <span>Pengaturan toko berhasil diperbarui!</span>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            {savedSuccess && (
+              <Badge
+                variant="success"
+                style={{
+                  padding: "6px 12px",
+                  fontSize: "12px",
+                  textTransform: "none",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  animation: "adminAlertSlideIn 0.2s ease-out",
+                }}
+              >
+                <CheckCircle size={14} style={{ color: "#15803d" }} />
+                <span>Pengaturan berhasil disimpan!</span>
+              </Badge>
+            )}
+            <Button type="submit" disabled={saving} className="flex items-center gap-2">
+              <Save size={16} />
+              <span>{saving ? "Menyimpan..." : "Simpan Pengaturan"}</span>
+            </Button>
           </div>
-        )}
+        </div>
 
         {/* 1.1 Kontak WhatsApp */}
         <Card>
@@ -316,15 +329,15 @@ export default function AdminSettingsPage() {
           <CardContent>
             <form onSubmit={handleChangePassword} className="space-y-4 max-w-xl">
               {passwordSuccess && (
-                <div className="p-3.5 rounded-lg bg-[#dcfce7] border border-[#bbf7d0] text-[#15803d] text-sm flex items-center gap-2">
-                  <CheckCircle size={18} className="shrink-0" />
+                <div className="admin-alert admin-alert-success" role="status">
+                  <CheckCircle size={16} />
                   <span>{passwordSuccess}</span>
                 </div>
               )}
 
               {passwordError && (
-                <div className="p-3.5 rounded-lg bg-[#fee2e2] border border-[#fecaca] text-[#dc2626] text-sm flex items-center gap-2">
-                  <AlertCircle size={18} className="shrink-0" />
+                <div className="admin-alert admin-alert-error" role="alert">
+                  <AlertCircle size={16} />
                   <span>{passwordError}</span>
                 </div>
               )}
@@ -428,6 +441,21 @@ export default function AdminSettingsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Floating Success Toasts */}
+      {savedSuccess && (
+        <div className="admin-toast-fixed" role="status">
+          <CheckCircle size={18} style={{ color: "#10b981", flexShrink: 0 }} />
+          <span>Pengaturan toko berhasil diperbarui!</span>
+        </div>
+      )}
+
+      {passwordSuccess && (
+        <div className="admin-toast-fixed" role="status">
+          <CheckCircle size={18} style={{ color: "#10b981", flexShrink: 0 }} />
+          <span>Password berhasil diperbarui!</span>
+        </div>
+      )}
     </div>
   );
 }
