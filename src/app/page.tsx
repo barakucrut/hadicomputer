@@ -321,7 +321,10 @@ export default async function HomePage() {
               <MessageCircle size={30} strokeWidth={1.3} />
               <h3>Belum tahu harus pilih apa?</h3>
               <p>Mulai dengan cerita tentang kebutuhanmu.</p>
-              <WhatsAppButton label="Tanya Hadi dulu" />
+              <WhatsAppButton
+                label="Tanya Hadi dulu"
+                phone={storeSettings.whatsapp}
+              />
               <small>Hubungi langsung via WhatsApp · Respon cepat</small>
             </div>
           </div>
@@ -330,6 +333,7 @@ export default async function HomePage() {
       <WhatsAppButton
         label="Tanya Hadi via WhatsApp"
         className="mobile-floating-whatsapp"
+        phone={storeSettings.whatsapp}
       />
     </div>
   );

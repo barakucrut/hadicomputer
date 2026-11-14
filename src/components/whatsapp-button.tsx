@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { MessageCircle } from "lucide-react";
+import { useStoreSettings } from "./store-context";
 
 const DEFAULT_WHATSAPP_PHONE = "+6285769000007";
 
@@ -16,7 +17,7 @@ export function WhatsAppButton({
   message = "Halo Hadi Computer, saya ingin konsultasi tentang produk dan layanan.",
   label = "Konsultasi via WhatsApp",
   className = "",
-  phone = DEFAULT_WHATSAPP_PHONE,
+  phone,
   trackingData,
 }: {
   message?: string;
@@ -25,7 +26,8 @@ export function WhatsAppButton({
   phone?: string | null;
   trackingData?: WhatsAppTrackingData;
 }) {
-  const rawPhone = phone || DEFAULT_WHATSAPP_PHONE;
+  const store = useStoreSettings();
+  const rawPhone = phone || store?.whatsapp || DEFAULT_WHATSAPP_PHONE;
   const phoneDigits = rawPhone.replace(/\D/g, "");
 
   // Initial URL (safe for SSR / before JS hydration)

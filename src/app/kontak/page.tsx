@@ -15,38 +15,41 @@ import { getLiveStoreSettings } from "@/lib/live-repository";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export const metadata: Metadata = {
-  title: "Kontak Kami & Konsultasi WhatsApp",
-  description:
-    "Hubungi Hadi Computer via WhatsApp resmi +62 857-6900-0007. Konsultasi pemilihan laptop, rakit PC, servis perangkat, atau cek ketersediaan unit setiap hari.",
-  openGraph: {
-    type: "website",
-    locale: "id_ID",
-    url: "/kontak",
-    siteName: "Hadi Computer",
-    title: "Kontak Kami & Konsultasi WhatsApp | Hadi Computer",
-    description:
-      "Hubungi Hadi Computer via WhatsApp resmi +62 857-6900-0007. Respon cepat, konsultasi ramah dan solutif setiap hari.",
-    images: [
-      {
-        url: "/images/banners/promo-bundle.png",
-        width: 1200,
-        height: 630,
-        alt: "Hubungi Hadi Computer",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Kontak Kami & Konsultasi WhatsApp | Hadi Computer",
-    description:
-      "Hubungi Hadi Computer via WhatsApp resmi +62 857-6900-0007. Respon cepat, konsultasi ramah dan solutif.",
-    images: ["/images/banners/promo-bundle.png"],
-  },
-  alternates: {
-    canonical: "/kontak",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const store = await getLiveStoreSettings();
+  const phoneText = store.whatsapp ? ` ${store.whatsapp}` : "";
+  const description = `Hubungi Hadi Computer via WhatsApp resmi${phoneText}. Konsultasi pemilihan laptop, rakit PC, servis perangkat, atau cek ketersediaan unit setiap hari.`;
+
+  return {
+    title: "Kontak Kami & Konsultasi WhatsApp",
+    description,
+    openGraph: {
+      type: "website",
+      locale: "id_ID",
+      url: "/kontak",
+      siteName: "Hadi Computer",
+      title: "Kontak Kami & Konsultasi WhatsApp | Hadi Computer",
+      description,
+      images: [
+        {
+          url: "/images/banners/promo-bundle.png",
+          width: 1200,
+          height: 630,
+          alt: "Hubungi Hadi Computer",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: "Kontak Kami & Konsultasi WhatsApp | Hadi Computer",
+      description,
+      images: ["/images/banners/promo-bundle.png"],
+    },
+    alternates: {
+      canonical: "/kontak",
+    },
+  };
+}
 export default async function ContactPage() {
   const store = await getLiveStoreSettings();
   return (

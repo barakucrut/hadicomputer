@@ -80,5 +80,9 @@ export async function PUT(request: Request) {
   });
 
   revalidatePath("/", "layout");
+  revalidatePath("/katalog");
+  revalidatePath("/kontak");
+  revalidatePath("/lokasi");
+  revalidatePath("/layanan");
   return NextResponse.json({ success: true, settings });
 }

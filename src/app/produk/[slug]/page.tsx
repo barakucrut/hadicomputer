@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { getProduct, getProducts } from "@/lib/repository";
-import { getLiveProduct, getLiveProducts } from "@/lib/live-repository";
+import { getLiveProduct, getLiveProducts, getLiveStoreSettings } from "@/lib/live-repository";
 import { effectiveOffer, getProductDiscount, priceLabel, rupiah } from "@/lib/catalog";
 import { Container, Breadcrumbs, SectionHeading } from "@/components/ui";
 import { ProductDetail } from "@/components/product-detail";
@@ -103,8 +103,11 @@ export default async function ProductPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const { slug } = await params,
-    product = await getLiveProduct(slug);
+  const { slug } = await params;
+  const [product, store] = await Promise.all([
+    getLiveProduct(slug),
+    getLiveStoreSettings(),
+  ]);
   if (!product) notFound();
 
   const offer = effectiveOffer(product);
@@ -207,7 +210,11 @@ export default async function ProductPage({
             { label: product.name },
           ]}
         />
-        <ProductDetail key={product.id} product={product} />
+        <ProductDetail
+          key={product.id}
+          product={product}
+          whatsappPhone={store.whatsapp}
+        />
         {related.length > 0 && (
           <section className="section">
             <SectionHeading

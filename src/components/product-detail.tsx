@@ -14,7 +14,13 @@ import { SafeImage } from "./safe-image";
 import { WhatsAppButton } from "./whatsapp-button";
 import { ShareButton } from "./share-button";
 
-export function ProductDetail({ product }: { product: Product }) {
+export function ProductDetail({
+  product,
+  whatsappPhone,
+}: {
+  product: Product;
+  whatsappPhone?: string | null;
+}) {
   const [image, setImage] = useState(0),
     [variantId, setVariantId] = useState(product.variants[0]?.id);
   const [isZoomed, setIsZoomed] = useState(false);
@@ -198,7 +204,12 @@ export function ProductDetail({ product }: { product: Product }) {
             </span>
           </div>
           <div className="detail-cta">
-            <WhatsAppButton label={label} message={message} trackingData={trackingData} />
+            <WhatsAppButton
+              label={label}
+              message={message}
+              trackingData={trackingData}
+              phone={whatsappPhone}
+            />
             <p>
               <MessageCircle size={14} />
               Tanpa checkout. Tanya langsung, pilih lebih tenang.
@@ -252,6 +263,7 @@ export function ProductDetail({ product }: { product: Product }) {
           label={offer.availability === "habis" ? "Tanya Stok" : "Tanya Hadi"}
           message={message}
           trackingData={trackingData}
+          phone={whatsappPhone}
         />
       </div>
     </>

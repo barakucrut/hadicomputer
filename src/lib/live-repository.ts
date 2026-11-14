@@ -169,9 +169,11 @@ export async function getLiveStoreSettings(): Promise<StoreSettings> {
       prisma.storeSetting.findUnique({ where: { id: "default" } })
     );
     if (s) {
-      const wa = s.whatsappNumber.startsWith("+")
-        ? s.whatsappNumber
-        : `+${s.whatsappNumber}`;
+      let waDigits = (s.whatsappNumber || "").replace(/\D/g, "");
+      if (waDigits.startsWith("0")) {
+        waDigits = "62" + waDigits.slice(1);
+      }
+      const wa = waDigits ? `+${waDigits}` : store.whatsapp;
       return {
         name: s.storeName,
         whatsapp: wa,

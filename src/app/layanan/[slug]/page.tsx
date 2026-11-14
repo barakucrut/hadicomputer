@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Check, ArrowRight } from "lucide-react";
 import { getService, services } from "@/lib/repository";
-import { getLiveService } from "@/lib/live-repository";
+import { getLiveService, getLiveStoreSettings } from "@/lib/live-repository";
 import { Container, Breadcrumbs, SectionHeading } from "@/components/ui";
 import { SafeImage } from "@/components/safe-image";
 import { WhatsAppButton } from "@/components/whatsapp-button";
@@ -62,8 +62,11 @@ export default async function ServiceDetailPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const { slug } = await params,
-    service = await getLiveService(slug);
+  const { slug } = await params;
+  const [service, store] = await Promise.all([
+    getLiveService(slug),
+    getLiveStoreSettings(),
+  ]);
   if (!service) notFound();
   const message = `Halo Hadi Computer, saya ingin konsultasi layanan ${service.name}.\n\nTautan: {origin}/layanan/${service.slug}\n\nKebutuhan atau kendala saya: `;
   return (
@@ -79,7 +82,11 @@ export default async function ServiceDetailPage({
           <span className="eyebrow">{service.eyebrow}</span>
           <h1>{service.name}</h1>
           <p>{service.summary}</p>
-          <WhatsAppButton label="Konsultasikan kebutuhanmu" message={message} />
+          <WhatsAppButton
+            label="Konsultasikan kebutuhanmu"
+            message={message}
+            phone={store.whatsapp}
+          />
           <span className="small-note">
             Hubungi untuk estimasi biaya dan konsultasi gratis
           </span>
@@ -131,7 +138,11 @@ export default async function ServiceDetailPage({
             Kita mulai dengan kebutuhanmu, lalu diskusikan pilihan solusinya.
           </p>
         </div>
-        <WhatsAppButton message={message} label="Tanya lewat WhatsApp" />
+        <WhatsAppButton
+          message={message}
+          label="Tanya lewat WhatsApp"
+          phone={store.whatsapp}
+        />
       </section>
     </Container>
   );

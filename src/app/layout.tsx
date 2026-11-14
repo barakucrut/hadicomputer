@@ -3,6 +3,7 @@ import "@fontsource-variable/plus-jakarta-sans";
 import "./globals.css";
 import "./mobile.css";
 import { Header, Footer } from "@/components/site-shell";
+import { StoreProvider } from "@/components/store-context";
 import { getLiveStoreSettings, getLiveCategories } from "@/lib/live-repository";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
@@ -120,9 +121,11 @@ export default async function RootLayout({
         />
       </head>
       <body>
-        <Header store={store} categories={liveCategories} />
-        <main id="main">{children}</main>
-        <Footer store={store} />
+        <StoreProvider store={store}>
+          <Header store={store} categories={liveCategories} />
+          <main id="main">{children}</main>
+          <Footer store={store} />
+        </StoreProvider>
       </body>
     </html>
   );

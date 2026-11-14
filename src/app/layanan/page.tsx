@@ -3,7 +3,7 @@ import { CheckCheck, MessageCircle, Wrench } from "lucide-react";
 import { Container, Breadcrumbs, SectionHeading } from "@/components/ui";
 import { ServiceCard } from "@/components/service-card";
 import { services } from "@/lib/repository";
-import { getLiveServices } from "@/lib/live-repository";
+import { getLiveServices, getLiveStoreSettings } from "@/lib/live-repository";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 
 export const dynamic = "force-dynamic";
@@ -42,7 +42,10 @@ export const metadata: Metadata = {
   },
 };
 export default async function ServicesPage() {
-  const serviceList = await getLiveServices();
+  const [serviceList, store] = await Promise.all([
+    getLiveServices(),
+    getLiveStoreSettings(),
+  ]);
   return (
     <Container className="page-container">
       <Breadcrumbs items={[{ label: "Layanan" }]} />
@@ -93,7 +96,7 @@ export default async function ServicesPage() {
             </span>
           </div>
         </div>
-        <WhatsAppButton label="Mulai konsultasi" />
+        <WhatsAppButton label="Mulai konsultasi" phone={store.whatsapp} />
       </section>
     </Container>
   );
