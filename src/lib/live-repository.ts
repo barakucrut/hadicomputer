@@ -235,3 +235,55 @@ export async function getLiveService(slug: string): Promise<Service | undefined>
   }
   return getService(slug);
 }
+
+export async function getLiveBrands(): Promise<Array<{ id: string; name: string; slug: string }>> {
+  try {
+    const dbBrands = await withTimeout(
+      prisma.brand.findMany({
+        where: { isActive: true },
+        orderBy: { sortOrder: "asc" },
+      })
+    );
+    if (dbBrands && dbBrands.length > 0) {
+      return dbBrands.map((b) => ({
+        id: b.id,
+        name: b.name,
+        slug: b.slug,
+      }));
+    }
+  } catch {
+    // Fallback
+  }
+  return [];
+}
+
+const DEFAULT_NEEDS = [
+  { id: "need-kerja", name: "Kerja", slug: "kerja", description: "Perangkat andalan untuk hari produktif", icon: "briefcase" },
+  { id: "need-kuliah", name: "Kuliah", slug: "kuliah", description: "Dari tugas pertama sampai ide besar", icon: "graduation-cap" },
+  { id: "need-kreatif", name: "Kreatif", slug: "kreatif", description: "Teman untuk mewujudkan imajinasimu", icon: "palette" },
+  { id: "need-gaming", name: "Gaming", slug: "gaming", description: "Performa tinggi untuk bermain game", icon: "gamepad" },
+  { id: "need-harian", name: "Harian", slug: "harian", description: "Aktivitas ringan & santai setiap hari", icon: "home" },
+];
+
+export async function getLiveNeeds(): Promise<Array<{ id: string; name: string; slug: string; description: string; icon: string }>> {
+  try {
+    const dbNeeds = await withTimeout<any[]>(
+      (prisma as any).productNeed.findMany({
+        where: { isActive: true },
+        orderBy: { sortOrder: "asc" },
+      })
+    );
+    if (Array.isArray(dbNeeds) && dbNeeds.length > 0) {
+      return dbNeeds.map((n: any) => ({
+        id: n.id,
+        name: n.name,
+        slug: n.slug,
+        description: n.description || "",
+        icon: n.icon || "tag",
+      }));
+    }
+  } catch {
+    // Fallback
+  }
+  return DEFAULT_NEEDS;
+}

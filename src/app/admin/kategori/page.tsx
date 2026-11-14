@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Plus, Layers, Tag } from "lucide-react";
+import { Plus, Layers, Tag, Sparkles } from "lucide-react";
 import { HugeIconEdit, HugeIconTrash } from "@/components/admin/ui/huge-icons";
 import { Button } from "@/components/admin/ui/button";
 import { Card } from "@/components/admin/ui/card";
@@ -35,6 +35,7 @@ export default function AdminCategoriesBrandsPage() {
   const toast = useToast();
   const [categories, setCategories] = React.useState<any[]>([]);
   const [brands, setBrands] = React.useState<any[]>([]);
+  const [needs, setNeeds] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
 
   // Pagination states
@@ -42,10 +43,12 @@ export default function AdminCategoriesBrandsPage() {
   const [catPageSize, setCatPageSize] = React.useState(10);
   const [brandPage, setBrandPage] = React.useState(1);
   const [brandPageSize, setBrandPageSize] = React.useState(10);
+  const [needPage, setNeedPage] = React.useState(1);
+  const [needPageSize, setNeedPageSize] = React.useState(10);
 
   // Dialog state
   const [dialogOpen, setDialogOpen] = React.useState(false);
-  const [dialogMode, setDialogMode] = React.useState<"cat" | "brand">("cat");
+  const [dialogMode, setDialogMode] = React.useState<"cat" | "brand" | "need">("cat");
   const [editingItem, setEditingItem] = React.useState<any | null>(null);
   const [name, setName] = React.useState("");
   const [slug, setSlug] = React.useState("");
@@ -53,18 +56,20 @@ export default function AdminCategoriesBrandsPage() {
   const [description, setDescription] = React.useState("");
 
   // Delete Dialog state
-  const [deleteTarget, setDeleteTarget] = React.useState<{ id: string; mode: "cat" | "brand"; name: string } | null>(null);
+  const [deleteTarget, setDeleteTarget] = React.useState<{ id: string; mode: "cat" | "brand" | "need"; name: string } | null>(null);
   const [deleting, setDeleting] = React.useState(false);
 
   const fetchData = React.useCallback(async () => {
     setLoading(true);
     try {
-      const [catRes, brandRes] = await Promise.all([
+      const [catRes, brandRes, needRes] = await Promise.all([
         fetch("/api/admin/categories").then((r) => r.json()),
         fetch("/api/admin/brands").then((r) => r.json()),
+        fetch("/api/admin/needs").then((r) => r.json()),
       ]);
       setCategories(catRes.categories || []);
       setBrands(brandRes.brands || []);
+      setNeeds(needRes.needs || []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -76,7 +81,7 @@ export default function AdminCategoriesBrandsPage() {
     fetchData();
   }, [fetchData]);
 
-  function openCreateDialog(mode: "cat" | "brand") {
+  function openCreateDialog(mode: "cat" | "brand" | "need") {
     setDialogMode(mode);
     setEditingItem(null);
     setName("");
@@ -86,7 +91,7 @@ export default function AdminCategoriesBrandsPage() {
     setDialogOpen(true);
   }
 
-  function openEditDialog(item: any, mode: "cat" | "brand") {
+  function openEditDialog(item: any, mode: "cat" | "brand" | "need") {
     setDialogMode(mode);
     setEditingItem(item);
     setName(item.name);
@@ -105,7 +110,12 @@ export default function AdminCategoriesBrandsPage() {
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)/g, "");
 
-    const endpoint = dialogMode === "cat" ? "/api/admin/categories" : "/api/admin/brands";
+    const endpoint =
+      dialogMode === "cat"
+        ? "/api/admin/categories"
+        : dialogMode === "brand"
+        ? "/api/admin/brands"
+        : "/api/admin/needs";
     const method = editingItem ? "PUT" : "POST";
     const body: any = {
       name,
@@ -116,8 +126,10 @@ export default function AdminCategoriesBrandsPage() {
     if (dialogMode === "cat") {
       body.icon = iconOrLogo;
       body.description = description;
-    } else {
+    } else if (dialogMode === "brand") {
       body.logoUrl = iconOrLogo;
+    } else {
+      body.description = description;
     }
 
     try {
@@ -129,18 +141,18 @@ export default function AdminCategoriesBrandsPage() {
       if (res.ok) {
         setDialogOpen(false);
         fetchData();
-        toast.success(
-          `${dialogMode === "cat" ? "Kategori" : "Merek"} "${name}" berhasil disimpan!`
-        );
+        const modeLabel = dialogMode === "cat" ? "Kategori" : dialogMode === "brand" ? "Merek" : "Kebutuhan";
+        toast.success(`${modeLabel} "${name}" berhasil disimpan!`);
       } else {
-        toast.error(`Gagal menyimpan ${dialogMode === "cat" ? "kategori" : "merek"}.`);
+        const modeLabel = dialogMode === "cat" ? "kategori" : dialogMode === "brand" ? "merek" : "kebutuhan";
+        toast.error(`Gagal menyimpan ${modeLabel}.`);
       }
     } catch (err) {
       toast.error("Terjadi kesalahan saat menyimpan data.");
     }
   }
 
-  function handleDelete(id: string, mode: "cat" | "brand", itemName: string) {
+  function handleDelete(id: string, mode: "cat" | "brand" | "need", itemName: string) {
     setDeleteTarget({ id, mode, name: itemName });
   }
 
@@ -150,14 +162,15 @@ export default function AdminCategoriesBrandsPage() {
     const endpoint =
       deleteTarget.mode === "cat"
         ? `/api/admin/categories?id=${deleteTarget.id}`
-        : `/api/admin/brands?id=${deleteTarget.id}`;
+        : deleteTarget.mode === "brand"
+        ? `/api/admin/brands?id=${deleteTarget.id}`
+        : `/api/admin/needs?id=${deleteTarget.id}`;
     try {
       const res = await fetch(endpoint, { method: "DELETE" });
       if (res.ok) {
         fetchData();
-        toast.success(
-          `${deleteTarget.mode === "cat" ? "Kategori" : "Merek"} "${deleteTarget.name}" berhasil dihapus!`
-        );
+        const modeLabel = deleteTarget.mode === "cat" ? "Kategori" : deleteTarget.mode === "brand" ? "Merek" : "Kebutuhan";
+        toast.success(`${modeLabel} "${deleteTarget.name}" berhasil dihapus!`);
       } else {
         toast.error("Gagal menghapus data.");
       }
@@ -173,9 +186,9 @@ export default function AdminCategoriesBrandsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-black text-[#111413] tracking-tight">Kategori & Merek</h2>
+        <h2 className="text-2xl font-black text-[#111413] tracking-tight">Kategori, Merek & Kebutuhan</h2>
         <p className="text-sm text-[#525854] mt-1">
-          Kelola struktur pengelompokan perangkat dan daftar brand resmi.
+          Kelola struktur pengelompokan perangkat, daftar brand resmi, serta tag filter kebutuhan.
         </p>
       </div>
 
@@ -189,6 +202,10 @@ export default function AdminCategoriesBrandsPage() {
             <TabsTrigger value="merek" className="flex items-center gap-2">
               <Tag size={14} />
               <span>Merek / Brand ({brands.length})</span>
+            </TabsTrigger>
+            <TabsTrigger value="kebutuhan" className="flex items-center gap-2">
+              <Sparkles size={14} />
+              <span>Kebutuhan ({needs.length})</span>
             </TabsTrigger>
           </TabsList>
         </div>
@@ -389,6 +406,92 @@ export default function AdminCategoriesBrandsPage() {
             />
           </Card>
         </TabsContent>
+
+        {/* Tab 3: Kebutuhan */}
+        <TabsContent value="kebutuhan" className="space-y-4">
+          <div className="flex justify-end">
+            <Button onClick={() => openCreateDialog("need")} className="flex items-center gap-1.5">
+              <Plus size={16} />
+              <span>Tambah Kebutuhan Baru</span>
+            </Button>
+          </div>
+
+          <Card>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nama Kebutuhan</TableHead>
+                  <TableHead>Slug Filter</TableHead>
+                  <TableHead>Deskripsi</TableHead>
+                  <TableHead className="text-right">Aksi</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {needs.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center py-8 text-[#525854]">
+                      Belum ada data kebutuhan. Klik tombol &quot;Tambah Kebutuhan Baru&quot;.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  needs
+                    .slice((needPage - 1) * needPageSize, needPage * needPageSize)
+                    .map((n) => (
+                      <TableRow key={n.id}>
+                        <TableCell className="font-bold text-[#111413]">
+                          <div className="flex items-center gap-2">
+                            <Sparkles size={16} className="text-[#cc252b]" />
+                            <span>{n.name}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <code className="text-xs font-mono bg-[#f1f3ed] px-2 py-0.5 rounded text-[#111413]">
+                            {n.slug}
+                          </code>
+                        </TableCell>
+                        <TableCell className="text-[#525854] text-xs max-w-xs truncate">
+                          {n.description || "-"}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => openEditDialog(n, "need")}
+                              className="admin-action-btn"
+                              title="Edit Kebutuhan"
+                            >
+                              <HugeIconEdit size={16} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(n.id, "need", n.name)}
+                              className="admin-action-btn delete"
+                              title="Hapus Kebutuhan"
+                            >
+                              <HugeIconTrash size={16} />
+                            </button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                )}
+              </TableBody>
+            </Table>
+
+            <AdminPagination
+              currentPage={needPage}
+              totalPages={Math.ceil(needs.length / needPageSize) || 1}
+              totalItems={needs.length}
+              pageSize={needPageSize}
+              onPageChange={(p) => setNeedPage(p)}
+              onPageSizeChange={(s) => {
+                setNeedPageSize(s);
+                setNeedPage(1);
+              }}
+              pageSizeOptions={[5, 10, 20]}
+            />
+          </Card>
+        </TabsContent>
       </Tabs>
 
       {/* Dialog Form */}
@@ -396,28 +499,28 @@ export default function AdminCategoriesBrandsPage() {
         <DialogHeader>
           <DialogTitle>
             {editingItem ? "Edit" : "Tambah"}{" "}
-            {dialogMode === "cat" ? "Kategori" : "Merek"}
+            {dialogMode === "cat" ? "Kategori" : dialogMode === "brand" ? "Merek" : "Kebutuhan"}
           </DialogTitle>
           <DialogDescription>
-            Masukkan detail {dialogMode === "cat" ? "kategori produk" : "merek perangkat"}.
+            Masukkan detail {dialogMode === "cat" ? "kategori produk" : dialogMode === "brand" ? "merek perangkat" : "tag filter kebutuhan perangkat"}.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
           <div>
-            <Label htmlFor="cat-brand-name">Nama *</Label>
+            <Label htmlFor="cat-brand-name">Nama {dialogMode === "need" ? "Kebutuhan" : ""} *</Label>
             <Input
               id="cat-brand-name"
               type="text"
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Laptop Gaming / Apple"
+              placeholder={dialogMode === "need" ? "e.g. Editing & Desain Grafis" : "e.g. Laptop Gaming / Apple"}
             />
           </div>
 
           <div>
-            <Label htmlFor="cat-brand-slug">Slug URL</Label>
+            <Label htmlFor="cat-brand-slug">Slug URL / Filter Tag</Label>
             <Input
               id="cat-brand-slug"
               type="text"
@@ -428,29 +531,29 @@ export default function AdminCategoriesBrandsPage() {
             />
           </div>
 
-          {dialogMode === "cat" && (
-            <>
-              <div>
-                <Label htmlFor="cat-desc">Deskripsi</Label>
-                <Input
-                  id="cat-desc"
-                  type="text"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="e.g. Kerja, kuliah & kreasi"
-                />
-              </div>
+          {(dialogMode === "cat" || dialogMode === "need") && (
+            <div>
+              <Label htmlFor="cat-desc">Deskripsi</Label>
+              <Input
+                id="cat-desc"
+                type="text"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder={dialogMode === "need" ? "e.g. Untuk render video, 3D modelling, dan animasi" : "e.g. Kerja, kuliah & kreasi"}
+              />
+            </div>
+          )}
 
-              <div>
-                <Label style={{ display: "block", marginBottom: "8px" }}>
-                  Ikon Kategori
-                </Label>
-                <IconPicker
-                  value={iconOrLogo}
-                  onChange={(val) => setIconOrLogo(val)}
-                />
-              </div>
-            </>
+          {dialogMode === "cat" && (
+            <div>
+              <Label style={{ display: "block", marginBottom: "8px" }}>
+                Ikon Kategori
+              </Label>
+              <IconPicker
+                value={iconOrLogo}
+                onChange={(val) => setIconOrLogo(val)}
+              />
+            </div>
           )}
 
           {dialogMode === "brand" && (
@@ -479,7 +582,7 @@ export default function AdminCategoriesBrandsPage() {
       <ConfirmDialog
         open={Boolean(deleteTarget)}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title={`Hapus ${deleteTarget?.mode === "cat" ? "Kategori" : "Merek"}?`}
+        title={`Hapus ${deleteTarget?.mode === "cat" ? "Kategori" : deleteTarget?.mode === "brand" ? "Merek" : "Kebutuhan"}?`}
         description={`Apakah Anda yakin ingin menghapus "${deleteTarget?.name}"? Tindakan ini tidak dapat dibatalkan.`}
         confirmLabel="Ya, Hapus Data"
         onConfirm={executeDelete}

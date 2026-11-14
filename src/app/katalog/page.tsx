@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { X } from "lucide-react";
 import { getProducts } from "@/lib/repository";
-import { getLiveProducts, getLiveCategories } from "@/lib/live-repository";
+import { getLiveProducts, getLiveCategories, getLiveBrands, getLiveNeeds } from "@/lib/live-repository";
 import { queryCatalog, rupiah, type CatalogQuery } from "@/lib/catalog";
 import { Container, Breadcrumbs, EmptyState } from "@/components/ui";
 import { ProductGrid } from "@/components/product-card";
@@ -73,12 +73,17 @@ export default async function CatalogPage({
       (entry): entry is [string, string] => typeof entry[1] === "string",
     ),
   ) as CatalogQuery;
-  const [products, liveCategories] = await Promise.all([
+  const [products, liveCategories, liveBrands, liveNeeds] = await Promise.all([
     getLiveProducts(),
     getLiveCategories(),
+    getLiveBrands(),
+    getLiveNeeds(),
   ]);
   const result = queryCatalog(products, query);
-  const brands = [...new Set(products.map((p) => p.brand))].sort();
+  // Merge live brands from DB with any active product brands
+  const productBrands = products.map((p) => p.brand);
+  const dbBrands = liveBrands.map((b) => b.name);
+  const allBrands = [...new Set([...dbBrands, ...productBrands])].filter(Boolean).sort();
   const chips = Object.entries(query).filter(
     ([key, value]) => value && !["page", "urut"].includes(key),
   );
@@ -97,8 +102,9 @@ export default async function CatalogPage({
         <CatalogFilters
           key={JSON.stringify(query)}
           query={query}
-          brands={brands}
+          brands={allBrands}
           categories={liveCategories}
+          needs={liveNeeds}
         />
         <div className="catalog-results">
           <div className="catalog-toolbar">

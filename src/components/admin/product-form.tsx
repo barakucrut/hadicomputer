@@ -53,6 +53,10 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
   const [bonus, setBonus] = React.useState(initialData?.bonus || "");
   const [categoryId, setCategoryId] = React.useState(initialData?.categoryId || "");
   const [brandId, setBrandId] = React.useState(initialData?.brandId || "");
+  const [availableNeeds, setAvailableNeeds] = React.useState<any[]>([]);
+  const [selectedNeeds, setSelectedNeeds] = React.useState<string[]>(
+    Array.isArray(initialData?.needs) ? initialData.needs : []
+  );
 
   // Toggles
   const [isFeatured, setIsFeatured] = React.useState(Boolean(initialData?.isFeatured));
@@ -110,6 +114,13 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
           setBrandId(d.brands[0].id);
         }
       });
+
+    fetch("/api/admin/needs")
+      .then((r) => r.json())
+      .then((d) => {
+        setAvailableNeeds(d.needs || []);
+      })
+      .catch(() => {});
   }, [categoryId, brandId]);
 
   // Handle local image upload
@@ -207,6 +218,7 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
       isBestSeller,
       isPromo,
       isNewArrival,
+      needs: selectedNeeds,
       categoryId,
       brandId,
       images,
@@ -717,6 +729,54 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                     </option>
                   ))}
                 </Select>
+              </div>
+
+              <div>
+                <Label style={{ display: "block", marginBottom: "8px" }}>
+                  Kesesuaian Kebutuhan
+                </Label>
+                {availableNeeds.length === 0 ? (
+                  <p className="text-xs text-[#525854]">Memuat daftar kebutuhan...</p>
+                ) : (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                    {availableNeeds.map((n) => {
+                      const isSelected = selectedNeeds.includes(n.slug);
+                      return (
+                        <button
+                          key={n.slug}
+                          type="button"
+                          onClick={() => {
+                            setSelectedNeeds((prev) =>
+                              prev.includes(n.slug)
+                                ? prev.filter((s) => s !== n.slug)
+                                : [...prev, n.slug]
+                            );
+                          }}
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "5px",
+                            padding: "6px 12px",
+                            borderRadius: "8px",
+                            fontSize: "12px",
+                            fontWeight: 600,
+                            cursor: "pointer",
+                            border: isSelected ? "1.5px solid #cc252b" : "1px solid #e5e7eb",
+                            backgroundColor: isSelected ? "#fef2f2" : "#ffffff",
+                            color: isSelected ? "#cc252b" : "#374151",
+                            transition: "all 0.15s ease",
+                          }}
+                        >
+                          {isSelected ? <Check size={12} style={{ strokeWidth: 3 }} /> : <Plus size={12} />}
+                          <span>{n.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+                <p className="text-xs text-[#525854] mt-1.5">
+                  Pilih satu atau lebih kebutuhan. Pengunjung dapat memfilter unit ini di katalog berdasarkan kebutuhan yang dicentang.
+                </p>
               </div>
             </CardContent>
           </Card>

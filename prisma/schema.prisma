@@ -54,6 +54,20 @@ model Brand {
   @@map("brands")
 }
 
+model ProductNeed {
+  id          String   @id @default(cuid())
+  name        String   @db.VarChar(100)
+  slug        String   @unique @db.VarChar(100)
+  description String?  @db.Text
+  icon        String?  @db.VarChar(50)
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("product_needs")
+}
+
 // ----------------------------------------------------
 // 3. PRODUK & DETAIL KATALOG
 // ----------------------------------------------------

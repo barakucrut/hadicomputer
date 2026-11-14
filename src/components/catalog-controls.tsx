@@ -16,12 +16,21 @@ function FilterForm({
   query,
   brands,
   categories: categoriesProp,
+  needs: needsProp,
 }: {
   query: CatalogQuery;
   brands: string[];
   categories?: Array<{ name: string; value: string }>;
+  needs?: Array<{ name: string; slug: string }>;
 }) {
   const categoryList = categoriesProp && categoriesProp.length > 0 ? categoriesProp : categories;
+  const needList = needsProp && needsProp.length > 0 ? needsProp : [
+    { name: "Kerja", slug: "kerja" },
+    { name: "Kuliah", slug: "kuliah" },
+    { name: "Kreatif", slug: "kreatif" },
+    { name: "Gaming", slug: "gaming" },
+    { name: "Harian", slug: "harian" },
+  ];
   const prefix = useId();
 
   const parseNum = (val?: string, fallback = 0) => {
@@ -230,11 +239,11 @@ function FilterForm({
           defaultValue={query.kebutuhan ?? ""}
         >
           <option value="">Semua kebutuhan</option>
-          <option value="kerja">Kerja</option>
-          <option value="kuliah">Kuliah</option>
-          <option value="kreatif">Kreatif</option>
-          <option value="gaming">Gaming</option>
-          <option value="harian">Harian</option>
+          {needList.map((n) => (
+            <option key={n.slug} value={n.slug}>
+              {n.name}
+            </option>
+          ))}
         </Select>
       </div>
 
@@ -251,16 +260,18 @@ export function CatalogFilters({
   query,
   brands,
   categories: categoriesProp,
+  needs: needsProp,
 }: {
   query: CatalogQuery;
   brands: string[];
   categories?: Array<{ name: string; value: string }>;
+  needs?: Array<{ name: string; slug: string }>;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   return (
     <>
       <aside className="desktop-filters" aria-label="Filter katalog">
-        <FilterForm query={query} brands={brands} categories={categoriesProp} />
+        <FilterForm query={query} brands={brands} categories={categoriesProp} needs={needsProp} />
       </aside>
       <button
         className="button secondary mobile-filter-button"
@@ -287,7 +298,7 @@ export function CatalogFilters({
             <X size={20} />
           </button>
         </div>
-        <FilterForm query={query} brands={brands} categories={categoriesProp} />
+        <FilterForm query={query} brands={brands} categories={categoriesProp} needs={needsProp} />
       </dialog>
     </>
   );
