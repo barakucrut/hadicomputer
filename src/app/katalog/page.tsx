@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { X } from "lucide-react";
 import { getProducts } from "@/lib/repository";
-import { getLiveProducts } from "@/lib/live-repository";
+import { getLiveProducts, getLiveCategories } from "@/lib/live-repository";
 import { queryCatalog, rupiah, type CatalogQuery } from "@/lib/catalog";
 import { Container, Breadcrumbs, EmptyState } from "@/components/ui";
 import { ProductGrid } from "@/components/product-card";
@@ -73,8 +73,11 @@ export default async function CatalogPage({
       (entry): entry is [string, string] => typeof entry[1] === "string",
     ),
   ) as CatalogQuery;
-  const products = await getLiveProducts(),
-    result = queryCatalog(products, query);
+  const [products, liveCategories] = await Promise.all([
+    getLiveProducts(),
+    getLiveCategories(),
+  ]);
+  const result = queryCatalog(products, query);
   const brands = [...new Set(products.map((p) => p.brand))].sort();
   const chips = Object.entries(query).filter(
     ([key, value]) => value && !["page", "urut"].includes(key),
@@ -95,6 +98,7 @@ export default async function CatalogPage({
           key={JSON.stringify(query)}
           query={query}
           brands={brands}
+          categories={liveCategories}
         />
         <div className="catalog-results">
           <div className="catalog-toolbar">

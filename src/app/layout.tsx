@@ -3,7 +3,7 @@ import "@fontsource-variable/plus-jakarta-sans";
 import "./globals.css";
 import "./mobile.css";
 import { Header, Footer } from "@/components/site-shell";
-import { getLiveStoreSettings } from "@/lib/live-repository";
+import { getLiveStoreSettings, getLiveCategories } from "@/lib/live-repository";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
@@ -75,7 +75,10 @@ export const metadata: Metadata = {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const store = await getLiveStoreSettings();
+  const [store, liveCategories] = await Promise.all([
+    getLiveStoreSettings(),
+    getLiveCategories(),
+  ]);
 
   const storeSchema = {
     "@context": "https://schema.org",
@@ -117,7 +120,7 @@ export default async function RootLayout({
         />
       </head>
       <body>
-        <Header store={store} />
+        <Header store={store} categories={liveCategories} />
         <main id="main">{children}</main>
         <Footer store={store} />
       </body>

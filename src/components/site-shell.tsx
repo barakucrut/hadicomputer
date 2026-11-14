@@ -29,7 +29,14 @@ export function Logo() {
     </Link>
   );
 }
-export function Header({ store }: { store?: StoreSettings }) {
+export function Header({
+  store,
+  categories: categoriesProp,
+}: {
+  store?: StoreSettings;
+  categories?: Array<{ name: string; value: string }>;
+}) {
+  const categoryList = categoriesProp && categoriesProp.length > 0 ? categoriesProp : categories;
   const [menuOpen, setMenuOpen] = useState(false);
   const path = usePathname();
 
@@ -75,7 +82,7 @@ export function Header({ store }: { store?: StoreSettings }) {
                 <ChevronDown size={14} />
               </summary>
               <div className="category-popover">
-                {categories.map((c) => (
+                {categoryList.map((c) => (
                   <Link
                     key={c.value}
                     href={`/katalog?kategori=${c.value}`}

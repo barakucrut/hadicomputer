@@ -15,10 +15,13 @@ const SLIDER_STEP = 500000;
 function FilterForm({
   query,
   brands,
+  categories: categoriesProp,
 }: {
   query: CatalogQuery;
   brands: string[];
+  categories?: Array<{ name: string; value: string }>;
 }) {
+  const categoryList = categoriesProp && categoriesProp.length > 0 ? categoriesProp : categories;
   const prefix = useId();
 
   const parseNum = (val?: string, fallback = 0) => {
@@ -108,7 +111,7 @@ function FilterForm({
           defaultValue={query.kategori ?? ""}
         >
           <option value="">Semua kategori</option>
-          {categories.map((c) => (
+          {categoryList.map((c) => (
             <option key={c.value} value={c.value}>
               {c.name}
             </option>
@@ -247,15 +250,17 @@ function FilterForm({
 export function CatalogFilters({
   query,
   brands,
+  categories: categoriesProp,
 }: {
   query: CatalogQuery;
   brands: string[];
+  categories?: Array<{ name: string; value: string }>;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   return (
     <>
       <aside className="desktop-filters" aria-label="Filter katalog">
-        <FilterForm query={query} brands={brands} />
+        <FilterForm query={query} brands={brands} categories={categoriesProp} />
       </aside>
       <button
         className="button secondary mobile-filter-button"
@@ -282,7 +287,7 @@ export function CatalogFilters({
             <X size={20} />
           </button>
         </div>
-        <FilterForm query={query} brands={brands} />
+        <FilterForm query={query} brands={brands} categories={categoriesProp} />
       </dialog>
     </>
   );
