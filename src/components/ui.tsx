@@ -22,6 +22,12 @@ import {
   ShoppingCart,
   Tag,
   Monitor,
+  BriefcaseBusiness,
+  GraduationCap,
+  Palette,
+  Gamepad2,
+  Home,
+  Sparkles,
 } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -120,6 +126,17 @@ export function CategoryIcon({
       "shopping-cart": ShoppingCart,
       sembako: ShoppingCart,
       tag: Tag,
+      briefcase: BriefcaseBusiness,
+      "graduation-cap": GraduationCap,
+      kuliah: GraduationCap,
+      kerja: BriefcaseBusiness,
+      palette: Palette,
+      kreatif: Palette,
+      gamepad: Gamepad2,
+      gaming: Gamepad2,
+      home: Home,
+      harian: Home,
+      sparkles: Sparkles,
     }[name] ?? Package;
   return <Icon size={size} strokeWidth={1.5} />;
 }

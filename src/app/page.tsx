@@ -23,6 +23,7 @@ import {
   getLiveBanners,
   getLiveCategories,
   getLiveStoreSettings,
+  getLiveNeeds,
 } from "@/lib/live-repository";
 import { Container, CategoryIcon, SectionHeading } from "@/components/ui";
 import { HeroSlider } from "@/components/hero-slider";
@@ -42,11 +43,12 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function HomePage() {
-  const [products, liveBanners, liveCategories, storeSettings] = await Promise.all([
+  const [products, liveBanners, liveCategories, storeSettings, liveNeeds] = await Promise.all([
     getLiveProducts(),
     getLiveBanners(),
     getLiveCategories(),
     getLiveStoreSettings(),
+    getLiveNeeds(),
   ]);
 
   const desktops = products.filter((product) => product.category === "pc");
@@ -155,51 +157,32 @@ export default async function HomePage() {
           <SectionHeading
             title="Beda kebutuhan, beda pilihan."
             description="Temukan perangkat yang sejalan dengan keseharianmu."
+            href="/katalog"
+            linkText="Lihat semua kebutuhan"
           />
           <div className="needs-grid">
-            {[
-              {
-                title: "Siap untuk kuliah",
-                text: "Dari tugas pertama sampai ide besar.",
-                need: "kuliah",
-                Icon: GraduationCap,
-                cls: "study",
-                number: "01",
-              },
-              {
-                title: "Bikin kerja lebih lancar",
-                text: "Perangkat andalan untuk hari produktif.",
-                need: "kerja",
-                Icon: BriefcaseBusiness,
-                cls: "work",
-                number: "02",
-              },
-              {
-                title: "Ruang untuk berkreasi",
-                text: "Teman untuk mewujudkan imajinasimu.",
-                need: "kreatif",
-                Icon: Palette,
-                cls: "create",
-                number: "03",
-              },
-            ].map(({ title, text, need, Icon, cls, number }) => (
-              <Link
-                key={need}
-                href={`/katalog?kebutuhan=${need}`}
-                className={`need-card ${cls}`}
-              >
-                <div className="need-top">
-                  <Icon size={29} strokeWidth={1.4} />
-                  <span>{number}</span>
-                </div>
-                <h3>{title}</h3>
-                <p>{text}</p>
-                <span className="need-link">
-                  Temukan pilihanmu
-                  <ArrowUpRight size={19} />
-                </span>
-              </Link>
-            ))}
+            {liveNeeds.map((needItem, idx) => {
+              const num = String(idx + 1).padStart(2, "0");
+              const cls = needItem.slug === "kuliah" ? "study" : needItem.slug === "kerja" ? "work" : "create";
+              return (
+                <Link
+                  key={needItem.slug}
+                  href={`/katalog?kebutuhan=${needItem.slug}`}
+                  className={`need-card ${cls}`}
+                >
+                  <div className="need-top">
+                    <CategoryIcon name={needItem.icon || "tag"} size={29} />
+                    <span>{num}</span>
+                  </div>
+                  <h3>{needItem.name}</h3>
+                  <p>{needItem.description || "Perangkat andalan untuk mendukung aktivitasmu."}</p>
+                  <span className="need-link">
+                    Temukan pilihanmu
+                    <ArrowUpRight size={19} />
+                  </span>
+                </Link>
+              );
+            })}
           </div>
         </Container>
       </section>
@@ -367,24 +350,11 @@ function HomeCategories({
               </span>
               <div>
                 <h3>{c.name}</h3>
-                <p>{c.description}</p>
+                <p>{c.description || "Temukan pilihan perangkat"}</p>
               </div>
               <ArrowUpRight size={16} />
             </Link>
           ))}
-          <Link
-            className="category-card used-category"
-            href="/katalog?kondisi=bekas"
-          >
-            <span className="category-icon">
-              <CheckCheck size={29} strokeWidth={1.5} />
-            </span>
-            <div>
-              <h3>Bekas pilihan</h3>
-              <p>Pilihan lebih bersahabat</p>
-            </div>
-            <ArrowUpRight size={16} />
-          </Link>
         </div>
       </Container>
     </section>
