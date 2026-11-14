@@ -57,6 +57,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Nama dan slug wajib diisi" }, { status: 400 });
   }
 
+  if (!(prisma as any).productNeed) {
+    return NextResponse.json(
+      { error: "Model ProductNeed belum ter-generate di server. Harap jalankan: npx prisma generate && npx prisma db push di server." },
+      { status: 500 }
+    );
+  }
+
   try {
     const need = await (prisma as any).productNeed.create({
       data: { name, slug, icon, description, sortOrder, isActive },
@@ -74,6 +81,14 @@ export async function PUT(request: Request) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id, name, slug, icon, description, sortOrder, isActive } = await request.json();
+
+  if (!(prisma as any).productNeed) {
+    return NextResponse.json(
+      { error: "Model ProductNeed belum ter-generate di server. Harap jalankan: npx prisma generate && npx prisma db push di server." },
+      { status: 500 }
+    );
+  }
+
   try {
     const need = await (prisma as any).productNeed.update({
       where: { id },
@@ -94,6 +109,13 @@ export async function DELETE(request: Request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
   if (!id) return NextResponse.json({ error: "ID missing" }, { status: 400 });
+
+  if (!(prisma as any).productNeed) {
+    return NextResponse.json(
+      { error: "Model ProductNeed belum ter-generate di server. Harap jalankan: npx prisma generate && npx prisma db push di server." },
+      { status: 500 }
+    );
+  }
 
   try {
     await (prisma as any).productNeed.delete({ where: { id } });
