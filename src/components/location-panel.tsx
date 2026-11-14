@@ -1,7 +1,7 @@
 import { MapPin, ArrowUpRight } from "lucide-react";
 import type { StoreSettings } from "@/lib/types";
 
-function parseGoogleMaps(raw?: string | null, address?: string | null) {
+export function parseGoogleMaps(raw?: string | null, address?: string | null) {
   if (!raw && !address) return null;
   const str = (raw || "").trim();
 

@@ -31,6 +31,7 @@ import { FeaturedProducts } from "@/components/featured-products";
 import { ProductGrid } from "@/components/product-card";
 import { ServiceCard } from "@/components/service-card";
 import { WhatsAppButton } from "@/components/whatsapp-button";
+import { parseGoogleMaps } from "@/components/location-panel";
 
 const mobilePcSlugs = new Set([
   "msi-mag-infinite-s3-14th",
@@ -50,6 +51,8 @@ export default async function HomePage() {
     getLiveStoreSettings(),
     getLiveNeeds(),
   ]);
+
+  const mapData = parseGoogleMaps(storeSettings.mapsUrl, storeSettings.address);
 
   const desktops = products.filter((product) => product.category === "pc");
   const promoProducts = products
@@ -275,12 +278,63 @@ export default async function HomePage() {
       <section className="section store-section">
         <Container>
           <div className="store-banner">
-            <div className="store-illustration">
-              <MapPin size={62} strokeWidth={1} />
-              <span>HADI COMPUTER</span>
-              <div className="map-road road-one" />
-              <div className="map-road road-two" />
-            </div>
+            {mapData?.embedUrl ? (
+              <div
+                className="store-illustration store-map-embed"
+                style={{
+                  position: "relative",
+                  padding: 0,
+                  minHeight: "260px",
+                  overflow: "hidden",
+                }}
+              >
+                <iframe
+                  src={mapData.embedUrl}
+                  width="100%"
+                  height="100%"
+                  style={{
+                    border: 0,
+                    width: "100%",
+                    height: "100%",
+                    minHeight: "260px",
+                    display: "block",
+                    borderRadius: "8px",
+                  }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title={`Peta Lokasi ${storeSettings.name || "Hadi Computer"}`}
+                />
+                {mapData.directUrl && (
+                  <a
+                    className="button white map-link"
+                    href={mapData.directUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      position: "absolute",
+                      bottom: "10px",
+                      right: "10px",
+                      boxShadow: "0 2px 10px rgba(0,0,0,0.18)",
+                      fontSize: "11px",
+                      padding: "6px 12px",
+                      borderRadius: "6px",
+                      zIndex: 10,
+                    }}
+                  >
+                    Buka Google Maps
+                    <MoveUpRight size={13} />
+                  </a>
+                )}
+              </div>
+            ) : (
+              <div className="store-illustration">
+                <MapPin size={62} strokeWidth={1} />
+                <span>HADI COMPUTER</span>
+                <div className="map-road road-one" />
+                <div className="map-road road-two" />
+              </div>
+            )}
             <div className="store-copy">
               <span className="eyebrow">SAMPAI KETEMU DI TOKO</span>
               <h2>
