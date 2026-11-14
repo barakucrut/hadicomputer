@@ -150,5 +150,7 @@ export const store: StoreSettings = {
   hours: "Buka setiap hari: 08.00 – 22.00 WIB",
   email: null,
   instagram: null,
+  tiktok: null,
+  facebook: null,
   mapsUrl: null,
 };

@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { Container, Breadcrumbs } from "@/components/ui";
 import { WhatsAppButton } from "@/components/whatsapp-button";
+import { SocialLinks } from "@/components/social-links";
 import { getLiveStoreSettings } from "@/lib/live-repository";
 
 export const dynamic = "force-dynamic";
@@ -120,10 +121,19 @@ export default async function ContactPage() {
       <div className="contact-footnote">
         <div>
           <h2>Lebih dekat dengan Hadi.</h2>
-          <p>
-            Email dan akun media sosial resmi akan ditampilkan setelah
-            dikonfirmasi oleh owner.
-          </p>
+          {store.instagram || store.tiktok || store.facebook ? (
+            <>
+              <p>
+                Ikuti akun media sosial resmi kami untuk informasi ketersediaan unit terbaru, tips perawatan, dan promo menarik.
+              </p>
+              <SocialLinks store={store} variant="contact" />
+            </>
+          ) : (
+            <p>
+              Email dan akun media sosial resmi akan ditampilkan setelah
+              dikonfirmasi oleh owner.
+            </p>
+          )}
         </div>
         <Link href="/" className="text-link">
           Kembali ke beranda

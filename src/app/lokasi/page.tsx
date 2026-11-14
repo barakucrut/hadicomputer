@@ -3,6 +3,7 @@ import { MapPin, Clock3, MessageCircle, Info } from "lucide-react";
 import { Container, Breadcrumbs } from "@/components/ui";
 import { LocationPanel } from "@/components/location-panel";
 import { WhatsAppButton } from "@/components/whatsapp-button";
+import { SocialLinks } from "@/components/social-links";
 import { getLiveStoreSettings } from "@/lib/live-repository";
 
 export const dynamic = "force-dynamic";
@@ -83,6 +84,7 @@ export default async function LocationPage() {
             phone={store.whatsapp}
             message={`Halo ${store.name}, saya ingin berkunjung ke toko di ${store.address}. Boleh konfirmasi ketersediaan jadwal hari ini?`}
           />
+          <SocialLinks store={store} variant="contact" />
         </div>
       </div>
       <div className="info-notice">

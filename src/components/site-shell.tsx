@@ -16,6 +16,7 @@ import { categories } from "@/lib/repository";
 import type { StoreSettings } from "@/lib/types";
 import { WhatsAppButton } from "./whatsapp-button";
 import { HeaderSearch } from "./header-search";
+import { SocialLinks } from "./social-links";
 
 export function Logo() {
   return (
@@ -170,6 +171,7 @@ export function Footer({ store }: { store?: StoreSettings }) {
             className="footer-wa"
             phone={store?.whatsapp}
           />
+          <SocialLinks store={store} variant="footer" />
         </div>
         <div>
           <h3>Jelajahi</h3>

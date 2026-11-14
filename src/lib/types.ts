@@ -66,5 +66,7 @@ export type StoreSettings = {
   hours: string | null;
   email: string | null;
   instagram: string | null;
+  tiktok: string | null;
+  facebook: string | null;
   mapsUrl: string | null;
 };

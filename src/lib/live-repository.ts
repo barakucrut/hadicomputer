@@ -181,6 +181,8 @@ export async function getLiveStoreSettings(): Promise<StoreSettings> {
         hours: s.openHours,
         email: null,
         instagram: s.socialInstagram,
+        tiktok: s.socialTiktok,
+        facebook: s.socialFacebook,
         mapsUrl: s.mapsEmbedUrl,
       };
     }
