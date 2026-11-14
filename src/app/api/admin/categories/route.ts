@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getAdminSession } from "@/lib/auth";
 
@@ -22,6 +23,7 @@ export async function POST(request: Request) {
   const category = await prisma.category.create({
     data: { name, slug, icon, description, sortOrder, isActive },
   });
+  revalidatePath("/", "layout");
   return NextResponse.json({ success: true, category });
 }
 
@@ -34,6 +36,7 @@ export async function PUT(request: Request) {
     where: { id },
     data: { name, slug, icon, description, sortOrder, isActive },
   });
+  revalidatePath("/", "layout");
   return NextResponse.json({ success: true, category });
 }
 
@@ -46,5 +49,6 @@ export async function DELETE(request: Request) {
   if (!id) return NextResponse.json({ error: "ID missing" }, { status: 400 });
 
   await prisma.category.delete({ where: { id } });
+  revalidatePath("/", "layout");
   return NextResponse.json({ success: true });
 }

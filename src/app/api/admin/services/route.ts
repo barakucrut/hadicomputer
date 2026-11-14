@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getAdminSession } from "@/lib/auth";
 
@@ -21,6 +22,7 @@ export async function POST(request: Request) {
     data: { title, slug, summary, description, estimatedTime, priceInfo, ctaWhatsappText, iconName, imageUrl, isActive, sortOrder },
   });
 
+  revalidatePath("/", "layout");
   return NextResponse.json({ success: true, service });
 }
 
@@ -36,5 +38,6 @@ export async function PUT(request: Request) {
     data: { title, slug, summary, description, estimatedTime, priceInfo, ctaWhatsappText, iconName, imageUrl, isActive, sortOrder },
   });
 
+  revalidatePath("/", "layout");
   return NextResponse.json({ success: true, service });
 }

@@ -7,6 +7,9 @@ import { Container, Breadcrumbs, SectionHeading } from "@/components/ui";
 import { SafeImage } from "@/components/safe-image";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export function generateStaticParams() {
   return services.map((s) => ({ slug: s.slug }));
 }

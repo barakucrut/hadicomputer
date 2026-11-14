@@ -8,6 +8,9 @@ import { Container, Breadcrumbs, SectionHeading } from "@/components/ui";
 import { ProductDetail } from "@/components/product-detail";
 import { ProductGrid } from "@/components/product-card";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export function generateStaticParams() {
   return getProducts().map((p) => ({ slug: p.slug }));
 }

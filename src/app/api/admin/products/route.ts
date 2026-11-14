@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getAdminSession } from "@/lib/auth";
 
@@ -201,6 +202,8 @@ export async function POST(request: Request) {
       },
     });
 
+    revalidatePath("/", "layout");
+    revalidatePath("/katalog");
     return NextResponse.json({ success: true, id: product.id });
   } catch (err: any) {
     console.error("Create product error:", err);

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getAdminSession } from "@/lib/auth";
 
@@ -41,6 +42,7 @@ export async function POST(request: Request) {
     include: { hotspots: true },
   });
 
+  revalidatePath("/", "layout");
   return NextResponse.json({ success: true, banner });
 }
 
@@ -85,6 +87,7 @@ export async function PUT(request: Request) {
     include: { hotspots: true },
   });
 
+  revalidatePath("/", "layout");
   return NextResponse.json({ success: true, banner: updated });
 }
 
@@ -97,5 +100,6 @@ export async function DELETE(request: Request) {
   if (!id) return NextResponse.json({ error: "ID missing" }, { status: 400 });
 
   await prisma.banner.delete({ where: { id } });
+  revalidatePath("/", "layout");
   return NextResponse.json({ success: true });
 }

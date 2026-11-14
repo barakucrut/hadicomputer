@@ -6,6 +6,9 @@ import { services } from "@/lib/repository";
 import { getLiveServices } from "@/lib/live-repository";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: "Layanan Servis Laptop & Jasa Rakit PC",
   description:

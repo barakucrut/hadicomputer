@@ -12,6 +12,9 @@ import { Container, Breadcrumbs } from "@/components/ui";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 import { getLiveStoreSettings } from "@/lib/live-repository";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: "Kontak Kami & Konsultasi WhatsApp",
   description:

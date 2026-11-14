@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getAdminSession } from "@/lib/auth";
 
@@ -78,5 +79,6 @@ export async function PUT(request: Request) {
     },
   });
 
+  revalidatePath("/", "layout");
   return NextResponse.json({ success: true, settings });
 }

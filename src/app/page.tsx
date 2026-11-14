@@ -38,6 +38,9 @@ const mobilePcSlugs = new Set([
   "asus-rog-g22ch",
 ]);
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function HomePage() {
   const [products, liveBanners, liveCategories, storeSettings] = await Promise.all([
     getLiveProducts(),

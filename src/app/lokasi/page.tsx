@@ -5,6 +5,9 @@ import { LocationPanel } from "@/components/location-panel";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 import { getLiveStoreSettings } from "@/lib/live-repository";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: "Lokasi Toko Fisik & Jam Operasional",
   description:
