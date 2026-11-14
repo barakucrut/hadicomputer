@@ -53,7 +53,7 @@ export default async function LocationPage() {
         </p>
       </div>
       <div className="location-layout">
-        <LocationPanel />
+        <LocationPanel store={store} />
         <div className="location-info">
           <span className="demo-pill">Toko Fisik & Konsultasi Langsung</span>
           <h2>{store.name}</h2>

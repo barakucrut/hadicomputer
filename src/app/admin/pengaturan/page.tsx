@@ -233,6 +233,22 @@ export default function AdminSettingsPage() {
                 onChange={(e) => setSettings({ ...settings, openHours: e.target.value })}
               />
             </div>
+
+            <div>
+              <Label htmlFor="set-maps">
+                Link Google Maps / Kode Embed Peta / Koordinat GPS
+              </Label>
+              <Input
+                id="set-maps"
+                type="text"
+                placeholder="Contoh: -8.2934, 113.7123 atau link Google Maps atau kode embed <iframe src='...'>"
+                value={settings.mapsEmbedUrl || ""}
+                onChange={(e) => setSettings({ ...settings, mapsEmbedUrl: e.target.value })}
+              />
+              <p className="text-xs text-[#525854] mt-1.5">
+                Bisa diisi <strong>koordinat GPS</strong> (misal: <code>-8.2934, 113.7123</code>), <strong>link Google Maps</strong>, atau <strong>kode embed iframe</strong>. Peta Google Maps interaktif akan langsung tampil di halaman Lokasi Toko.
+              </p>
+            </div>
           </CardContent>
         </Card>
 
