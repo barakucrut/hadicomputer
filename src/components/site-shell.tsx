@@ -40,7 +40,19 @@ export function Header({
 }) {
   const categoryList = categoriesProp && categoriesProp.length > 0 ? categoriesProp : categories;
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const path = usePathname();
+
+  // Sticky header on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 36);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Lock body scroll when mobile menu is open
   useEffect(() => {
@@ -75,7 +87,10 @@ export function Header({
           </span>
         </div>
       </div>
-      <header className="site-header" data-home={path === "/"}>
+      <header
+        className={`site-header ${isScrolled ? "is-sticky" : ""}`}
+        data-home={path === "/"}
+      >
         <div className="container header-main">
           <Logo />
           <HeaderSearch />

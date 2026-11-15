@@ -309,14 +309,37 @@ fieldset {
 }
 .site-header {
   background: white;
-  position: relative;
-  z-index: 30;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  transition: background 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
+.site-header.is-sticky {
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.03);
+  animation: stickyHeaderDrop 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes stickyHeaderDrop {
+  from {
+    transform: translateY(-6px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
 .header-main {
   display: flex;
   align-items: center;
   gap: 52px;
   padding-block: 20px;
+  transition: padding 0.25s ease;
+}
+.site-header.is-sticky .header-main {
+  padding-block: 10px;
 }
 .logo {
   display: block;
@@ -325,7 +348,11 @@ fieldset {
   width: 155px;
   height: 56px;
   flex-shrink: 0;
-  background: white;
+  background: transparent;
+  transition: height 0.25s ease;
+}
+.site-header.is-sticky .logo {
+  height: 48px;
 }
 .logo img {
   position: absolute;
