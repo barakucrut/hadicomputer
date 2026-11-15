@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ArrowUpRight,
   ChevronDown,
@@ -41,6 +41,23 @@ export function Header({
   const categoryList = categoriesProp && categoriesProp.length > 0 ? categoriesProp : categories;
   const [menuOpen, setMenuOpen] = useState(false);
   const path = usePathname();
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [menuOpen]);
+
+  // Close menu automatically on route change
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [path]);
 
   // Do not render public header on admin pages
   if (path?.startsWith("/admin")) return null;
@@ -109,28 +126,87 @@ export function Header({
           </nav>
         </div>
         {menuOpen && (
-          <nav
+          <div
             id="mobile-navigation"
-            className="mobile-navigation container"
-            aria-label="Navigasi ponsel"
+            className="mobile-nav-fullscreen"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Navigasi Menu Ponsel"
           >
-            {[
-              { href: "/", label: "Beranda" },
-              { href: "/katalog", label: "Katalog Produk" },
-              { href: "/layanan", label: "Layanan" },
-              { href: "/lokasi", label: "Lokasi Toko" },
-              { href: "/kontak", label: "Kontak Kami" },
-            ].map((n) => (
-              <Link
-                key={n.href}
-                href={n.href}
+            <div className="mobile-nav-header container">
+              <Logo />
+              <button
+                className="icon-button mobile-menu-close"
+                aria-label="Tutup menu"
                 onClick={() => setMenuOpen(false)}
               >
-                {n.label}
-                <ArrowRight size={16} />
-              </Link>
-            ))}
-          </nav>
+                <X size={22} />
+              </button>
+            </div>
+
+            <div className="mobile-nav-body container">
+              <div className="mobile-nav-search-wrap">
+                <HeaderSearch />
+              </div>
+
+              <nav className="mobile-nav-list" aria-label="Menu navigasi">
+                {[
+                  { href: "/", label: "Beranda" },
+                  { href: "/katalog", label: "Katalog Produk" },
+                  { href: "/layanan", label: "Layanan" },
+                  { href: "/lokasi", label: "Lokasi Toko" },
+                  { href: "/kontak", label: "Kontak Kami" },
+                ].map((n, idx) => {
+                  const isActive = n.href === "/" ? path === "/" : path.startsWith(n.href);
+                  return (
+                    <Link
+                      key={n.href}
+                      href={n.href}
+                      onClick={() => setMenuOpen(false)}
+                      className={`mobile-nav-item ${isActive ? "active" : ""}`}
+                      style={{ animationDelay: `${idx * 40}ms` }}
+                    >
+                      <span>{n.label}</span>
+                      <ArrowRight size={18} className="nav-arrow" />
+                    </Link>
+                  );
+                })}
+              </nav>
+
+              <div className="mobile-nav-categories">
+                <span className="mobile-nav-cat-title">Kategori Populer</span>
+                <div className="mobile-nav-cat-grid">
+                  {categoryList.map((c) => (
+                    <Link
+                      key={c.value}
+                      href={`/katalog?kategori=${c.value}`}
+                      onClick={() => setMenuOpen(false)}
+                      className="mobile-cat-pill"
+                    >
+                      {c.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mobile-nav-footer">
+                <div className="mobile-nav-store-info">
+                  <span className="info-hours">
+                    {store?.hours || "Buka setiap hari: 08.00 – 22.00 WIB"}
+                  </span>
+                  <span className="info-address">
+                    {store?.address || "Tempurejo, Kabupaten Jember"}
+                  </span>
+                </div>
+                <WhatsAppButton
+                  label="Konsultasi via WhatsApp"
+                  phone={store?.whatsapp}
+                  className="mobile-full-wa"
+                />
+                <SocialLinks store={store} variant="footer" />
+              </div>
+            </div>
+          </div>
         )}
       </header>
     </>
