@@ -155,18 +155,12 @@ export function HeaderSearch() {
   return (
     <div
       ref={containerRef}
-      style={{
-        position: "relative",
-        flex: 1,
-        maxWidth: "610px",
-        width: "100%",
-      }}
+      className="header-search-wrap"
     >
       <form
         onSubmit={handleSubmit}
         className="header-search"
         role="search"
-        style={{ width: "100%" }}
       >
         <Search size={19} />
         <input
