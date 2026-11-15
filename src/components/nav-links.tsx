@@ -74,7 +74,10 @@ export function NavLinks() {
             }}
             aria-current={isActive ? "page" : undefined}
             onMouseEnter={() => setHoveredIndex(index)}
-            className="nav-link-item"
+            className={`nav-link-item ${isActive ? "active" : ""}`}
+            style={{
+              fontWeight: isActive ? 600 : 500,
+            }}
           >
             {item.label}
           </Link>
