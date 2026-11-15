@@ -570,11 +570,19 @@ fieldset {
   align-items: center;
   border-bottom: 2px solid transparent;
   color: #676d67;
+  transition: color 0.2s ease;
+}
+.nav-links.has-slider a {
+  border-bottom: none !important;
 }
 .nav-links a[aria-current],
 .nav-links a:hover {
   color: var(--red);
   border-bottom-color: var(--red);
+}
+.nav-links.has-slider a[aria-current],
+.nav-links.has-slider a:hover {
+  border-bottom: none !important;
 }
 .location-nav {
   display: flex;

@@ -17,6 +17,7 @@ import type { StoreSettings } from "@/lib/types";
 import { WhatsAppButton } from "./whatsapp-button";
 import { HeaderSearch } from "./header-search";
 import { SocialLinks } from "./social-links";
+import { NavLinks } from "./nav-links";
 
 export function Logo() {
   return (
@@ -99,22 +100,7 @@ export function Header({
                 ))}
               </div>
             </details>
-            <div className="nav-links">
-              {[
-                { href: "/", label: "Beranda" },
-                { href: "/katalog", label: "Katalog Produk" },
-                { href: "/layanan", label: "Layanan" },
-                { href: "/kontak", label: "Kontak Kami" },
-              ].map((n) => (
-                <Link
-                  href={n.href}
-                  key={n.href}
-                  aria-current={path === n.href ? "page" : undefined}
-                >
-                  {n.label}
-                </Link>
-              ))}
-            </div>
+            <NavLinks />
             <Link className="location-nav" href="/lokasi">
               <MapPin size={16} />
               Lokasi toko
