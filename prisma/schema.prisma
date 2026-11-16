@@ -7,6 +7,81 @@ generator client {
 }
 
 // ----------------------------------------------------
+// 0. MULTI-TENANT SAAS ARCHITECTURE
+// ----------------------------------------------------
+enum TenantPlan {
+  STARTER
+  PRO
+  ENTERPRISE
+}
+
+enum TenantStatus {
+  ACTIVE
+  TRIAL
+  SUSPENDED
+}
+
+model Tenant {
+  id           String         @id @db.VarChar(40) // 40-char SHA-1 hex ID
+  slug         String         @unique @db.VarChar(100)
+  name         String         @db.VarChar(150)
+  customDomain String?        @unique @db.VarChar(191)
+  plan         TenantPlan     @default(PRO)
+  status       TenantStatus   @default(ACTIVE)
+  features     Json?          // { "pcBuilder": true, "tradeIn": true, "instantCheckout": false }
+  
+  settings     TenantSetting?
+  adminUsers   AdminUser[]
+  products     Product[]
+  categories   Category[]
+  brands       Brand[]
+  banners      Banner[]
+  services     Service[]
+  needs        ProductNeed[]
+  inquiryLogs  InquiryLog[]
+
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@map("tenants")
+}
+
+model TenantSetting {
+  id                      String   @id @default(cuid())
+  tenantId                String   @unique @db.VarChar(40)
+  tenant                  Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  // Branding
+  tagline                 String?  @db.VarChar(200)
+  logoUrl                 String?  @db.VarChar(255)
+  faviconUrl              String?  @db.VarChar(255)
+  primaryColor            String   @default("#cc252b") @db.VarChar(20)
+  secondaryColor          String   @default("#111413") @db.VarChar(20)
+  
+  // Kontak & Lokasi
+  whatsappNumber          String   @default("6285769000007") @db.VarChar(30)
+  whatsappDefaultTemplate String?  @db.Text
+  address                 String?  @db.Text
+  mapsEmbedUrl            String?  @db.Text
+  mapsUrl                 String?  @db.VarChar(255)
+  openHours               String   @default("Buka setiap hari: 08.00 – 22.00 WIB") @db.VarChar(200)
+  
+  // Media Sosial
+  socialInstagram         String?  @db.VarChar(100)
+  socialTiktok            String?  @db.VarChar(100)
+  socialFacebook          String?  @db.VarChar(100)
+  socialYoutube           String?  @db.VarChar(100)
+
+  // Pengumuman
+  announcementText        String?  @db.VarChar(255)
+  isAnnouncementActive    Boolean  @default(false)
+
+  updatedAt               DateTime @updatedAt
+
+  @@map("tenant_settings")
+}
+
+// ----------------------------------------------------
 // 1. AUTENTIKASI ADMIN / OWNER
 // ----------------------------------------------------
 model AdminUser {
@@ -15,10 +90,13 @@ model AdminUser {
   passwordHash String    @db.VarChar(255)
   name         String    @db.VarChar(100)
   role         String    @default("OWNER") @db.VarChar(30)
+  tenantId     String?   @db.VarChar(40)
+  tenant       Tenant?   @relation(fields: [tenantId], references: [id], onDelete: SetNull)
   lastLoginAt  DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
+  @@index([tenantId])
   @@map("admin_users")
 }
 
@@ -27,9 +105,11 @@ model AdminUser {
 // ----------------------------------------------------
 model Category {
   id          String    @id @default(cuid())
+  tenantId    String?   @db.VarChar(40)
+  tenant      Tenant?   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   name        String    @db.VarChar(100)
   slug        String    @unique @db.VarChar(100)
-  icon        String?   @db.VarChar(50) // e.g. "laptop", "monitor", "cpu"
+  icon        String?   @db.VarChar(50)
   description String?   @db.Text
   sortOrder   Int       @default(0)
   isActive    Boolean   @default(true)
@@ -37,11 +117,14 @@ model Category {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
+  @@index([tenantId])
   @@map("categories")
 }
 
 model Brand {
   id        String    @id @default(cuid())
+  tenantId  String?   @db.VarChar(40)
+  tenant    Tenant?   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   name      String    @db.VarChar(100)
   slug      String    @unique @db.VarChar(100)
   logoUrl   String?   @db.VarChar(255)
@@ -51,11 +134,14 @@ model Brand {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
+  @@index([tenantId])
   @@map("brands")
 }
 
 model ProductNeed {
   id          String   @id @default(cuid())
+  tenantId    String?  @db.VarChar(40)
+  tenant      Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   name        String   @db.VarChar(100)
   slug        String   @unique @db.VarChar(100)
   description String?  @db.Text
@@ -65,6 +151,7 @@ model ProductNeed {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  @@index([tenantId])
   @@map("product_needs")
 }
 
@@ -90,6 +177,8 @@ enum PublicationStatus {
 
 model Product {
   id                String             @id @default(cuid())
+  tenantId          String?            @db.VarChar(40)
+  tenant            Tenant?            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   code              String             @unique @db.VarChar(50)
   slug              String             @unique @db.VarChar(150)
   name              String             @db.VarChar(200)
@@ -126,6 +215,7 @@ model Product {
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
 
+  @@index([tenantId])
   @@index([categoryId])
   @@index([brandId])
   @@index([publicationStatus, availability])
@@ -181,6 +271,8 @@ model ProductSpec {
 // ----------------------------------------------------
 model Banner {
   id        String          @id @default(cuid())
+  tenantId  String?         @db.VarChar(40)
+  tenant    Tenant?         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   title     String          @db.VarChar(150)
   subtitle  String?         @db.VarChar(255)
   badgeText String?         @db.VarChar(100)
@@ -195,6 +287,7 @@ model Banner {
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
 
+  @@index([tenantId])
   @@map("banners")
 }
 
@@ -217,6 +310,8 @@ model BannerHotspot {
 // ----------------------------------------------------
 model Service {
   id                 String       @id @default(cuid())
+  tenantId           String?      @db.VarChar(40)
+  tenant             Tenant?      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   title              String       @db.VarChar(150)
   slug               String       @unique @db.VarChar(150)
   summary            String       @db.VarChar(255)
@@ -232,6 +327,7 @@ model Service {
   createdAt          DateTime     @default(now())
   updatedAt          DateTime     @updatedAt
 
+  @@index([tenantId])
   @@map("services")
 }
 
@@ -268,6 +364,8 @@ enum InquiryType {
 
 model InquiryLog {
   id             String      @id @default(cuid())
+  tenantId       String?     @db.VarChar(40)
+  tenant         Tenant?     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   inquiryType    InquiryType @default(PRODUCT)
   productId      String?
   product        Product?    @relation(fields: [productId], references: [id], onDelete: SetNull)
@@ -280,6 +378,7 @@ model InquiryLog {
   referrer       String?     @db.VarChar(255)
   createdAt      DateTime    @default(now())
 
+  @@index([tenantId])
   @@index([inquiryType])
   @@index([productId])
   @@index([serviceId])
