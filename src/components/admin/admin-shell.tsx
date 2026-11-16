@@ -16,6 +16,8 @@ import {
   Store,
   Menu,
   X,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import { ToastProvider } from "@/components/admin/ui/toast";
 import "@/app/admin.css";
@@ -29,6 +31,26 @@ export function AdminShell({ children, user }: AdminShellProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [isCollapsed, setIsCollapsed] = React.useState(false);
+
+  React.useEffect(() => {
+    try {
+      const saved = localStorage.getItem("admin_sidebar_collapsed");
+      if (saved === "true") setIsCollapsed(true);
+    } catch {
+      // Ignore SSR / privacy mode
+    }
+  }, []);
+
+  const toggleSidebar = () => {
+    setIsCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem("admin_sidebar_collapsed", String(next));
+      } catch {}
+      return next;
+    });
+  };
 
   // If on login page, don't show admin shell
   if (pathname === "/admin/login") {
@@ -74,7 +96,7 @@ export function AdminShell({ children, user }: AdminShellProps) {
 
       {/* Sidebar Navigation */}
       <aside
-        className="admin-sidebar"
+        className={`admin-sidebar ${isCollapsed ? "is-collapsed" : ""}`}
         style={{
           transform: mobileMenuOpen ? "translateX(0)" : undefined,
         }}
@@ -83,6 +105,7 @@ export function AdminShell({ children, user }: AdminShellProps) {
         <div className="admin-sidebar-header">
           <Link
             href="/admin"
+            title="Hadi CMS — Dashboard"
             style={{
               display: "flex",
               alignItems: "center",
@@ -91,12 +114,14 @@ export function AdminShell({ children, user }: AdminShellProps) {
               fontSize: "17px",
               color: "var(--ink)",
               textDecoration: "none",
+              minWidth: 0,
             }}
           >
             <div
               style={{
                 height: "36px",
                 width: "36px",
+                minWidth: "36px",
                 borderRadius: "10px",
                 backgroundColor: "var(--red)",
                 color: "#ffffff",
@@ -110,8 +135,30 @@ export function AdminShell({ children, user }: AdminShellProps) {
             >
               HC
             </div>
-            <span>Hadi CMS</span>
+            <span className="admin-sidebar-brand-text" style={{ whiteSpace: "nowrap" }}>
+              Hadi CMS
+            </span>
           </Link>
+
+          {/* Desktop Toggle in Sidebar Header */}
+          <button
+            type="button"
+            onClick={toggleSidebar}
+            className="admin-sidebar-header-toggle hidden md:inline-flex"
+            title="Ciutkan Sidebar"
+            style={{
+              background: "transparent",
+              border: "none",
+              color: "var(--muted)",
+              cursor: "pointer",
+              padding: "6px",
+              borderRadius: "6px",
+            }}
+          >
+            <PanelLeftClose size={18} />
+          </button>
+
+          {/* Mobile close */}
           <button
             onClick={() => setMobileMenuOpen(false)}
             className="md:hidden"
@@ -131,7 +178,7 @@ export function AdminShell({ children, user }: AdminShellProps) {
         <nav
           style={{
             flex: 1,
-            padding: "16px 12px",
+            padding: isCollapsed ? "16px 8px" : "16px 12px",
             display: "flex",
             flexDirection: "column",
             gap: "4px",
@@ -151,10 +198,11 @@ export function AdminShell({ children, user }: AdminShellProps) {
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
                 className={`admin-nav-item ${isActive ? "active" : ""}`}
+                title={item.label}
               >
                 <Icon
-                  size={18}
-                  style={{ color: isActive ? "#ffffff" : "var(--muted)" }}
+                  size={19}
+                  style={{ color: isActive ? "#ffffff" : "var(--muted)", flexShrink: 0 }}
                 />
                 <span>{item.label}</span>
               </Link>
@@ -164,8 +212,9 @@ export function AdminShell({ children, user }: AdminShellProps) {
 
         {/* Sidebar Footer */}
         <div
+          className="admin-sidebar-footer"
           style={{
-            padding: "14px",
+            padding: isCollapsed ? "12px 8px" : "14px",
             borderTop: "1px solid var(--border)",
             display: "flex",
             flexDirection: "column",
@@ -176,10 +225,11 @@ export function AdminShell({ children, user }: AdminShellProps) {
             href="/"
             target="_blank"
             rel="noopener noreferrer"
+            title="Buka Toko Publik"
             style={{
               display: "flex",
               alignItems: "center",
-              justifyContent: "space-between",
+              justifyContent: isCollapsed ? "center" : "space-between",
               padding: "9px 12px",
               borderRadius: "var(--radius-sm)",
               fontSize: "12px",
@@ -192,17 +242,19 @@ export function AdminShell({ children, user }: AdminShellProps) {
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
           >
             <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <Store size={15} />
-              Buka Toko Publik
+              <Store size={16} style={{ flexShrink: 0 }} />
+              <span>Buka Toko Publik</span>
             </span>
-            <ExternalLink size={13} />
+            <ExternalLink size={13} style={{ flexShrink: 0 }} />
           </a>
           <button
             onClick={handleLogout}
+            title="Keluar Akun"
             style={{
               width: "100%",
               display: "flex",
               alignItems: "center",
+              justifyContent: isCollapsed ? "center" : "flex-start",
               gap: "8px",
               padding: "9px 12px",
               borderRadius: "var(--radius-sm)",
@@ -218,7 +270,7 @@ export function AdminShell({ children, user }: AdminShellProps) {
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#fee2e2")}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
           >
-            <LogOut size={15} />
+            <LogOut size={16} style={{ flexShrink: 0 }} />
             <span>Keluar Akun</span>
           </button>
         </div>
@@ -229,6 +281,37 @@ export function AdminShell({ children, user }: AdminShellProps) {
         {/* Top Navbar */}
         <header className="admin-topbar">
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            {/* Desktop Toggle Button in Topbar */}
+            <button
+              type="button"
+              onClick={toggleSidebar}
+              className="hidden md:inline-flex"
+              title={isCollapsed ? "Bentangkan Sidebar" : "Ciutkan Sidebar"}
+              style={{
+                background: "transparent",
+                border: "1px solid var(--border)",
+                color: "var(--muted)",
+                cursor: "pointer",
+                padding: "6px",
+                borderRadius: "6px",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: "background 0.15s ease, color 0.15s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "var(--surface)";
+                e.currentTarget.style.color = "var(--ink)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "transparent";
+                e.currentTarget.style.color = "var(--muted)";
+              }}
+            >
+              {isCollapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+            </button>
+
+            {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(true)}
               className="md:hidden"

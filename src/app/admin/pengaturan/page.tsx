@@ -135,7 +135,7 @@ export default function AdminSettingsPage() {
   }
 
   return (
-    <div className="space-y-10 max-w-4xl pb-16">
+    <div className="space-y-10 w-full pb-16">
       {/* 1. Pengaturan Toko Form */}
       <form onSubmit={handleSave} className="space-y-6">
         <div className="flex items-center justify-between">
