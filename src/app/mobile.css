@@ -15,21 +15,19 @@
     display: none !important;
   }
 
-  /* Full-width expansive mobile header */
+  /* Mobile header container aligned with page content */
   .site-header .container.header-main {
-    width: calc(100% - 24px);
-    max-width: 100%;
-    gap: 10px;
-    padding-block: 10px 12px;
+    gap: 12px;
+    padding-block: 10px 14px;
   }
   .header-main .logo {
-    width: 112px;
+    width: 102px;
     height: 40px;
   }
   .header-main .logo img {
     width: 127px;
     top: -22px;
-    left: -7px;
+    left: -15px;
   }
   .header-search-wrap {
     grid-row: 2;
@@ -65,8 +63,15 @@
     background: #ffffff;
   }
   .mobile-menu-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    width: 44px;
+    height: 44px;
     min-width: 44px;
     min-height: 44px;
+    padding: 0;
+    justify-self: end;
   }
   .site-header[data-home="true"] .nav-border {
     display: none;
