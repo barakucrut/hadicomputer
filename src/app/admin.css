@@ -132,11 +132,14 @@
 .admin-input-icon-left {
   position: absolute;
   left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
   color: var(--muted);
   pointer-events: none;
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 2;
 }
 
 .admin-password-toggle-btn {
@@ -175,11 +178,13 @@
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
   box-sizing: border-box;
 }
-.admin-input-styled.has-left-icon {
-  padding-left: 40px;
+.admin-input-styled.has-left-icon,
+.shadcn-input.has-left-icon {
+  padding-left: 40px !important;
 }
-.admin-input-styled.has-right-icon {
-  padding-right: 42px;
+.admin-input-styled.has-right-icon,
+.shadcn-input.has-right-icon {
+  padding-right: 42px !important;
 }
 .admin-input-styled:focus {
   outline: none;

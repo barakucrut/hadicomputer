@@ -15,6 +15,8 @@ import {
   LayoutDashboard,
   LogOut,
   Receipt,
+  Search,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/admin/ui/button";
 import { Badge } from "@/components/admin/ui/badge";
@@ -40,6 +42,8 @@ function GodModeStyleguideContent() {
   const toast = useToast();
   const [currencyVal, setCurrencyVal] = React.useState<string>("12500000");
   const [switchVal, setSwitchVal] = React.useState(true);
+  const [emptySearch, setEmptySearch] = React.useState("");
+  const [styleguideSearch, setStyleguideSearch] = React.useState("Lenovo Legion Pro 5");
 
   async function handleLogout() {
     try {
@@ -368,10 +372,122 @@ function GodModeStyleguideContent() {
               </Card>
             </section>
 
-            {/* 5. Data Table Sample */}
+            {/* 5. Search Inputs & Filter Toolbars */}
             <section className="space-y-4">
               <div>
-                <h2 className="text-lg font-bold text-[#111413]">5. Data Tables</h2>
+                <h2 className="text-lg font-bold text-[#111413]">5. Search Inputs & Filter Toolbars</h2>
+                <p className="text-xs text-[#525854] mt-0.5">
+                  Komponen input pencarian dengan icon magnifying glass presisi di tengah, tombol pembersih (clear X), dan layout toolbar filter.
+                </p>
+              </div>
+
+              <Card className="shadow-sm border-[#e5e5e2] rounded-2xl overflow-hidden">
+                <CardContent className="p-8 space-y-6">
+                  {/* Standalone Search Inputs */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label className="text-xs font-bold text-[#111413]">Search Input (Kondisi Kosong / Default)</Label>
+                      <div className="admin-input-wrapper">
+                        <span className="admin-input-icon-left">
+                          <Search size={16} />
+                        </span>
+                        <input
+                          type="text"
+                          placeholder="Cari perangkat, tenant, atau transaksi..."
+                          value={emptySearch}
+                          onChange={(e) => setEmptySearch(e.target.value)}
+                          className={`admin-input-styled has-left-icon ${emptySearch ? "has-right-icon" : ""}`}
+                          style={{ height: "40px", fontSize: "13px" }}
+                        />
+                        {emptySearch && (
+                          <button
+                            type="button"
+                            onClick={() => setEmptySearch("")}
+                            className="admin-password-toggle-btn"
+                            title="Hapus pencarian"
+                            style={{ right: "10px" }}
+                          >
+                            <X size={14} />
+                          </button>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-[#818779]">
+                        Icon pencarian presisi vertikal 50% dan padding teks kiri 40px otomatis.
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-xs font-bold text-[#111413]">Search Input (Kondisi Terisi dengan Tombol Clear)</Label>
+                      <div className="admin-input-wrapper">
+                        <span className="admin-input-icon-left">
+                          <Search size={16} />
+                        </span>
+                        <input
+                          type="text"
+                          placeholder="Cari..."
+                          value={styleguideSearch}
+                          onChange={(e) => setStyleguideSearch(e.target.value)}
+                          className={`admin-input-styled has-left-icon ${styleguideSearch ? "has-right-icon" : ""}`}
+                          style={{ height: "40px", fontSize: "13px" }}
+                        />
+                        {styleguideSearch && (
+                          <button
+                            type="button"
+                            onClick={() => setStyleguideSearch("")}
+                            className="admin-password-toggle-btn"
+                            title="Hapus pencarian"
+                            style={{ right: "10px" }}
+                          >
+                            <X size={14} />
+                          </button>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-[#818779]">
+                        Klik tombol silang di kanan untuk mereset query pencarian.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Complete Toolbar Example */}
+                  <div className="border-t border-[#e5e5e2] pt-6 space-y-3">
+                    <Label className="text-xs font-bold text-[#111413]">Pola Lengkap: Filter Toolbar di Halaman Data</Label>
+                    <div className="p-4 border border-[#e5e5e2] rounded-xl bg-[#fafafa] flex flex-col md:flex-row gap-3 items-center justify-between">
+                      <div className="admin-input-wrapper w-full md:w-80">
+                        <span className="admin-input-icon-left">
+                          <Search size={16} />
+                        </span>
+                        <input
+                          type="text"
+                          placeholder="Cari toko, subdomain, atau ID..."
+                          defaultValue=""
+                          className="admin-input-styled has-left-icon"
+                          style={{ height: "38px", fontSize: "12px", backgroundColor: "#ffffff" }}
+                        />
+                      </div>
+
+                      <div className="flex items-center gap-2.5 w-full md:w-auto">
+                        <Select defaultValue="ALL" className="text-xs h-9.5 w-36 bg-white">
+                          <option value="ALL">Semua Paket</option>
+                          <option value="STARTER">Starter</option>
+                          <option value="PRO">Pro</option>
+                          <option value="ENTERPRISE">Enterprise</option>
+                        </Select>
+
+                        <Button size="sm" className="h-9.5 text-xs font-bold flex items-center gap-1.5">
+                          <Plus size={14} />
+                          <span>Aksi Cepat</span>
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </section>
+
+            {/* 6. Data Tables */}
+            <section className="space-y-4">
+              <div>
+                <h2 className="text-lg font-bold text-[#111413]">6. Data Tables</h2>
                 <p className="text-xs text-[#525854] mt-0.5">
                   Tabel data untuk manajemen produk, inventaris, dan tenant toko.
                 </p>

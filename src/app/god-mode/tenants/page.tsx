@@ -30,6 +30,7 @@ import {
   ChevronLeft,
   Zap,
   Receipt,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/admin/ui/button";
 import { Badge } from "@/components/admin/ui/badge";
@@ -596,10 +597,12 @@ function TenantsManagementContent() {
             {/* Filter & Search Bar */}
             <Card className="border-[#e5e5e2] shadow-sm rounded-2xl">
               <CardContent className="p-4 flex flex-col md:flex-row gap-3 items-center justify-between">
-                {/* Search */}
-                <div className="relative w-full md:w-80">
-                  <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <Input
+                {/* Search with perfectly centered icon & clear button */}
+                <div className="admin-input-wrapper w-full md:w-84">
+                  <span className="admin-input-icon-left">
+                    <Search size={16} />
+                  </span>
+                  <input
                     type="text"
                     placeholder="Cari toko, slug, domain, atau ID..."
                     value={searchQuery}
@@ -607,8 +610,23 @@ function TenantsManagementContent() {
                       setSearchQuery(e.target.value);
                       setCurrentPage(1);
                     }}
-                    className="pl-9 text-xs h-9 bg-white"
+                    className={`admin-input-styled has-left-icon ${searchQuery ? "has-right-icon" : ""}`}
+                    style={{ height: "40px", fontSize: "12px" }}
                   />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSearchQuery("");
+                        setCurrentPage(1);
+                      }}
+                      className="admin-password-toggle-btn"
+                      title="Hapus pencarian"
+                      style={{ right: "10px" }}
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
                 </div>
 
                 {/* Filters */}
@@ -619,7 +637,7 @@ function TenantsManagementContent() {
                       setPlanFilter(e.target.value);
                       setCurrentPage(1);
                     }}
-                    className="text-xs h-9 w-36 bg-white"
+                    className="text-xs h-10 w-36 bg-white"
                   >
                     <option value="ALL">Semua Paket</option>
                     <option value="STARTER">Paket Starter</option>
@@ -633,7 +651,7 @@ function TenantsManagementContent() {
                       setStatusFilter(e.target.value);
                       setCurrentPage(1);
                     }}
-                    className="text-xs h-9 w-36 bg-white"
+                    className="text-xs h-10 w-36 bg-white"
                   >
                     <option value="ALL">Semua Status</option>
                     <option value="ACTIVE">Status Active</option>

@@ -25,6 +25,7 @@ import {
   ArrowUpRight,
   ArrowDownLeft,
   PieChart,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/admin/ui/button";
 import { Badge } from "@/components/admin/ui/badge";
@@ -459,9 +460,11 @@ function TransactionsContent() {
             {/* Filter Bar */}
             <Card className="border-[#e5e5e2] shadow-sm rounded-2xl">
               <CardContent className="p-4 flex flex-col md:flex-row gap-3 items-center justify-between">
-                <div className="relative w-full md:w-80">
-                  <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <Input
+                <div className="admin-input-wrapper w-full md:w-84">
+                  <span className="admin-input-icon-left">
+                    <Search size={16} />
+                  </span>
+                  <input
                     type="text"
                     placeholder="Cari transaksi, merchant, keterangan..."
                     value={searchQuery}
@@ -469,8 +472,23 @@ function TransactionsContent() {
                       setSearchQuery(e.target.value);
                       setCurrentPage(1);
                     }}
-                    className="pl-9 text-xs h-9 bg-white"
+                    className={`admin-input-styled has-left-icon ${searchQuery ? "has-right-icon" : ""}`}
+                    style={{ height: "40px", fontSize: "12px" }}
                   />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSearchQuery("");
+                        setCurrentPage(1);
+                      }}
+                      className="admin-password-toggle-btn"
+                      title="Hapus pencarian"
+                      style={{ right: "10px" }}
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-2.5 w-full md:w-auto">
