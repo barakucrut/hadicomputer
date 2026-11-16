@@ -88,6 +88,19 @@ interface TenantOption {
   customDomain: string | null;
 }
 
+const CATEGORY_LABELS: Record<string, { label: string; badgeClass: string }> = {
+  SUBSCRIPTION: { label: "Subscription", badgeClass: "bg-blue-50 text-blue-700 border-blue-200" },
+  JUAL_PUTUS: { label: "Jual Putus", badgeClass: "bg-purple-100 text-purple-800 border-purple-300 font-extrabold" },
+  SETUP_FEE: { label: "Biaya Setup", badgeClass: "bg-amber-50 text-amber-700 border-amber-200" },
+  ADDON: { label: "Add-on Fitur", badgeClass: "bg-indigo-50 text-indigo-700 border-indigo-200" },
+  SERVER_INFRA: { label: "Server & Hosting", badgeClass: "bg-gray-100 text-gray-700 border-gray-200" },
+  DOMAIN_REGISTRATION: { label: "Domain Registrar", badgeClass: "bg-gray-100 text-gray-700 border-gray-200" },
+  WHATSAPP_GATEWAY: { label: "WhatsApp Gateway", badgeClass: "bg-green-50 text-green-700 border-green-200" },
+  MARKETING: { label: "Marketing & Iklan", badgeClass: "bg-orange-50 text-orange-700 border-orange-200" },
+  OPERATIONAL: { label: "Operasional", badgeClass: "bg-gray-100 text-gray-700 border-gray-200" },
+  OTHER: { label: "Lainnya", badgeClass: "bg-gray-100 text-gray-700 border-gray-200" },
+};
+
 function TransactionsContent() {
   const router = useRouter();
   const toast = useToast();
@@ -535,6 +548,7 @@ function TransactionsContent() {
                   >
                     <option value="ALL">Semua Kategori Transaksi</option>
                     <option value="SUBSCRIPTION">Subscription Paket</option>
+                    <option value="JUAL_PUTUS">Jual Putus (Source Code / Lisensi)</option>
                     <option value="SETUP_FEE">Biaya Setup Domain</option>
                     <option value="ADDON">Add-on Fitur</option>
                     <option value="SERVER_INFRA">Server & Hosting</option>
@@ -624,8 +638,8 @@ function TransactionsContent() {
                             <div>
                               <div className="font-bold text-[#111413] text-sm">{t.title}</div>
                               <div className="text-xs text-[#818779] flex items-center gap-2 mt-0.5">
-                                <span className="bg-[#f0f0ee] px-1.5 py-0.5 rounded text-[10px] font-mono font-bold">
-                                  {t.category}
+                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${CATEGORY_LABELS[t.category]?.badgeClass || "bg-[#f0f0ee] text-[#525854] border-gray-200"}`}>
+                                  {CATEGORY_LABELS[t.category]?.label || t.category}
                                 </span>
                                 {t.paymentMethod && <span>• via {t.paymentMethod}</span>}
                               </div>
@@ -814,6 +828,7 @@ function TransactionsContent() {
                   {newType === "INCOME" ? (
                     <>
                       <option value="SUBSCRIPTION">Subscription Paket</option>
+                      <option value="JUAL_PUTUS">Jual Putus (Source Code / Lisensi Penuh)</option>
                       <option value="SETUP_FEE">Biaya Setup Domain</option>
                       <option value="ADDON">Add-on Fitur</option>
                       <option value="OTHER">Lainnya</option>
