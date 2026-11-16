@@ -28,6 +28,7 @@ import {
   Phone,
   Globe,
   Sliders,
+  LayoutDashboard,
 } from "lucide-react";
 import { Button } from "@/components/admin/ui/button";
 import { Badge } from "@/components/admin/ui/badge";
@@ -302,16 +303,27 @@ function GodModeDashboard() {
           }}
         >
           <Link href="/god-mode" className="admin-nav-item active">
-            <Store size={19} />
-            <span>Manajemen Tenant</span>
+            <LayoutDashboard size={19} />
+            <span>Dashboard Platform</span>
           </Link>
-          <Link href="/docs/styleguide" className="admin-nav-item">
+          <a
+            href="#daftar-toko"
+            className="admin-nav-item"
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById("daftar-toko")?.scrollIntoView({ behavior: "smooth" });
+            }}
+          >
+            <Store size={19} />
+            <span>Daftar Tenant Toko</span>
+          </a>
+          <Link href="/god-mode/styleguide" className="admin-nav-item">
             <Palette size={19} />
             <span>Living Styleguide</span>
           </Link>
           <Link href="/admin" className="admin-nav-item">
             <ExternalLink size={19} />
-            <span>Buka CMS Toko #1</span>
+            <span>Buka CMS Hadicomputer</span>
           </Link>
         </nav>
 
@@ -394,19 +406,28 @@ function GodModeDashboard() {
                 <div
                   style={{
                     position: "absolute",
-                    top: "calc(100% + 6px)",
+                    top: "calc(100% + 8px)",
                     right: 0,
-                    width: "280px",
-                    background: "#ffffff",
-                    border: "1px solid var(--border)",
-                    borderRadius: "10px",
-                    boxShadow: "0 10px 25px -4px rgba(0,0,0,0.1)",
+                    width: "300px",
+                    backgroundColor: "#ffffff",
+                    border: "1px solid #e2e8f0",
+                    borderRadius: "12px",
+                    boxShadow: "0 10px 30px -5px rgba(0, 0, 0, 0.12), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
                     zIndex: 100,
                     overflow: "hidden",
-                    padding: "6px",
+                    padding: "8px",
                   }}
                 >
-                  <div style={{ padding: "6px 10px", fontSize: "11px", fontWeight: 800, color: "var(--muted)", textTransform: "uppercase" }}>
+                  <div
+                    style={{
+                      padding: "6px 10px 8px 10px",
+                      fontSize: "11px",
+                      fontWeight: 800,
+                      color: "#64748b",
+                      letterSpacing: "0.05em",
+                      textTransform: "uppercase",
+                    }}
+                  >
                     Beralih Tampilan / Tenant
                   </div>
 
@@ -422,87 +443,132 @@ function GodModeDashboard() {
                       alignItems: "center",
                       justifyContent: "space-between",
                       padding: "8px 10px",
-                      borderRadius: "6px",
+                      borderRadius: "8px",
                       fontSize: "13px",
-                      fontWeight: selectedTenantId === "all" ? 800 : 500,
-                      backgroundColor: selectedTenantId === "all" ? "var(--surface)" : "transparent",
+                      fontWeight: selectedTenantId === "all" ? 800 : 600,
+                      backgroundColor: selectedTenantId === "all" ? "#f1f5f9" : "transparent",
                       border: "none",
                       cursor: "pointer",
                       textAlign: "left",
                       color: "var(--ink)",
+                      transition: "background-color 0.15s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (selectedTenantId !== "all") e.currentTarget.style.backgroundColor = "#f8fafc";
+                    }}
+                    onMouseLeave={(e) => {
+                      if (selectedTenantId !== "all") e.currentTarget.style.backgroundColor = "transparent";
                     }}
                   >
-                    <span>👑 Overview Semua Toko</span>
-                    {selectedTenantId === "all" && <CheckCircle2 size={14} className="text-red-600" />}
+                    <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <span>👑</span>
+                      <span>Overview Semua Toko</span>
+                    </span>
+                    {selectedTenantId === "all" && <CheckCircle2 size={15} className="text-red-600" />}
                   </button>
 
-                  <div style={{ borderTop: "1px solid var(--border)", margin: "4px 0" }} />
+                  <div style={{ height: "1px", backgroundColor: "#f1f5f9", margin: "6px 0" }} />
 
-                  {tenants.map((t) => (
-                    <div
-                      key={t.id}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        padding: "6px 8px",
-                        borderRadius: "6px",
-                        backgroundColor: selectedTenantId === t.id ? "var(--surface)" : "transparent",
-                      }}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedTenantId(t.id);
-                          setIsDropdownOpen(false);
-                        }}
-                        style={{
-                          background: "transparent",
-                          border: "none",
-                          fontSize: "13px",
-                          fontWeight: selectedTenantId === t.id ? 800 : 600,
-                          color: "var(--ink)",
-                          textAlign: "left",
-                          cursor: "pointer",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "6px",
-                        }}
-                      >
-                        <span
-                          style={{
-                            width: "8px",
-                            height: "8px",
-                            borderRadius: "50%",
-                            backgroundColor: t.settings?.primaryColor || "#cc252b",
-                          }}
-                        />
-                        <span>{t.name}</span>
-                      </button>
-
-                      <Link
-                        href="/admin"
-                        title="Masuk ke CMS Toko ini"
-                        style={{
-                          padding: "4px 8px",
-                          borderRadius: "4px",
-                          fontSize: "11px",
-                          fontWeight: 700,
-                          backgroundColor: "#fee2e2",
-                          color: "#b91c1c",
-                          textDecoration: "none",
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: "4px",
-                        }}
-                      >
-                        <span>CMS</span>
-                        <ExternalLink size={10} />
-                      </Link>
+                  {tenants.length === 0 ? (
+                    <div style={{ padding: "10px", textAlign: "center", fontSize: "12px", color: "var(--muted)" }}>
+                      Belum ada tenant toko
                     </div>
-                  ))}
+                  ) : (
+                    <div style={{ maxHeight: "200px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "2px" }}>
+                      {tenants.map((t) => (
+                        <div
+                          key={t.id}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            padding: "6px 8px",
+                            borderRadius: "8px",
+                            backgroundColor: selectedTenantId === t.id ? "#f1f5f9" : "transparent",
+                            transition: "background-color 0.15s ease",
+                          }}
+                          onMouseEnter={(e) => {
+                            if (selectedTenantId !== t.id) e.currentTarget.style.backgroundColor = "#f8fafc";
+                          }}
+                          onMouseLeave={(e) => {
+                            if (selectedTenantId !== t.id) e.currentTarget.style.backgroundColor = "transparent";
+                          }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedTenantId(t.id);
+                              setIsDropdownOpen(false);
+                            }}
+                            style={{
+                              background: "transparent",
+                              border: "none",
+                              fontSize: "13px",
+                              fontWeight: selectedTenantId === t.id ? 800 : 600,
+                              color: "var(--ink)",
+                              textAlign: "left",
+                              cursor: "pointer",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "8px",
+                              flex: 1,
+                              minWidth: 0,
+                            }}
+                          >
+                            <span
+                              style={{
+                                width: "9px",
+                                height: "9px",
+                                borderRadius: "50%",
+                                backgroundColor: t.settings?.primaryColor || "#cc252b",
+                                flexShrink: 0,
+                              }}
+                            />
+                            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                              {t.name}
+                            </span>
+                            <span
+                              style={{
+                                fontSize: "10px",
+                                fontWeight: 800,
+                                backgroundColor: "#e2e8f0",
+                                color: "#475569",
+                                padding: "1px 6px",
+                                borderRadius: "4px",
+                                marginLeft: "auto",
+                                marginRight: "6px",
+                              }}
+                            >
+                              {t.plan}
+                            </span>
+                          </button>
 
-                  <div style={{ borderTop: "1px solid var(--border)", margin: "4px 0" }} />
+                          <Link
+                            href="/admin"
+                            title="Masuk ke Panel CMS Toko"
+                            style={{
+                              padding: "4px 8px",
+                              borderRadius: "6px",
+                              fontSize: "11px",
+                              fontWeight: 700,
+                              backgroundColor: "#fee2e2",
+                              color: "#b91c1c",
+                              textDecoration: "none",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "4px",
+                              flexShrink: 0,
+                            }}
+                          >
+                            <span>CMS</span>
+                            <ExternalLink size={10} />
+                          </Link>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div style={{ height: "1px", backgroundColor: "#f1f5f9", margin: "6px 0" }} />
 
                   <button
                     type="button"
@@ -516,7 +582,7 @@ function GodModeDashboard() {
                       alignItems: "center",
                       gap: "8px",
                       padding: "8px 10px",
-                      borderRadius: "6px",
+                      borderRadius: "8px",
                       fontSize: "12px",
                       fontWeight: 700,
                       color: "var(--red)",
@@ -524,10 +590,13 @@ function GodModeDashboard() {
                       border: "none",
                       cursor: "pointer",
                       textAlign: "left",
+                      transition: "background-color 0.15s ease",
                     }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(221, 32, 40, 0.05)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
                   >
-                    <Plus size={14} />
-                    <span>+ Tambah Toko Baru</span>
+                    <Plus size={15} />
+                    <span>Tambah Toko Baru</span>
                   </button>
                 </div>
               )}
@@ -642,7 +711,7 @@ function GodModeDashboard() {
             </div>
 
             {/* Tenants Data Table */}
-            <Card>
+            <Card id="daftar-toko">
               <CardHeader className="border-b border-[#e5e5e2] pb-4">
                 <CardTitle className="text-base flex items-center justify-between">
                   <span>Daftar Tenant Toko Terdaftar</span>

@@ -1,7 +1,5 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../src/lib/db";
 import crypto from "crypto";
-
-const prisma = new PrismaClient();
 
 export function generateTenantId(slug: string): string {
   return crypto.createHash("sha1").update(slug.toLowerCase().trim()).digest("hex");
