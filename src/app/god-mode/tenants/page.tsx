@@ -387,7 +387,7 @@ function TenantsManagementContent() {
           </Link>
           <Link href="/god-mode/styleguide" className="admin-nav-item">
             <Palette size={19} />
-            <span>Living Styleguide</span>
+            <span>Design Guide</span>
           </Link>
         </nav>
 
@@ -445,7 +445,8 @@ function TenantsManagementContent() {
                   display: "inline-flex",
                   alignItems: "center",
                   gap: "8px",
-                  padding: "7px 14px",
+                  height: "40px",
+                  padding: "0 14px",
                   borderRadius: "8px",
                   border: "1px solid var(--border)",
                   backgroundColor: "#ffffff",
@@ -454,6 +455,7 @@ function TenantsManagementContent() {
                   color: "var(--ink)",
                   cursor: "pointer",
                   boxShadow: "var(--shadow-xs)",
+                  boxSizing: "border-box",
                 }}
               >
                 <Store size={16} className="text-[#cc252b]" />
@@ -549,16 +551,15 @@ function TenantsManagementContent() {
               )}
             </div>
 
-            <Button onClick={() => setIsAddModalOpen(true)} className="flex items-center gap-1.5">
+            <Button onClick={() => setIsAddModalOpen(true)} className="flex items-center gap-1.5 h-10 px-4 text-xs font-bold">
               <Plus size={16} />
               <span>Tambah Toko</span>
             </Button>
 
             <Button
               variant="outline"
-              size="sm"
               onClick={handleLogout}
-              className="flex items-center gap-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+              className="flex items-center gap-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 h-10 px-4 text-xs font-bold"
               title="Keluar dari sesi God-Mode"
             >
               <LogOut size={14} />
@@ -584,9 +585,8 @@ function TenantsManagementContent() {
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
-                  size="sm"
                   onClick={fetchTenants}
-                  className="flex items-center gap-1.5 text-xs font-semibold"
+                  className="flex items-center gap-1.5 text-xs font-semibold h-10 px-4"
                 >
                   <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
                   <span>Refresh Data</span>

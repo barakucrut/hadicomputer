@@ -236,7 +236,7 @@ function GodModeExecutiveSummary() {
           </Link>
           <Link href="/god-mode/styleguide" className="admin-nav-item">
             <Palette size={19} />
-            <span>Living Styleguide</span>
+            <span>Design Guide</span>
           </Link>
         </nav>
 
@@ -294,7 +294,8 @@ function GodModeExecutiveSummary() {
                   display: "inline-flex",
                   alignItems: "center",
                   gap: "8px",
-                  padding: "7px 14px",
+                  height: "40px",
+                  padding: "0 14px",
                   borderRadius: "8px",
                   border: "1px solid var(--border)",
                   backgroundColor: "#ffffff",
@@ -303,6 +304,7 @@ function GodModeExecutiveSummary() {
                   color: "var(--ink)",
                   cursor: "pointer",
                   boxShadow: "var(--shadow-xs)",
+                  boxSizing: "border-box",
                 }}
               >
                 <Store size={16} className="text-[#cc252b]" />
@@ -399,7 +401,7 @@ function GodModeExecutiveSummary() {
             </div>
 
             <Link href="/god-mode/tenants">
-              <Button size="sm" className="flex items-center gap-1.5">
+              <Button className="flex items-center gap-1.5 h-10 px-4 text-xs font-bold">
                 <Store size={15} />
                 <span>Kelola Tenant</span>
               </Button>
@@ -407,9 +409,8 @@ function GodModeExecutiveSummary() {
 
             <Button
               variant="outline"
-              size="sm"
               onClick={handleLogout}
-              className="flex items-center gap-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+              className="flex items-center gap-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 h-10 px-4 text-xs font-bold"
               title="Keluar dari sesi God-Mode"
             >
               <LogOut size={14} />
@@ -434,13 +435,13 @@ function GodModeExecutiveSummary() {
 
               <div className="flex items-center gap-2">
                 <Link href="/god-mode/transactions">
-                  <Button variant="outline" size="sm" className="flex items-center gap-1.5 text-xs font-semibold">
+                  <Button variant="outline" className="flex items-center gap-1.5 text-xs font-semibold h-10 px-4">
                     <Receipt size={14} />
                     <span>Lihat Mutasi Keuangan</span>
                   </Button>
                 </Link>
                 <Link href="/god-mode/tenants">
-                  <Button size="sm" className="flex items-center gap-1.5 text-xs font-bold">
+                  <Button className="flex items-center gap-1.5 text-xs font-bold h-10 px-4">
                     <Store size={14} />
                     <span>Daftar Seluruh Merchant</span>
                     <ArrowRight size={13} />

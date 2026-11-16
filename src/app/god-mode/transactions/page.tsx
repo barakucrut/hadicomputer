@@ -105,6 +105,7 @@ function TransactionsContent() {
   // Filters
   const [searchQuery, setSearchQuery] = React.useState("");
   const [typeFilter, setTypeFilter] = React.useState<"ALL" | "INCOME" | "EXPENSE">("ALL");
+  const [categoryFilter, setCategoryFilter] = React.useState("ALL");
 
   // Pagination
   const [currentPage, setCurrentPage] = React.useState(1);
@@ -220,15 +221,16 @@ function TransactionsContent() {
   const filteredList = React.useMemo(() => {
     return transactions.filter((t) => {
       const matchesType = typeFilter === "ALL" || t.type === typeFilter;
+      const matchesCategory = categoryFilter === "ALL" || t.category === categoryFilter;
       const matchesSearch =
         searchQuery === "" ||
         t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (t.tenantName && t.tenantName.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (t.description && t.description.toLowerCase().includes(searchQuery.toLowerCase()));
 
-      return matchesType && matchesSearch;
+      return matchesType && matchesCategory && matchesSearch;
     });
-  }, [transactions, typeFilter, searchQuery]);
+  }, [transactions, typeFilter, categoryFilter, searchQuery]);
 
   // Pagination Slice
   const totalItems = filteredList.length;
@@ -304,7 +306,7 @@ function TransactionsContent() {
           </Link>
           <Link href="/god-mode/styleguide" className="admin-nav-item">
             <Palette size={19} />
-            <span>Living Styleguide</span>
+            <span>Design Guide</span>
           </Link>
         </nav>
 
@@ -353,16 +355,15 @@ function TransactionsContent() {
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <Button onClick={() => setIsAddOpen(true)} className="flex items-center gap-1.5">
+            <Button onClick={() => setIsAddOpen(true)} className="flex items-center gap-1.5 h-10 px-4 text-xs font-bold">
               <Plus size={16} />
               <span>Catat Transaksi</span>
             </Button>
 
             <Button
               variant="outline"
-              size="sm"
               onClick={handleLogout}
-              className="flex items-center gap-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+              className="flex items-center gap-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 h-10 px-4 text-xs font-bold"
               title="Keluar dari sesi God-Mode"
             >
               <LogOut size={14} />
@@ -388,9 +389,8 @@ function TransactionsContent() {
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
-                  size="sm"
                   onClick={fetchTransactions}
-                  className="flex items-center gap-1.5 text-xs font-semibold"
+                  className="flex items-center gap-1.5 text-xs font-semibold h-10 px-4"
                 >
                   <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
                   <span>Refresh Data</span>
@@ -511,44 +511,38 @@ function TransactionsContent() {
                 </div>
 
                 <div className="flex items-center gap-2.5 w-full md:w-auto">
-                  <div className="flex bg-[#f6f6f4] p-1 rounded-lg border border-[#e5e5e2]">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setTypeFilter("ALL");
-                        setCurrentPage(1);
-                      }}
-                      className={`px-3 py-1 text-xs font-bold rounded-md transition-colors ${
-                        typeFilter === "ALL" ? "bg-white text-[#111413] shadow-xs" : "text-[#525854]"
-                      }`}
-                    >
-                      Semua
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setTypeFilter("INCOME");
-                        setCurrentPage(1);
-                      }}
-                      className={`px-3 py-1 text-xs font-bold rounded-md transition-colors ${
-                        typeFilter === "INCOME" ? "bg-white text-green-700 shadow-xs" : "text-[#525854]"
-                      }`}
-                    >
-                      Pemasukan
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setTypeFilter("EXPENSE");
-                        setCurrentPage(1);
-                      }}
-                      className={`px-3 py-1 text-xs font-bold rounded-md transition-colors ${
-                        typeFilter === "EXPENSE" ? "bg-white text-red-600 shadow-xs" : "text-[#525854]"
-                      }`}
-                    >
-                      Pengeluaran
-                    </button>
-                  </div>
+                  <Select
+                    value={typeFilter}
+                    onChange={(e) => {
+                      setTypeFilter(e.target.value as any);
+                      setCurrentPage(1);
+                    }}
+                    className="text-xs h-10 w-44 bg-white"
+                  >
+                    <option value="ALL">Semua Tipe Arus Kas</option>
+                    <option value="INCOME">Pemasukan (+)</option>
+                    <option value="EXPENSE">Pengeluaran (-)</option>
+                  </Select>
+
+                  <Select
+                    value={categoryFilter}
+                    onChange={(e) => {
+                      setCategoryFilter(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    className="text-xs h-10 w-48 bg-white"
+                  >
+                    <option value="ALL">Semua Kategori Transaksi</option>
+                    <option value="SUBSCRIPTION">Subscription Paket</option>
+                    <option value="SETUP_FEE">Biaya Setup Domain</option>
+                    <option value="ADDON">Add-on Fitur</option>
+                    <option value="SERVER_INFRA">Server & Hosting</option>
+                    <option value="DOMAIN_REGISTRATION">Domain Registrar</option>
+                    <option value="WHATSAPP_GATEWAY">WhatsApp Gateway</option>
+                    <option value="MARKETING">Marketing & Iklan</option>
+                    <option value="OPERATIONAL">Operasional</option>
+                    <option value="OTHER">Lainnya</option>
+                  </Select>
                 </div>
               </CardContent>
             </Card>

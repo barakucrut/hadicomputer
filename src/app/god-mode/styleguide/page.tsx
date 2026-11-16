@@ -122,7 +122,7 @@ function GodModeStyleguideContent() {
           </Link>
           <Link href="/god-mode/styleguide" className="admin-nav-item active">
             <Palette size={19} />
-            <span>Living Styleguide</span>
+            <span>Design Guide</span>
           </Link>
         </nav>
 
@@ -163,17 +163,17 @@ function GodModeStyleguideContent() {
         <header className="admin-topbar">
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <span style={{ fontSize: "14px", fontWeight: 800, color: "var(--ink)" }}>
-              Living Styleguide & Design System
+              Design Guide & UI Standards
             </span>
             <Badge variant="secondary" className="text-[11px] font-bold">
-              SHADCN UI
+              PLATFORM STANDARD
             </Badge>
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <Link
               href="/god-mode"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-700"
+              className="inline-flex items-center gap-1.5 px-4 h-10 text-xs font-bold rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 shadow-xs"
             >
               <span>Kembali ke Dashboard</span>
               <ArrowRight size={13} />
@@ -181,9 +181,8 @@ function GodModeStyleguideContent() {
 
             <Button
               variant="outline"
-              size="sm"
               onClick={handleLogout}
-              className="flex items-center gap-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+              className="flex items-center gap-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 h-10 px-4 text-xs font-bold"
               title="Keluar dari sesi God-Mode"
             >
               <LogOut size={14} />
@@ -198,10 +197,10 @@ function GodModeStyleguideContent() {
             {/* Header intro */}
             <div>
               <h1 className="text-2xl font-black text-[#111413] tracking-tight">
-                Living Styleguide & Component Showcase
+                Design Guide & UI Component Standards
               </h1>
               <p className="text-sm text-[#525854] mt-1.5">
-                Panduan baku token warna, komponen Shadcn UI, form controls, dan status badge untuk seluruh ekosistem CMS multi-tenant.
+                Standar utama dan acuan baku komponen visual, ukuran tombol, form controls, dialog modal, dan palet warna untuk seluruh pengembangan fitur di ekosistem CMS multi-tenant.
               </p>
             </div>
 
@@ -537,6 +536,86 @@ function GodModeStyleguideContent() {
                   </TableBody>
                 </Table>
               </Card>
+            </section>
+
+            <div className="border-t border-[#e5e5e2]" />
+
+            {/* 7. Design Standards & Sizing Rules */}
+            <section className="space-y-4">
+              <div>
+                <h2 className="text-lg font-bold text-[#111413]">7. Aturan Baku Ukuran Komponen (Sizing & Spacing Standards)</h2>
+                <p className="text-xs text-[#525854] mt-0.5">
+                  Standar wajib yang harus dipatuhi oleh siapapun pengembang / AI agent saat menambahkan fitur baru agar konsistensi desain tetap terjaga.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Button Standards */}
+                <Card className="shadow-sm border-[#e5e5e2] rounded-2xl p-6 flex flex-col gap-3">
+                  <div className="flex items-center gap-2 font-bold text-sm text-[#111413]">
+                    <span className="w-6 h-6 rounded-md bg-red-100 text-red-700 flex items-center justify-center text-xs">1</span>
+                    <span>Standar Ukuran Tombol</span>
+                  </div>
+                  <ul className="text-xs text-[#525854] space-y-2 leading-relaxed">
+                    <li>
+                      <strong>Topbar & Main Action:</strong> Height <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">h-10 (40px)</code>, padding <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">px-4</code>, font <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">text-xs font-bold</code>, radius <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">rounded-lg (8px)</code>.
+                    </li>
+                    <li>
+                      <strong>Table Action (Secondary):</strong> <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">size="sm"</code> height <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">h-8 (32px)</code>, padding <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">px-3</code>, text <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">text-xs</code>.
+                    </li>
+                    <li>
+                      <strong>Table Action (Icon Only):</strong> Gunakan tombol icon persegi <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">h-8 w-8 p-0</code> dengan icon size 14px.
+                    </li>
+                    <li>
+                      <strong>Large Hero CTA:</strong> <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">size="lg"</code> height 46px, padding px-6.
+                    </li>
+                  </ul>
+                </Card>
+
+                {/* Form & Search Standards */}
+                <Card className="shadow-sm border-[#e5e5e2] rounded-2xl p-6 flex flex-col gap-3">
+                  <div className="flex items-center gap-2 font-bold text-sm text-[#111413]">
+                    <span className="w-6 h-6 rounded-md bg-blue-100 text-blue-700 flex items-center justify-center text-xs">2</span>
+                    <span>Search Input & Filter Bar</span>
+                  </div>
+                  <ul className="text-xs text-[#525854] space-y-2 leading-relaxed">
+                    <li>
+                      <strong>Input & Select Height:</strong> Wajib konsisten <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">h-10 (40px)</code> agar sejajar sempurna dengan tombol toolbar.
+                    </li>
+                    <li>
+                      <strong>Centered Search Icon:</strong> Class <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">.admin-input-icon-left</code> dengan <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">top: 50%; transform: translateY(-50%)</code>.
+                    </li>
+                    <li>
+                      <strong>Left Text Padding:</strong> Class <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">.has-left-icon</code> wajib padding kiri 40px agar teks input tidak menabrak icon.
+                    </li>
+                    <li>
+                      <strong>Clear Button (X):</strong> Muncul otomatis hanya saat input terisi, posisi di <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">right: 10px</code> dengan icon size 14px.
+                    </li>
+                  </ul>
+                </Card>
+
+                {/* Dialog Modal Standards */}
+                <Card className="shadow-sm border-[#e5e5e2] rounded-2xl p-6 flex flex-col gap-3">
+                  <div className="flex items-center gap-2 font-bold text-sm text-[#111413]">
+                    <span className="w-6 h-6 rounded-md bg-green-100 text-green-700 flex items-center justify-center text-xs">3</span>
+                    <span>Dialog Modal & Toggles</span>
+                  </div>
+                  <ul className="text-xs text-[#525854] space-y-2 leading-relaxed">
+                    <li>
+                      <strong>Modal Header:</strong> Judul dialog tegas, hilangkan subtitle deskriptif yang tidak perlu demi kerapian visual.
+                    </li>
+                    <li>
+                      <strong>Segmented Tabs:</strong> Tipe opsi penting (e.g. Pemasukan vs Pengeluaran) menggunakan tab bar tersegmentasi <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">bg-[#f6f6f4]</code>, bukan radio button biasa.
+                    </li>
+                    <li>
+                      <strong>Dropdown Terhubung Data:</strong> Dropdown pilihan merchant terisi dinamis dari API <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">/api/god-mode/tenants</code>.
+                    </li>
+                    <li>
+                      <strong>Modal Footer:</strong> Tombol Batal & Simpan menggunakan tinggi standar <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">h-10 px-4</code>.
+                    </li>
+                  </ul>
+                </Card>
+              </div>
             </section>
           </div>
         </main>
