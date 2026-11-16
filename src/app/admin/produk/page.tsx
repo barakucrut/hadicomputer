@@ -283,7 +283,8 @@ export default function AdminProductsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <>
+      <div className="space-y-6">
       {/* Page Title & Action Buttons */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -614,6 +615,7 @@ export default function AdminProductsPage() {
           pageSizeOptions={[10, 20, 50]}
         />
       </Card>
+      </div>
 
       {/* ========================================================
           SLIDE-OVER FILTER DRAWER (FROM RIGHT SIDE)
@@ -624,11 +626,18 @@ export default function AdminProductsPage() {
           {/* Backdrop */}
           <div
             className="admin-drawer-backdrop"
+            style={{ margin: 0, top: 0 }}
             onClick={() => setIsFilterDrawerOpen(false)}
           />
 
           {/* Drawer Panel */}
-          <div className="admin-drawer-panel" role="dialog" aria-modal="true" aria-label="Filter Produk">
+          <div
+            className="admin-drawer-panel"
+            style={{ margin: 0, top: 0, height: "100vh" }}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Filter Produk"
+          >
             {/* Header */}
             <div className="admin-drawer-header">
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -876,6 +885,6 @@ export default function AdminProductsPage() {
         onConfirm={executeDelete}
         loading={deleting}
       />
-    </div>
+    </>
   );
 }
