@@ -142,6 +142,17 @@ function GodModeDashboard() {
     fetchTenants();
   }, [fetchTenants]);
 
+  async function handleLogout() {
+    try {
+      await fetch("/api/god-mode/auth/logout", { method: "POST" });
+      router.push("/god-mode/login");
+      router.refresh();
+    } catch (err) {
+      console.error("Logout error:", err);
+      router.push("/god-mode/login");
+    }
+  }
+
   // Close dropdown when click outside
   React.useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -304,7 +315,29 @@ function GodModeDashboard() {
           </Link>
         </nav>
 
-        <div className="admin-sidebar-footer" style={{ padding: "14px", borderTop: "1px solid var(--border)" }}>
+        <div className="admin-sidebar-footer" style={{ padding: "14px", borderTop: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: "12px" }}>
+          <button
+            type="button"
+            onClick={handleLogout}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "8px 10px",
+              borderRadius: "8px",
+              border: "1px solid var(--border)",
+              backgroundColor: "transparent",
+              color: "var(--red)",
+              fontSize: "12px",
+              fontWeight: 700,
+              cursor: "pointer",
+              transition: "all 0.15s ease",
+            }}
+          >
+            <LogOut size={15} />
+            <span>Keluar God-Mode</span>
+          </button>
+
           <div style={{ fontSize: "11px", color: "var(--muted)", lineHeight: 1.4 }}>
             Multi-Tenant Platform SaaS
             <br />
@@ -507,6 +540,18 @@ function GodModeDashboard() {
             >
               <Plus size={16} />
               <span>Tambah Toko</span>
+            </Button>
+
+            {/* Logout Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleLogout}
+              className="flex items-center gap-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+              title="Keluar dari sesi God-Mode"
+            >
+              <LogOut size={14} />
+              <span className="hidden sm:inline">Logout</span>
             </Button>
           </div>
         </header>

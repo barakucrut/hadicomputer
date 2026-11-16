@@ -71,8 +71,14 @@ export function Header({
     setMenuOpen(false);
   }, [path]);
 
-  // Do not render public header on admin pages
-  if (path?.startsWith("/admin")) return null;
+  // Do not render public header on admin, god-mode, or styleguide pages
+  if (
+    path?.startsWith("/admin") ||
+    path?.startsWith("/god-mode") ||
+    path?.startsWith("/docs/styleguide")
+  ) {
+    return null;
+  }
 
   return (
     <>
@@ -230,8 +236,14 @@ export function Header({
 export function Footer({ store }: { store?: StoreSettings }) {
   const path = usePathname();
 
-  // Do not render public footer on admin pages
-  if (path?.startsWith("/admin")) return null;
+  // Do not render public footer on admin, god-mode, or styleguide pages
+  if (
+    path?.startsWith("/admin") ||
+    path?.startsWith("/god-mode") ||
+    path?.startsWith("/docs/styleguide")
+  ) {
+    return null;
+  }
 
   return (
     <footer className="site-footer">
