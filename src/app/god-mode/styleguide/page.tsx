@@ -17,6 +17,8 @@ import {
   Receipt,
   Search,
   X,
+  ArrowUpRight,
+  ArrowDownLeft,
 } from "lucide-react";
 import { Button } from "@/components/admin/ui/button";
 import { Badge } from "@/components/admin/ui/badge";
@@ -44,6 +46,8 @@ function GodModeStyleguideContent() {
   const [switchVal, setSwitchVal] = React.useState(true);
   const [emptySearch, setEmptySearch] = React.useState("");
   const [styleguideSearch, setStyleguideSearch] = React.useState("Lenovo Legion Pro 5");
+  const [demoNavTab, setDemoNavTab] = React.useState<"ringkasan" | "mutasi" | "pengaturan">("ringkasan");
+  const [demoTypeTab, setDemoTypeTab] = React.useState<"INCOME" | "EXPENSE">("INCOME");
 
   async function handleLogout() {
     try {
@@ -193,7 +197,7 @@ function GodModeStyleguideContent() {
 
         {/* Content Body */}
         <main className="admin-main-content">
-          <div className="w-full pb-28 flex flex-col gap-12">
+          <div className="w-full pb-28" style={{ display: "flex", flexDirection: "column", gap: "48px" }}>
             {/* Header intro */}
             <div>
               <h1 className="text-2xl font-black text-[#111413] tracking-tight">
@@ -243,19 +247,19 @@ function GodModeStyleguideContent() {
               </div>
             </section>
 
-            <div className="border-t border-[#e5e5e2]" />
+            <hr className="admin-section-divider" style={{ width: "100%", height: "1px", backgroundColor: "var(--border)", margin: "48px 0", border: "none" }} />
 
             {/* 2. Button System */}
             <section className="space-y-4">
               <div>
                 <h2 className="text-lg font-bold text-[#111413]">2. Buttons & Actions</h2>
                 <p className="text-xs text-[#525854] mt-0.5">
-                  Varian tombol composable berbasis arsitektur Shadcn UI.
+                  Varian tombol composable berbasis arsitektur Shadcn UI dengan aturan ukuran standar baku.
                 </p>
               </div>
 
               <Card className="shadow-sm border-[#e5e5e2] rounded-2xl overflow-hidden">
-                <CardContent className="p-8 space-y-6">
+                <CardContent className="p-8">
                   {/* Variant Row */}
                   <div className="flex flex-wrap items-center gap-4">
                     <Button variant="default">Primary Button</Button>
@@ -266,19 +270,22 @@ function GodModeStyleguideContent() {
                     <Button disabled>Disabled Button</Button>
                   </div>
 
+                  {/* Inner Divider with clear vertical margins */}
+                  <hr className="admin-inner-divider" style={{ width: "100%", height: "1px", backgroundColor: "var(--border)", margin: "28px 0", border: "none" }} />
+
                   {/* Size & Icon Row */}
-                  <div className="flex flex-wrap items-center gap-4 border-t border-[#e5e5e2] pt-6">
+                  <div className="flex flex-wrap items-center gap-4">
                     <Button size="sm" className="flex items-center gap-2">
                       <Plus size={14} />
-                      <span>Small with Icon</span>
+                      <span>Small with Icon (h-8)</span>
                     </Button>
                     <Button size="default" className="flex items-center gap-2">
                       <Sparkles size={16} />
-                      <span>Default with Icon</span>
+                      <span>Default with Icon (h-10)</span>
                     </Button>
                     <Button size="lg" className="flex items-center gap-2">
                       <Laptop size={18} />
-                      <span>Large CTA Button</span>
+                      <span>Large CTA Button (h-11)</span>
                     </Button>
                     <Button
                       variant="outline"
@@ -294,14 +301,101 @@ function GodModeStyleguideContent() {
               </Card>
             </section>
 
-            <div className="border-t border-[#e5e5e2]" />
+            <hr className="admin-section-divider" style={{ width: "100%", height: "1px", backgroundColor: "var(--border)", margin: "48px 0", border: "none" }} />
 
-            {/* 3. Badge System */}
+            {/* 3. Tabs Navigation System (Active vs Inactive) */}
             <section className="space-y-4">
               <div>
-                <h2 className="text-lg font-bold text-[#111413]">3. Status Badges</h2>
+                <h2 className="text-lg font-bold text-[#111413]">3. Tabs Navigation (Active & Inactive State)</h2>
                 <p className="text-xs text-[#525854] mt-0.5">
-                  Label status inventaris, kondisi perangkat, dan paket langganan.
+                  Standar komponen tab navigasi dan tab segmented tombol aksi. Tab aktif wajib memiliki background solid kontras, border halus, dan bayangan elevasi.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Demo Tab 1: Platform Navigation Tabs */}
+                <Card className="shadow-sm border-[#e5e5e2] rounded-2xl p-6 flex flex-col gap-4">
+                  <div>
+                    <h3 className="text-xs font-bold text-[#111413] uppercase tracking-wide">A. Platform Navigation Tabs</h3>
+                    <p className="text-[11px] text-[#525854] mt-0.5">Tab navigasi antar halaman atau panel pengaturan CMS.</p>
+                  </div>
+
+                  <div className="admin-tabs-list" style={{ display: "inline-flex", backgroundColor: "#f1f3ed", padding: "4px", borderRadius: "10px", border: "1px solid var(--border)", gap: "4px" }}>
+                    <button
+                      type="button"
+                      onClick={() => setDemoNavTab("ringkasan")}
+                      className={`admin-tab-trigger ${demoNavTab === "ringkasan" ? "active" : ""}`}
+                    >
+                      <LayoutDashboard size={14} />
+                      <span>Ringkasan {demoNavTab === "ringkasan" ? "(Active)" : ""}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDemoNavTab("mutasi")}
+                      className={`admin-tab-trigger ${demoNavTab === "mutasi" ? "active" : ""}`}
+                    >
+                      <Receipt size={14} />
+                      <span>Mutasi Kas {demoNavTab === "mutasi" ? "(Active)" : ""}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDemoNavTab("pengaturan")}
+                      className={`admin-tab-trigger ${demoNavTab === "pengaturan" ? "active" : ""}`}
+                    >
+                      <Store size={14} />
+                      <span>Pengaturan {demoNavTab === "pengaturan" ? "(Active)" : ""}</span>
+                    </button>
+                  </div>
+
+                  <div className="text-[11px] text-[#818779] bg-[#fafafa] p-3 rounded-lg border border-[#e5e5e2] leading-relaxed">
+                    <strong>Aturan Visual:</strong> Tab aktif berlatar belakang putih murni (<code className="font-mono text-red-600 font-bold">#ffffff</code>), teks merah/hitam tegas, dengan shadow elevasi halus. Tab inaktif berlatar transparan dengan teks muted (<code className="font-mono">#525854</code>).
+                  </div>
+                </Card>
+
+                {/* Demo Tab 2: Segmented Action Choice Tabs */}
+                <Card className="shadow-sm border-[#e5e5e2] rounded-2xl p-6 flex flex-col gap-4">
+                  <div>
+                    <h3 className="text-xs font-bold text-[#111413] uppercase tracking-wide">B. Segmented Choice Tabs (Full-Width)</h3>
+                    <p className="text-[11px] text-[#525854] mt-0.5">Tab pilihan binary dalam modal popup form (misal: Pemasukan vs Pengeluaran).</p>
+                  </div>
+
+                  <div className="admin-tabs-list full-width" style={{ width: "100%", display: "flex", backgroundColor: "#f1f3ed", padding: "4px", borderRadius: "10px", border: "1px solid var(--border)", gap: "4px" }}>
+                    <button
+                      type="button"
+                      onClick={() => setDemoTypeTab("INCOME")}
+                      className={`admin-tab-trigger ${demoTypeTab === "INCOME" ? "active-income" : ""}`}
+                      style={{ flex: 1, height: "38px", fontSize: "13px", fontWeight: 700 }}
+                    >
+                      <ArrowUpRight size={15} />
+                      <span>Pemasukan (+) {demoTypeTab === "INCOME" ? "✓" : ""}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setDemoTypeTab("EXPENSE")}
+                      className={`admin-tab-trigger ${demoTypeTab === "EXPENSE" ? "active-expense" : ""}`}
+                      style={{ flex: 1, height: "38px", fontSize: "13px", fontWeight: 700 }}
+                    >
+                      <ArrowDownLeft size={15} />
+                      <span>Pengeluaran (-) {demoTypeTab === "EXPENSE" ? "✓" : ""}</span>
+                    </button>
+                  </div>
+
+                  <div className="text-[11px] text-[#818779] bg-[#fafafa] p-3 rounded-lg border border-[#e5e5e2] leading-relaxed">
+                    <strong>Aturan Visual:</strong> Tab tersegmentasi memiliki lebar seimbang (<code className="font-mono font-bold">flex: 1</code>), tinggi 38px, dan indikator warna tematik (Hijau untuk Pemasukan, Merah untuk Pengeluaran).
+                  </div>
+                </Card>
+              </div>
+            </section>
+
+            <hr className="admin-section-divider" style={{ width: "100%", height: "1px", backgroundColor: "var(--border)", margin: "48px 0", border: "none" }} />
+
+            {/* 4. Status Badges */}
+            <section className="space-y-4">
+              <div>
+                <h2 className="text-lg font-bold text-[#111413]">4. Status Badges</h2>
+                <p className="text-xs text-[#525854] mt-0.5">
+                  Label status inventaris, kondisi perangkat, dan paket langganan multi-tenant.
                 </p>
               </div>
 
@@ -327,62 +421,76 @@ function GodModeStyleguideContent() {
               </Card>
             </section>
 
-            <div className="border-t border-[#e5e5e2]" />
+            <hr className="admin-section-divider" style={{ width: "100%", height: "1px", backgroundColor: "var(--border)", margin: "48px 0", border: "none" }} />
 
-            {/* 4. Form Controls */}
+            {/* 5. Form Inputs & Controls */}
             <section className="space-y-4">
               <div>
-                <h2 className="text-lg font-bold text-[#111413]">4. Form Inputs & Controls</h2>
+                <h2 className="text-lg font-bold text-[#111413]">5. Form Inputs & Controls</h2>
                 <p className="text-xs text-[#525854] mt-0.5">
-                  Field input form terstandarisasi untuk inventaris komputer.
+                  Field input form dengan margin dan padding proporsional. Seluruh input angka wajib terformat secara otomatis (Currency Input).
                 </p>
               </div>
 
               <Card className="shadow-sm border-[#e5e5e2] rounded-2xl overflow-hidden">
-                <CardContent className="p-8 grid grid-cols-1 md:grid-cols-2 gap-7">
-                  <div className="space-y-2">
-                    <Label htmlFor="demo-name" className="text-xs font-bold text-[#111413]">Nama Produk</Label>
-                    <Input id="demo-name" placeholder="e.g. ASUS ROG Strix G16" defaultValue="ASUS ROG Strix G16 (2024)" />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="demo-price" className="text-xs font-bold text-[#111413]">Harga Produk (Currency Formatter)</Label>
-                    <CurrencyInput
-                      id="demo-price"
-                      name="price"
-                      value={currencyVal}
-                      onValueChange={(val) => setCurrencyVal(val)}
-                      placeholder="Rp 0"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="demo-category" className="text-xs font-bold text-[#111413]">Kategori Perangkat</Label>
-                    <Select id="demo-category" defaultValue="laptop">
-                      <option value="laptop">Laptop & Notebook</option>
-                      <option value="pc-rakitan">PC Desktop Rakitan</option>
-                      <option value="gadget">Smartphone & Tablet</option>
-                      <option value="aksesoris">Aksesoris & Peripheral</option>
-                    </Select>
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 border border-[#e5e5e2] rounded-xl bg-[#fafafa]">
-                    <div>
-                      <div className="text-xs font-bold text-[#111413]">Aktifkan Modul PC Builder</div>
-                      <div className="text-[11px] text-[#525854] mt-0.5">Tampilkan simulator rakit PC di toko ini</div>
+                <CardContent className="p-8">
+                  {/* Grid layout with explicit 24px gap across both rows and columns */}
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                      <Label htmlFor="demo-name" className="text-xs font-bold text-[#111413]">Nama Produk</Label>
+                      <Input id="demo-name" placeholder="e.g. ASUS ROG Strix G16" defaultValue="ASUS ROG Strix G16 (2024)" />
                     </div>
-                    <Switch checked={switchVal} onCheckedChange={setSwitchVal} />
+
+                    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="demo-price" className="text-xs font-bold text-[#111413]">Harga Produk (Auto Currency Formatter)</Label>
+                        <span className="text-[10px] font-bold text-green-700 bg-green-50 px-2 py-0.5 rounded border border-green-200">
+                          Auto-Formatted
+                        </span>
+                      </div>
+                      <CurrencyInput
+                        id="demo-price"
+                        name="price"
+                        value={currencyVal}
+                        onValueChange={(val) => setCurrencyVal(val)}
+                        placeholder="Rp 0"
+                      />
+                      <p className="text-[11px] text-[#818779]">
+                        Mengetik angka otomatis diberi pemisah ribuan titik (<code className="font-mono">Rp 12.500.000</code>).
+                      </p>
+                    </div>
+
+                    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                      <Label htmlFor="demo-category" className="text-xs font-bold text-[#111413]">Kategori Perangkat</Label>
+                      <Select id="demo-category" defaultValue="laptop">
+                        <option value="laptop">Laptop & Notebook</option>
+                        <option value="pc-rakitan">PC Desktop Rakitan</option>
+                        <option value="gadget">Smartphone & Tablet</option>
+                        <option value="aksesoris">Aksesoris & Peripheral</option>
+                      </Select>
+                    </div>
+
+                    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                      <Label className="text-xs font-bold text-[#111413]">Fitur Tambahan</Label>
+                      <div className="flex items-center justify-between p-3.5 border border-[#e5e5e2] rounded-xl bg-[#fafafa]">
+                        <div>
+                          <div className="text-xs font-bold text-[#111413]">Aktifkan Modul PC Builder</div>
+                          <div className="text-[11px] text-[#525854] mt-0.5">Tampilkan simulator rakit PC di toko ini</div>
+                        </div>
+                        <Switch checked={switchVal} onCheckedChange={setSwitchVal} />
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             </section>
 
-            <div className="border-t border-[#e5e5e2]" />
+            <hr className="admin-section-divider" style={{ width: "100%", height: "1px", backgroundColor: "var(--border)", margin: "48px 0", border: "none" }} />
 
-            {/* 5. Search Inputs & Filter Toolbars */}
+            {/* 6. Search Inputs & Filter Toolbars */}
             <section className="space-y-4">
               <div>
-                <h2 className="text-lg font-bold text-[#111413]">5. Search Inputs & Filter Toolbars</h2>
+                <h2 className="text-lg font-bold text-[#111413]">6. Search Inputs & Filter Toolbars</h2>
                 <p className="text-xs text-[#525854] mt-0.5">
                   Komponen input pencarian dengan icon magnifying glass presisi di tengah, tombol pembersih (clear X), dan layout toolbar filter.
                 </p>
@@ -392,7 +500,7 @@ function GodModeStyleguideContent() {
                 <CardContent className="p-8 space-y-6">
                   {/* Standalone Search Inputs */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
+                    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                       <Label className="text-xs font-bold text-[#111413]">Search Input (Kondisi Kosong / Default)</Label>
                       <div className="admin-input-wrapper">
                         <span className="admin-input-icon-left">
@@ -423,7 +531,7 @@ function GodModeStyleguideContent() {
                       </p>
                     </div>
 
-                    <div className="space-y-2">
+                    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                       <Label className="text-xs font-bold text-[#111413]">Search Input (Kondisi Terisi dengan Tombol Clear)</Label>
                       <div className="admin-input-wrapper">
                         <span className="admin-input-icon-left">
@@ -456,7 +564,9 @@ function GodModeStyleguideContent() {
                   </div>
 
                   {/* Complete Toolbar Example */}
-                  <div className="border-t border-[#e5e5e2] pt-6 space-y-3">
+                  <hr className="admin-inner-divider" style={{ width: "100%", height: "1px", backgroundColor: "var(--border)", margin: "24px 0", border: "none" }} />
+
+                  <div className="space-y-3">
                     <Label className="text-xs font-bold text-[#111413]">Pola Lengkap: Filter Toolbar di Halaman Data</Label>
                     <div className="p-4 border border-[#e5e5e2] rounded-xl bg-[#fafafa] flex flex-col md:flex-row gap-3 items-center justify-between">
                       <div className="admin-input-wrapper w-full md:w-80">
@@ -468,20 +578,20 @@ function GodModeStyleguideContent() {
                           placeholder="Cari toko, subdomain, atau ID..."
                           defaultValue=""
                           className="admin-input-styled has-left-icon"
-                          style={{ height: "38px", fontSize: "12px", backgroundColor: "#ffffff" }}
+                          style={{ height: "40px", fontSize: "12px", backgroundColor: "#ffffff" }}
                         />
                       </div>
 
                       <div className="flex items-center gap-2.5 w-full md:w-auto">
-                        <Select defaultValue="ALL" className="text-xs h-9.5 w-36 bg-white">
+                        <Select defaultValue="ALL" className="text-xs h-10 w-36 bg-white">
                           <option value="ALL">Semua Paket</option>
                           <option value="STARTER">Starter</option>
                           <option value="PRO">Pro</option>
                           <option value="ENTERPRISE">Enterprise</option>
                         </Select>
 
-                        <Button size="sm" className="h-9.5 text-xs font-bold flex items-center gap-1.5">
-                          <Plus size={14} />
+                        <Button className="h-10 px-4 text-xs font-bold flex items-center gap-1.5">
+                          <Plus size={15} />
                           <span>Aksi Cepat</span>
                         </Button>
                       </div>
@@ -491,14 +601,14 @@ function GodModeStyleguideContent() {
               </Card>
             </section>
 
-            <div className="border-t border-[#e5e5e2]" />
+            <hr className="admin-section-divider" style={{ width: "100%", height: "1px", backgroundColor: "var(--border)", margin: "48px 0", border: "none" }} />
 
-            {/* 6. Data Tables */}
+            {/* 7. Data Tables */}
             <section className="space-y-4">
               <div>
-                <h2 className="text-lg font-bold text-[#111413]">6. Data Tables</h2>
+                <h2 className="text-lg font-bold text-[#111413]">7. Data Tables</h2>
                 <p className="text-xs text-[#525854] mt-0.5">
-                  Tabel data untuk manajemen produk, inventaris, dan tenant toko.
+                  Tabel data untuk manajemen produk, mutasi kas, dan database tenant toko.
                 </p>
               </div>
 
@@ -538,19 +648,19 @@ function GodModeStyleguideContent() {
               </Card>
             </section>
 
-            <div className="border-t border-[#e5e5e2]" />
+            <hr className="admin-section-divider" style={{ width: "100%", height: "1px", backgroundColor: "var(--border)", margin: "48px 0", border: "none" }} />
 
-            {/* 7. Design Standards & Sizing Rules */}
+            {/* 8. Design Standards & Developer Guide */}
             <section className="space-y-4">
               <div>
-                <h2 className="text-lg font-bold text-[#111413]">7. Aturan Baku Ukuran Komponen (Sizing & Spacing Standards)</h2>
+                <h2 className="text-lg font-bold text-[#111413]">8. Aturan Baku Developer Guide & UI Standards</h2>
                 <p className="text-xs text-[#525854] mt-0.5">
                   Standar wajib yang harus dipatuhi oleh siapapun pengembang / AI agent saat menambahkan fitur baru agar konsistensi desain tetap terjaga.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Button Standards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {/* 1. Button Standards */}
                 <Card className="shadow-sm border-[#e5e5e2] rounded-2xl p-6 flex flex-col gap-3">
                   <div className="flex items-center gap-2 font-bold text-sm text-[#111413]">
                     <span className="w-6 h-6 rounded-md bg-red-100 text-red-700 flex items-center justify-center text-xs">1</span>
@@ -558,60 +668,58 @@ function GodModeStyleguideContent() {
                   </div>
                   <ul className="text-xs text-[#525854] space-y-2 leading-relaxed">
                     <li>
-                      <strong>Topbar & Main Action:</strong> Height <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">h-10 (40px)</code>, padding <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">px-4</code>, font <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">text-xs font-bold</code>, radius <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">rounded-lg (8px)</code>.
+                      <strong>Topbar & Toolbar:</strong> Wajib tinggi baku <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">h-10 (40px)</code>, padding <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">px-4</code>, font <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">text-xs font-bold</code>, radius <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">rounded-lg</code>.
                     </li>
                     <li>
-                      <strong>Table Action (Secondary):</strong> <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">size="sm"</code> height <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">h-8 (32px)</code>, padding <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">px-3</code>, text <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">text-xs</code>.
-                    </li>
-                    <li>
-                      <strong>Table Action (Icon Only):</strong> Gunakan tombol icon persegi <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">h-8 w-8 p-0</code> dengan icon size 14px.
-                    </li>
-                    <li>
-                      <strong>Large Hero CTA:</strong> <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">size="lg"</code> height 46px, padding px-6.
+                      <strong>Table Action:</strong> <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">size="sm"</code> tinggi <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">h-8 (32px)</code> atau icon persegi <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">h-8 w-8 p-0</code>.
                     </li>
                   </ul>
                 </Card>
 
-                {/* Form & Search Standards */}
+                {/* 2. Number Formatting Standards */}
                 <Card className="shadow-sm border-[#e5e5e2] rounded-2xl p-6 flex flex-col gap-3">
                   <div className="flex items-center gap-2 font-bold text-sm text-[#111413]">
-                    <span className="w-6 h-6 rounded-md bg-blue-100 text-blue-700 flex items-center justify-center text-xs">2</span>
-                    <span>Search Input & Filter Bar</span>
+                    <span className="w-6 h-6 rounded-md bg-green-100 text-green-700 flex items-center justify-center text-xs">2</span>
+                    <span>Format Angka (Currency)</span>
                   </div>
                   <ul className="text-xs text-[#525854] space-y-2 leading-relaxed">
                     <li>
-                      <strong>Input & Select Height:</strong> Wajib konsisten <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">h-10 (40px)</code> agar sejajar sempurna dengan tombol toolbar.
+                      <strong>Wajib Format Ribuan:</strong> Seluruh input angka atau nominal uang WAJIB menggunakan <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">CurrencyInput</code> dari <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">@/components/ui/currency-input</code>.
                     </li>
                     <li>
-                      <strong>Centered Search Icon:</strong> Class <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">.admin-input-icon-left</code> dengan <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">top: 50%; transform: translateY(-50%)</code>.
-                    </li>
-                    <li>
-                      <strong>Left Text Padding:</strong> Class <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">.has-left-icon</code> wajib padding kiri 40px agar teks input tidak menabrak icon.
-                    </li>
-                    <li>
-                      <strong>Clear Button (X):</strong> Muncul otomatis hanya saat input terisi, posisi di <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">right: 10px</code> dengan icon size 14px.
+                      <strong>Real-Time Formatting:</strong> Otomatis menampilkan pemisah ribuan (<code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">Rp 250.000</code>), namun nilai state tersimpan bersih sebagai string digit numerik murni.
                     </li>
                   </ul>
                 </Card>
 
-                {/* Dialog Modal Standards */}
+                {/* 3. Tabs Navigation Standards */}
                 <Card className="shadow-sm border-[#e5e5e2] rounded-2xl p-6 flex flex-col gap-3">
                   <div className="flex items-center gap-2 font-bold text-sm text-[#111413]">
-                    <span className="w-6 h-6 rounded-md bg-green-100 text-green-700 flex items-center justify-center text-xs">3</span>
-                    <span>Dialog Modal & Toggles</span>
+                    <span className="w-6 h-6 rounded-md bg-purple-100 text-purple-700 flex items-center justify-center text-xs">3</span>
+                    <span>Standar Tab Aktif & Inaktif</span>
                   </div>
                   <ul className="text-xs text-[#525854] space-y-2 leading-relaxed">
                     <li>
-                      <strong>Modal Header:</strong> Judul dialog tegas, hilangkan subtitle deskriptif yang tidak perlu demi kerapian visual.
+                      <strong>Tab Aktif:</strong> Latar putih <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">#ffffff</code>, teks tegas/warna tematik, berbayang halus (<code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">box-shadow</code>) dan berborder tipis.
                     </li>
                     <li>
-                      <strong>Segmented Tabs:</strong> Tipe opsi penting (e.g. Pemasukan vs Pengeluaran) menggunakan tab bar tersegmentasi <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">bg-[#f6f6f4]</code>, bukan radio button biasa.
+                      <strong>Tab Inaktif:</strong> Latar transparan, teks netral abu-abu (<code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">#525854</code>), bereaksi saat hover kursor.
+                    </li>
+                  </ul>
+                </Card>
+
+                {/* 4. Margin & Spacing Standards */}
+                <Card className="shadow-sm border-[#e5e5e2] rounded-2xl p-6 flex flex-col gap-3">
+                  <div className="flex items-center gap-2 font-bold text-sm text-[#111413]">
+                    <span className="w-6 h-6 rounded-md bg-blue-100 text-blue-700 flex items-center justify-center text-xs">4</span>
+                    <span>Margin & Spacing Baku</span>
+                  </div>
+                  <ul className="text-xs text-[#525854] space-y-2 leading-relaxed">
+                    <li>
+                      <strong>Antar Section:</strong> Jarak vertikal wajib <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">48px</code> dengan divider pemisah <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">.admin-section-divider</code>.
                     </li>
                     <li>
-                      <strong>Dropdown Terhubung Data:</strong> Dropdown pilihan merchant terisi dinamis dari API <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">/api/god-mode/tenants</code>.
-                    </li>
-                    <li>
-                      <strong>Modal Footer:</strong> Tombol Batal & Simpan menggunakan tinggi standar <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">h-10 px-4</code>.
+                      <strong>Dalam Card / Form:</strong> Jarak grid kolom & baris wajib <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">24px</code>, jarak label ke field input <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">8px</code>.
                     </li>
                   </ul>
                 </Card>

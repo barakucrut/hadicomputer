@@ -453,8 +453,16 @@
   background-color: #f1f3ed;
   padding: 4px;
   border-radius: 10px;
-  border: none !important;
+  border: 1px solid var(--border);
   gap: 4px;
+}
+.admin-tabs-list.full-width {
+  display: flex !important;
+  width: 100% !important;
+}
+.admin-tabs-list.full-width .admin-tab-trigger {
+  flex: 1 !important;
+  text-align: center !important;
 }
 
 .admin-tab-trigger {
@@ -462,11 +470,11 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 7px 16px;
+  padding: 8px 16px;
   border-radius: 7px;
   font-size: 13px;
   font-weight: 600;
-  border: none !important;
+  border: 1px solid transparent !important;
   outline: none !important;
   cursor: pointer;
   background-color: transparent !important;
@@ -476,12 +484,28 @@
 }
 .admin-tab-trigger:hover {
   color: #111413 !important;
+  background-color: rgba(0, 0, 0, 0.03) !important;
 }
 .admin-tab-trigger.active {
   background-color: #ffffff !important;
   color: #cc252b !important;
-  font-weight: 700;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+  font-weight: 700 !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08) !important;
+}
+.admin-tab-trigger.active-income {
+  background-color: #ffffff !important;
+  color: #15803d !important;
+  font-weight: 700 !important;
+  border: 1px solid rgba(21, 128, 61, 0.25) !important;
+  box-shadow: 0 2px 6px rgba(21, 128, 61, 0.12) !important;
+}
+.admin-tab-trigger.active-expense {
+  background-color: #ffffff !important;
+  color: #dc2626 !important;
+  font-weight: 700 !important;
+  border: 1px solid rgba(220, 38, 38, 0.25) !important;
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.12) !important;
 }
 
 /* ==========================================================
@@ -970,8 +994,30 @@
 .gap-2\.5 { gap: 10px; }
 .gap-3 { gap: 12px; }
 .gap-4 { gap: 16px; }
+.gap-5 { gap: 20px; }
 .gap-6 { gap: 24px; }
+.gap-7 { gap: 28px; }
 .gap-8 { gap: 32px; }
+.gap-10 { gap: 40px; }
+.gap-12 { gap: 48px; }
+
+.admin-section-divider {
+  width: 100% !important;
+  height: 1px !important;
+  background-color: var(--border) !important;
+  margin: 48px 0 !important;
+  border: none !important;
+  display: block !important;
+}
+
+.admin-inner-divider {
+  width: 100% !important;
+  height: 1px !important;
+  background-color: var(--border) !important;
+  margin: 24px 0 !important;
+  border: none !important;
+  display: block !important;
+}
 
 .space-y-1 > :not([hidden]) ~ :not([hidden]) { margin-top: 4px; }
 .space-y-1\.5 > :not([hidden]) ~ :not([hidden]) { margin-top: 6px; }

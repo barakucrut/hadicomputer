@@ -47,6 +47,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
+import { CurrencyInput } from "@/components/ui/currency-input";
 import {
   Dialog,
   DialogContent,
@@ -748,20 +749,22 @@ function TransactionsContent() {
             {/* Segmented Tab Styling for Tipe Arus Kas */}
             <div>
               <Label className="text-xs font-bold text-[#111413] mb-1.5 block">Tipe Arus Kas *</Label>
-              <div className="flex bg-[#f1f5f9] p-1 rounded-xl border border-[#e2e8f0]">
+              <div className="admin-tabs-list full-width" style={{ width: "100%", display: "flex", backgroundColor: "#f1f3ed", padding: "4px", borderRadius: "10px", border: "1px solid var(--border)", gap: "4px" }}>
                 <button
                   type="button"
                   onClick={() => {
                     setNewType("INCOME");
                     setNewCategory("SUBSCRIPTION");
                   }}
-                  className={`flex-1 py-2 text-xs font-bold rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                    newType === "INCOME"
-                      ? "bg-white text-green-700 shadow-sm border border-gray-200"
-                      : "text-[#525854] hover:text-[#111413] border border-transparent"
-                  }`}
+                  className={`admin-tab-trigger ${newType === "INCOME" ? "active-income" : ""}`}
+                  style={{
+                    flex: 1,
+                    height: "38px",
+                    fontSize: "13px",
+                    fontWeight: 700,
+                  }}
                 >
-                  <ArrowUpRight size={14} />
+                  <ArrowUpRight size={15} />
                   <span>Pemasukan (+)</span>
                 </button>
 
@@ -771,13 +774,15 @@ function TransactionsContent() {
                     setNewType("EXPENSE");
                     setNewCategory("SERVER_INFRA");
                   }}
-                  className={`flex-1 py-2 text-xs font-bold rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                    newType === "EXPENSE"
-                      ? "bg-white text-red-600 shadow-sm border border-gray-200"
-                      : "text-[#525854] hover:text-[#111413] border border-transparent"
-                  }`}
+                  className={`admin-tab-trigger ${newType === "EXPENSE" ? "active-expense" : ""}`}
+                  style={{
+                    flex: 1,
+                    height: "38px",
+                    fontSize: "13px",
+                    fontWeight: 700,
+                  }}
                 >
-                  <ArrowDownLeft size={14} />
+                  <ArrowDownLeft size={15} />
                   <span>Pengeluaran (-)</span>
                 </button>
               </div>
@@ -828,14 +833,12 @@ function TransactionsContent() {
 
               <div>
                 <Label htmlFor="tx-amount">Nominal (Rp) *</Label>
-                <Input
+                <CurrencyInput
                   id="tx-amount"
-                  type="number"
-                  required
-                  min="1"
+                  name="amount"
                   value={newAmount}
-                  onChange={(e) => setNewAmount(e.target.value)}
-                  placeholder="e.g. 250000"
+                  onValueChange={(val) => setNewAmount(val)}
+                  placeholder="0"
                 />
               </div>
             </div>
