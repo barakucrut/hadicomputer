@@ -110,3 +110,34 @@ flowchart TD
 * **Milestone 2:** Kloning template ini secara manual untuk 5 toko prospek pertama di kota sekitar. Validasi kesediaan bayar (*willingness to pay*).
 * **Milestone 3:** Bangun skrip otomasi pembuatan demo dan integrasi AI.
 * **Milestone 4:** Rilis platform SaaS mandiri dengan panel pendaftaran otomatis dan integrasi pembayaran.
+
+---
+
+## 6. Fitur Unggulan Mendatang: Smart WhatsApp Broadcast & CRM Engine
+
+### A. Latar Belakang & Kebutuhan Merchant
+Pemilik toko komputer sering memiliki ratusan hingga ribuan kontak pelanggan (pelanggan servis, pembeli rakit PC, langganan kantor/sekolah), tetapi nomor tersebut pasif dan jarang di-follow-up. Merchant membutuhkan sarana untuk menyiarkan penawaran promo, restock laptop gaming, atau reminder jadwal servis berkala langsung ke WhatsApp pelanggan tanpa repot mengirim pesan manual satu per satu.
+
+### B. Mekanisme & Syarat Keamanan Meta / Anti-Banned
+Mengirim broadcast massal di WhatsApp memiliki risiko tinggi pemblokiran nomor (*banned*) oleh sistem AI Meta jika tidak mengikuti protokol ketat:
+
+1. **Ketentuan Umur Nomor (*Account Warm-up & Aged Number*):**
+   - **Syarat Wajib:** Nomor WhatsApp yang digunakan wajib berumur **minimal 3–6 bulan** dan memiliki riwayat percakapan 2 arah yang aktif dan natural.
+   - **Peringatan Keras:** Dilarang keras menggunakan nomor perdana baru (*fresh SIM card*). Nomor baru yang langsung mengirim >50 pesan dalam hitungan jam memiliki risiko terblokir 99%.
+   
+2. **Batas Kuota Pengiriman (*Rate Limiting & Tiered Quota*):**
+   - **Tier Akun Baru Bergabung:** Maksimal 50–100 pesan / hari.
+   - **Tier Akun Terverifikasi:** Maksimal 250–500 pesan / hari.
+   - Pengiriman dipecah menjadi batch kecil dengan jeda dinamis acak (*random delay/jitter*) antara **8 hingga 20 detik per pesan** untuk meniru perilaku manusia.
+
+3. **Personalisasi Pesan Dinamis (*Dynamic Tags & Spintax*):**
+   - Mendukung tag personal seperti `{nama_pelanggan}`, `{perangkat_terakhir}`, dan variasi salam otomatis (*Spintax*: `Halo / Selamat Pagi / Hai kak`) agar teks pesan yang dikirim tidak identik 100%.
+
+4. **Klausul Anti-Spam & Tombol Berhenti (*Opt-Out Compliance*):**
+   - Di bagian akhir pesan broadcast, wajib disertakan opsi sopan: *"Balas STOP jika tidak ingin menerima info promo ini lagi"*.
+   - Jika penerima membalas STOP, sistem secara otomatis memasukkan nomor tersebut ke daftar *Blacklist* agar tidak dikirimi lagi, menjaga reputasi nomor toko tetap aman dari laporan spam (*Report Spam*).
+
+### C. Potensi Monetisasi SaaS
+* **Add-On Kuota:** 1.000 pesan broadcast seharga Rp 150.000 / paket.
+* **Fitur Eksklusif Paket PRO & Enterprise:** Menjadi nilai jual utama (*upselling*) agar toko upgrade ke paket langganan tahunan yang lebih tinggi.
+

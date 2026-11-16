@@ -1,6 +1,7 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { prisma } from "./db";
+import { getGodSession } from "./god-auth";
 
 const JWT_SECRET = new TextEncoder().encode(
   process.env.ADMIN_JWT_SECRET || "hadi-computer-cms-secret-key-32-chars-long-2026"
@@ -13,6 +14,7 @@ export interface AdminSessionPayload {
   email: string;
   name: string;
   role: string;
+  tenantId?: string | null;
 }
 
 export async function signAdminToken(payload: AdminSessionPayload): Promise<string> {
@@ -41,12 +43,64 @@ export async function getAdminSession(): Promise<AdminSessionPayload | null> {
 
 export async function requireAdminSession() {
   const session = await getAdminSession();
-  if (!session) {
-    return null;
+  if (session) {
+    const user = await prisma.adminUser.findUnique({
+      where: { id: session.id },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        tenantId: true,
+        tenant: {
+          select: { id: true, name: true, slug: true },
+        },
+      },
+    });
+    if (user) {
+      return {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        tenantId: user.tenantId,
+        tenantName: user.tenant?.name || "Hadi Computer",
+        isImpersonating: false,
+      };
+    }
   }
-  const user = await prisma.adminUser.findUnique({
-    where: { id: session.id },
-    select: { id: true, email: true, name: true, role: true },
-  });
-  return user;
+
+  // Check if Superadmin God-Mode session is active (Impersonation Mode)
+  const godSession = await getGodSession();
+  if (godSession) {
+    const cookieStore = await cookies();
+    const impersonatedTenantId = cookieStore.get("god_impersonated_tenant_id")?.value;
+
+    let tenant = null;
+    if (impersonatedTenantId) {
+      tenant = await prisma.tenant.findUnique({
+        where: { id: impersonatedTenantId },
+        select: { id: true, name: true, slug: true },
+      });
+    }
+
+    if (!tenant) {
+      tenant = await prisma.tenant.findFirst({
+        orderBy: { createdAt: "asc" },
+        select: { id: true, name: true, slug: true },
+      });
+    }
+
+    return {
+      id: "god-mode-superadmin",
+      email: godSession.username,
+      name: "Superadmin God-Mode",
+      role: "SUPERADMIN",
+      tenantId: tenant?.id || null,
+      tenantName: tenant?.name || "Semua Merchant",
+      isImpersonating: true,
+    };
+  }
+
+  return null;
 }

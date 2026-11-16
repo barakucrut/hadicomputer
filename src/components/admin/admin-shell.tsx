@@ -24,7 +24,14 @@ import "@/app/admin.css";
 
 interface AdminShellProps {
   children: React.ReactNode;
-  user?: { name: string; email: string; role: string } | null;
+  user?: {
+    name: string;
+    email: string;
+    role: string;
+    tenantId?: string | null;
+    tenantName?: string;
+    isImpersonating?: boolean;
+  } | null;
 }
 
 export function AdminShell({ children, user }: AdminShellProps) {
@@ -221,6 +228,33 @@ export function AdminShell({ children, user }: AdminShellProps) {
             gap: "4px",
           }}
         >
+          {user?.role === "SUPERADMIN" && (
+            <Link
+              href="/god-mode"
+              title="Kembali ke Pusat Kendali God-Mode"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: isCollapsed ? "center" : "space-between",
+                padding: "9px 12px",
+                borderRadius: "var(--radius-sm)",
+                fontSize: "12px",
+                fontWeight: 700,
+                color: "var(--red)",
+                backgroundColor: "rgba(221, 32, 40, 0.08)",
+                textDecoration: "none",
+                transition: "background 0.15s ease",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(221, 32, 40, 0.15)")}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "rgba(221, 32, 40, 0.08)")}
+            >
+              <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span>⚡</span>
+                <span>Pusat God-Mode</span>
+              </span>
+            </Link>
+          )}
+
           <a
             href="/"
             target="_blank"
@@ -278,6 +312,63 @@ export function AdminShell({ children, user }: AdminShellProps) {
 
       {/* Main Content Area */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
+        {/* Superadmin Impersonation Banner */}
+        {user?.role === "SUPERADMIN" && (
+          <div
+            style={{
+              backgroundColor: "#111413",
+              color: "#ffffff",
+              padding: "8px 20px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              fontSize: "12px",
+              fontWeight: 600,
+              borderBottom: "2px solid var(--red)",
+              zIndex: 40,
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <span
+                style={{
+                  backgroundColor: "var(--red)",
+                  color: "#ffffff",
+                  padding: "2px 7px",
+                  borderRadius: "4px",
+                  fontSize: "10px",
+                  fontWeight: 900,
+                  letterSpacing: "0.5px",
+                }}
+              >
+                GOD-MODE
+              </span>
+              <span>
+                Mode Akses Master: Anda sedang mengelola toko <strong>{user.tenantName || "Hadi Computer"}</strong>
+              </span>
+            </div>
+            <Link
+              href="/god-mode"
+              style={{
+                color: "#ffffff",
+                backgroundColor: "rgba(255,255,255,0.15)",
+                padding: "4px 12px",
+                borderRadius: "6px",
+                fontSize: "11px",
+                fontWeight: 700,
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "5px",
+                transition: "background 0.15s ease",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.25)")}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.15)")}
+            >
+              <span>⚡ Kembali ke God-Mode</span>
+            </Link>
+          </div>
+        )}
+
         {/* Top Navbar */}
         <header className="admin-topbar">
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
@@ -326,7 +417,7 @@ export function AdminShell({ children, user }: AdminShellProps) {
               <Menu size={22} />
             </button>
             <span style={{ fontSize: "14px", fontWeight: 700, color: "var(--ink)" }}>
-              Panel Pengelola Hadi Computer
+              Panel Pengelola {user?.tenantName || "Hadi Computer"}
             </span>
           </div>
 

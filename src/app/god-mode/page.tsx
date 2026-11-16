@@ -4,31 +4,29 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  ShieldAlert,
   Store,
-  Sparkles,
   Plus,
   ExternalLink,
   Laptop,
   Cpu,
   ArrowRight,
   TrendingUp,
-  Settings,
+  TrendingDown,
   Layers,
   CheckCircle2,
-  AlertCircle,
-  Copy,
   ChevronDown,
-  ChevronRight,
-  Eye,
-  Trash2,
-  RefreshCw,
   LogOut,
   Palette,
-  Phone,
-  Globe,
-  Sliders,
   LayoutDashboard,
+  Receipt,
+  Building,
+  Zap,
+  ArrowUpRight,
+  ArrowDownLeft,
+  DollarSign,
+  PieChart,
+  ShieldCheck,
+  Activity,
 } from "lucide-react";
 import { Button } from "@/components/admin/ui/button";
 import { Badge } from "@/components/admin/ui/badge";
@@ -39,26 +37,6 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/admin/ui/card";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableHead,
-  TableRow,
-  TableCell,
-} from "@/components/admin/ui/table";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
-import { Switch } from "@/components/admin/ui/switch";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/admin/ui/dialog";
 import { useToast, ToastProvider } from "@/components/admin/ui/toast";
 import "@/app/admin.css";
 
@@ -76,19 +54,8 @@ interface TenantData {
     [key: string]: boolean | undefined;
   };
   settings: {
-    tagline: string | null;
-    logoUrl: string | null;
-    faviconUrl: string | null;
     primaryColor: string;
-    secondaryColor: string;
     whatsappNumber: string;
-    whatsappDefaultTemplate: string | null;
-    address: string | null;
-    openHours: string;
-    mapsEmbedUrl: string | null;
-    socialInstagram: string | null;
-    socialTiktok: string | null;
-    socialFacebook: string | null;
   } | null;
   _count?: {
     products: number;
@@ -97,51 +64,65 @@ interface TenantData {
   createdAt: string;
 }
 
-function GodModeDashboard() {
+interface FinancialStats {
+  totalIncome: number;
+  totalExpense: number;
+  netProfit: number;
+  count: number;
+}
+
+function GodModeExecutiveSummary() {
   const router = useRouter();
   const toast = useToast();
+
   const [tenants, setTenants] = React.useState<TenantData[]>([]);
-  const [loading, setLoading] = React.useState(true);
-  const [selectedTenantId, setSelectedTenantId] = React.useState<string>("all");
-  const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
-  const [isAddModalOpen, setIsAddModalOpen] = React.useState(false);
-  const [submitting, setSubmitting] = React.useState(false);
-
-  // Form New Tenant State
-  const [newName, setNewName] = React.useState("");
-  const [newSlug, setNewSlug] = React.useState("");
-  const [newDomain, setNewDomain] = React.useState("");
-  const [newPlan, setNewPlan] = React.useState<"STARTER" | "PRO" | "ENTERPRISE">("PRO");
-  const [newPhone, setNewPhone] = React.useState("628");
-  const [newColor, setNewColor] = React.useState("#cc252b");
-  const [newFeatures, setNewFeatures] = React.useState({
-    pcBuilder: true,
-    tradeIn: true,
-    instantCheckout: false,
+  const [financeStats, setFinanceStats] = React.useState<FinancialStats>({
+    totalIncome: 0,
+    totalExpense: 0,
+    netProfit: 0,
+    count: 0,
   });
+  const [loading, setLoading] = React.useState(true);
 
+  // Topbar Dropdown
+  const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
 
-  // Load Tenants
-  const fetchTenants = React.useCallback(async () => {
+  const fetchSummary = React.useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/god-mode/tenants");
-      const data = await res.json();
-      if (data.tenants) {
-        setTenants(data.tenants);
-      }
+      const [resTenants, resFinance] = await Promise.all([
+        fetch("/api/god-mode/tenants"),
+        fetch("/api/god-mode/transactions"),
+      ]);
+
+      const dataTenants = await resTenants.json();
+      if (dataTenants.tenants) setTenants(dataTenants.tenants);
+
+      const dataFinance = await resFinance.json();
+      if (dataFinance.stats) setFinanceStats(dataFinance.stats);
     } catch (err) {
-      console.error("Failed to load tenants:", err);
-      toast.error("Gagal memuat daftar tenant toko.");
+      console.error("Failed to load executive summary:", err);
+      toast.error("Gagal memuat ringkasan eksekutif.");
     } finally {
       setLoading(false);
     }
   }, [toast]);
 
   React.useEffect(() => {
-    fetchTenants();
-  }, [fetchTenants]);
+    fetchSummary();
+  }, [fetchSummary]);
+
+  // Close dropdown on outside click
+  React.useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   async function handleLogout() {
     try {
@@ -154,101 +135,40 @@ function GodModeDashboard() {
     }
   }
 
-  // Close dropdown when click outside
-  React.useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setIsDropdownOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  // Auto-generate slug from name
-  function handleNameChange(val: string) {
-    setNewName(val);
-    const slug = val
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-    setNewSlug(slug);
-  }
-
-  // Handle Add Tenant
-  async function handleAddTenant(e: React.FormEvent) {
-    e.preventDefault();
-    if (!newName.trim() || !newSlug.trim()) {
-      toast.error("Nama toko dan slug subdomain wajib diisi!");
-      return;
-    }
-
+  // Impersonate / Login as Tenant
+  async function handleImpersonate(tenantId: string) {
     try {
-      setSubmitting(true);
-      const res = await fetch("/api/god-mode/tenants", {
+      const res = await fetch("/api/god-mode/auth/impersonate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: newName,
-          slug: newSlug,
-          customDomain: newDomain || undefined,
-          plan: newPlan,
-          primaryColor: newColor,
-          whatsappNumber: newPhone,
-          features: newFeatures,
-        }),
+        body: JSON.stringify({ tenantId }),
       });
-
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Gagal membuat tenant");
+      if (!res.ok) throw new Error(data.error || "Gagal beralih ke CMS merchant");
 
-      toast.success(`Toko ${newName} berhasil dibuat!`);
-      setIsAddModalOpen(false);
-      // Reset form
-      setNewName("");
-      setNewSlug("");
-      setNewDomain("");
-      setNewPhone("628");
-      setNewColor("#cc252b");
-      fetchTenants();
+      toast.success(`Beralih ke CMS ${data.tenant?.name || "Merchant"}!`);
+      router.push("/admin");
+      router.refresh();
     } catch (err: any) {
-      toast.error(err.message || "Gagal membuat toko baru.");
-    } finally {
-      setSubmitting(false);
+      toast.error(err.message || "Gagal melakukan impersonasi");
     }
   }
 
-  // Toggle Feature Flag
-  async function handleToggleFeature(tenantId: string, featureKey: string, currentVal: boolean) {
-    const tenant = tenants.find((t) => t.id === tenantId);
-    if (!tenant) return;
-
-    const updatedFeatures = {
-      ...tenant.features,
-      [featureKey]: !currentVal,
-    };
-
-    // Optimistic update
-    setTenants((prev) =>
-      prev.map((t) => (t.id === tenantId ? { ...t, features: updatedFeatures } : t))
-    );
-
-    try {
-      const res = await fetch(`/api/god-mode/tenants/${tenantId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ features: updatedFeatures }),
-      });
-      if (!res.ok) throw new Error("Gagal update fitur");
-      toast.success(`Fitur ${featureKey} ${!currentVal ? "diaktifkan" : "dinonaktifkan"}`);
-    } catch {
-      toast.error("Gagal memperbarui fitur toggle");
-      fetchTenants();
-    }
-  }
-
-  const selectedTenant = tenants.find((t) => t.id === selectedTenantId);
+  // Aggregated Metrics
+  const totalTenants = tenants.length;
+  const activeTenants = tenants.filter((t) => t.status === "ACTIVE").length;
+  const proTenants = tenants.filter((t) => t.plan === "PRO").length;
+  const starterTenants = tenants.filter((t) => t.plan === "STARTER").length;
+  const enterpriseTenants = tenants.filter((t) => t.plan === "ENTERPRISE").length;
+  const totalProducts = tenants.reduce((acc, t) => acc + (t._count?.products || 0), 0);
+  const pcBuilderActive = tenants.filter((t) => !!t.features.pcBuilder).length;
+  const tradeInActive = tenants.filter((t) => !!t.features.tradeIn).length;
+  const estimatedMRR = tenants.reduce((sum, t) => {
+    if (t.plan === "PRO") return sum + 232500;
+    if (t.plan === "STARTER") return sum + 124000;
+    if (t.plan === "ENTERPRISE") return sum + 408000;
+    return sum;
+  }, 0);
 
   return (
     <div className="admin-shell-root">
@@ -304,26 +224,19 @@ function GodModeDashboard() {
         >
           <Link href="/god-mode" className="admin-nav-item active">
             <LayoutDashboard size={19} />
-            <span>Dashboard Platform</span>
+            <span>Dashboard Summary</span>
           </Link>
-          <a
-            href="#daftar-toko"
-            className="admin-nav-item"
-            onClick={(e) => {
-              e.preventDefault();
-              document.getElementById("daftar-toko")?.scrollIntoView({ behavior: "smooth" });
-            }}
-          >
+          <Link href="/god-mode/tenants" className="admin-nav-item">
             <Store size={19} />
             <span>Daftar Tenant Toko</span>
-          </a>
+          </Link>
+          <Link href="/god-mode/transactions" className="admin-nav-item">
+            <Receipt size={19} />
+            <span>Transaksi Keuangan</span>
+          </Link>
           <Link href="/god-mode/styleguide" className="admin-nav-item">
             <Palette size={19} />
             <span>Living Styleguide</span>
-          </Link>
-          <Link href="/admin" className="admin-nav-item">
-            <ExternalLink size={19} />
-            <span>Buka CMS Hadicomputer</span>
           </Link>
         </nav>
 
@@ -360,20 +273,19 @@ function GodModeDashboard() {
 
       {/* Main Area */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
-        {/* Topbar with Tenant Switcher */}
+        {/* Topbar with Impersonation Dropdown */}
         <header className="admin-topbar">
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <span style={{ fontSize: "14px", fontWeight: 800, color: "var(--ink)" }}>
-              Pusat Kendali God-Mode
+              Pusat Kendali Eksekutif Platform
             </span>
             <Badge variant="default" className="text-[11px] bg-red-600">
               SUPERADMIN
             </Badge>
           </div>
 
-          {/* Right Controls: Switcher & Add Store */}
           <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-            {/* Tenant Switcher Dropdown */}
+            {/* Topbar Dropdown Switcher */}
             <div ref={dropdownRef} style={{ position: "relative" }}>
               <button
                 type="button"
@@ -394,11 +306,7 @@ function GodModeDashboard() {
                 }}
               >
                 <Store size={16} className="text-[#cc252b]" />
-                <span>
-                  {selectedTenantId === "all"
-                    ? "Semua Tenant Toko"
-                    : selectedTenant?.name || "Pilih Tenant"}
-                </span>
+                <span>Masuk CMS Merchant</span>
                 <ChevronDown size={14} className="text-[#818779]" />
               </button>
 
@@ -428,190 +336,75 @@ function GodModeDashboard() {
                       textTransform: "uppercase",
                     }}
                   >
-                    Beralih Tampilan / Tenant
+                    PILIH TOKO UNTUK DIKELOLA (CMS)
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedTenantId("all");
-                      setIsDropdownOpen(false);
-                    }}
-                    style={{
-                      width: "100%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      padding: "8px 10px",
-                      borderRadius: "8px",
-                      fontSize: "13px",
-                      fontWeight: selectedTenantId === "all" ? 800 : 600,
-                      backgroundColor: selectedTenantId === "all" ? "#f1f5f9" : "transparent",
-                      border: "none",
-                      cursor: "pointer",
-                      textAlign: "left",
-                      color: "var(--ink)",
-                      transition: "background-color 0.15s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                      if (selectedTenantId !== "all") e.currentTarget.style.backgroundColor = "#f8fafc";
-                    }}
-                    onMouseLeave={(e) => {
-                      if (selectedTenantId !== "all") e.currentTarget.style.backgroundColor = "transparent";
-                    }}
-                  >
-                    <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                      <span>👑</span>
-                      <span>Overview Semua Toko</span>
-                    </span>
-                    {selectedTenantId === "all" && <CheckCircle2 size={15} className="text-red-600" />}
-                  </button>
-
-                  <div style={{ height: "1px", backgroundColor: "#f1f5f9", margin: "6px 0" }} />
-
-                  {tenants.length === 0 ? (
-                    <div style={{ padding: "10px", textAlign: "center", fontSize: "12px", color: "var(--muted)" }}>
-                      Belum ada tenant toko
-                    </div>
-                  ) : (
-                    <div style={{ maxHeight: "200px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "2px" }}>
-                      {tenants.map((t) => (
-                        <div
-                          key={t.id}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            padding: "6px 8px",
-                            borderRadius: "8px",
-                            backgroundColor: selectedTenantId === t.id ? "#f1f5f9" : "transparent",
-                            transition: "background-color 0.15s ease",
-                          }}
-                          onMouseEnter={(e) => {
-                            if (selectedTenantId !== t.id) e.currentTarget.style.backgroundColor = "#f8fafc";
-                          }}
-                          onMouseLeave={(e) => {
-                            if (selectedTenantId !== t.id) e.currentTarget.style.backgroundColor = "transparent";
-                          }}
-                        >
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSelectedTenantId(t.id);
-                              setIsDropdownOpen(false);
-                            }}
+                  <div style={{ maxHeight: "240px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "2px" }}>
+                    {tenants.map((t) => (
+                      <button
+                        key={t.id}
+                        type="button"
+                        onClick={() => {
+                          setIsDropdownOpen(false);
+                          handleImpersonate(t.id);
+                        }}
+                        style={{
+                          width: "100%",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          padding: "8px 10px",
+                          borderRadius: "8px",
+                          backgroundColor: "transparent",
+                          border: "none",
+                          cursor: "pointer",
+                          textAlign: "left",
+                          transition: "background-color 0.15s ease",
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f8fafc")}
+                        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0 }}>
+                          <span
                             style={{
-                              background: "transparent",
-                              border: "none",
-                              fontSize: "13px",
-                              fontWeight: selectedTenantId === t.id ? 800 : 600,
-                              color: "var(--ink)",
-                              textAlign: "left",
-                              cursor: "pointer",
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "8px",
-                              flex: 1,
-                              minWidth: 0,
-                            }}
-                          >
-                            <span
-                              style={{
-                                width: "9px",
-                                height: "9px",
-                                borderRadius: "50%",
-                                backgroundColor: t.settings?.primaryColor || "#cc252b",
-                                flexShrink: 0,
-                              }}
-                            />
-                            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                              {t.name}
-                            </span>
-                            <span
-                              style={{
-                                fontSize: "10px",
-                                fontWeight: 800,
-                                backgroundColor: "#e2e8f0",
-                                color: "#475569",
-                                padding: "1px 6px",
-                                borderRadius: "4px",
-                                marginLeft: "auto",
-                                marginRight: "6px",
-                              }}
-                            >
-                              {t.plan}
-                            </span>
-                          </button>
-
-                          <Link
-                            href="/admin"
-                            title="Masuk ke Panel CMS Toko"
-                            style={{
-                              padding: "4px 8px",
-                              borderRadius: "6px",
-                              fontSize: "11px",
-                              fontWeight: 700,
-                              backgroundColor: "#fee2e2",
-                              color: "#b91c1c",
-                              textDecoration: "none",
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: "4px",
+                              width: "9px",
+                              height: "9px",
+                              borderRadius: "50%",
+                              backgroundColor: t.settings?.primaryColor || "#cc252b",
                               flexShrink: 0,
                             }}
-                          >
-                            <span>CMS</span>
-                            <ExternalLink size={10} />
-                          </Link>
+                          />
+                          <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--ink)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            {t.name}
+                          </span>
                         </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <div style={{ height: "1px", backgroundColor: "#f1f5f9", margin: "6px 0" }} />
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsDropdownOpen(false);
-                      setIsAddModalOpen(true);
-                    }}
-                    style={{
-                      width: "100%",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      padding: "8px 10px",
-                      borderRadius: "8px",
-                      fontSize: "12px",
-                      fontWeight: 700,
-                      color: "var(--red)",
-                      backgroundColor: "transparent",
-                      border: "none",
-                      cursor: "pointer",
-                      textAlign: "left",
-                      transition: "background-color 0.15s ease",
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(221, 32, 40, 0.05)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-                  >
-                    <Plus size={15} />
-                    <span>Tambah Toko Baru</span>
-                  </button>
+                        <span
+                          style={{
+                            fontSize: "10px",
+                            fontWeight: 800,
+                            backgroundColor: "#fee2e2",
+                            color: "#b91c1c",
+                            padding: "2px 6px",
+                            borderRadius: "4px",
+                            flexShrink: 0,
+                          }}
+                        >
+                          Buka CMS ↗
+                        </span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
 
-            {/* Quick Button Add Store */}
-            <Button
-              onClick={() => setIsAddModalOpen(true)}
-              className="flex items-center gap-1.5"
-            >
-              <Plus size={16} />
-              <span>Tambah Toko</span>
-            </Button>
+            <Link href="/god-mode/tenants">
+              <Button size="sm" className="flex items-center gap-1.5">
+                <Store size={15} />
+                <span>Kelola Tenant</span>
+              </Button>
+            </Link>
 
-            {/* Logout Button */}
             <Button
               variant="outline"
               size="sm"
@@ -627,51 +420,65 @@ function GodModeDashboard() {
 
         {/* Content Body */}
         <main className="admin-main-content">
-          <div className="space-y-8 w-full pb-16">
-            {/* Header Title & Metrics */}
+          <div className="space-y-8 w-full pb-20">
+            {/* Header Title */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <h1 className="text-2xl font-black text-[#111413] tracking-tight">
-                  Manajemen Tenant Toko Komputer
+                  Executive Dashboard & SaaS Summary
                 </h1>
                 <p className="text-sm text-[#525854] mt-1">
-                  Kelola seluruh toko retailer, konfigurasi domain, paket langganan, dan aktifkan fitur modular.
+                  Laporan performa makro platform multi-tenant: metrik langganan merchant, adopsi modul, dan ringkasan arus kas keuangan.
                 </p>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={fetchTenants}
-                className="flex items-center gap-1.5 self-start"
-              >
-                <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
-                <span>Refresh Data</span>
-              </Button>
+
+              <div className="flex items-center gap-2">
+                <Link href="/god-mode/transactions">
+                  <Button variant="outline" size="sm" className="flex items-center gap-1.5 text-xs font-semibold">
+                    <Receipt size={14} />
+                    <span>Lihat Mutasi Keuangan</span>
+                  </Button>
+                </Link>
+                <Link href="/god-mode/tenants">
+                  <Button size="sm" className="flex items-center gap-1.5 text-xs font-bold">
+                    <Store size={14} />
+                    <span>Daftar Seluruh Merchant</span>
+                    <ArrowRight size={13} />
+                  </Button>
+                </Link>
+              </div>
             </div>
 
-            {/* Metric Overview */}
+            {/* 1. Core KPIs */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card>
+              {/* Total Active Tenants */}
+              <Card className="border-[#e5e5e2] shadow-sm rounded-2xl">
                 <CardContent className="p-5 flex items-center justify-between">
                   <div>
-                    <div className="text-xs font-semibold text-[#818779]">Total Toko Aktif</div>
-                    <div className="text-2xl font-black text-[#111413] mt-1">{tenants.length} Toko</div>
-                    <div className="text-[11px] text-green-700 font-bold mt-1">100% Online & Terkoneksi</div>
+                    <div className="text-xs font-semibold text-[#818779]">Merchant / Toko Aktif</div>
+                    <div className="text-2xl font-black text-[#111413] mt-1">
+                      {activeTenants} Toko
+                    </div>
+                    <div className="text-[11px] text-green-700 font-bold flex items-center gap-1 mt-1">
+                      <CheckCircle2 size={12} />
+                      <span>100% Online & Terhubung</span>
+                    </div>
                   </div>
-                  <div className="w-11 h-11 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center font-bold">
+                  <div className="w-11 h-11 rounded-xl bg-red-50 text-red-700 flex items-center justify-center font-bold">
                     <Store size={22} />
                   </div>
                 </CardContent>
               </Card>
 
-              <Card>
+              {/* Total Catalog Products */}
+              <Card className="border-[#e5e5e2] shadow-sm rounded-2xl">
                 <CardContent className="p-5 flex items-center justify-between">
                   <div>
-                    <div className="text-xs font-semibold text-[#818779]">Total Katalog Produk</div>
+                    <div className="text-xs font-semibold text-[#818779]">Total Produk Ekosistem</div>
                     <div className="text-2xl font-black text-[#111413] mt-1">
-                      {tenants.reduce((acc, t) => acc + (t._count?.products || 0), 0)} Unit
+                      {totalProducts} Unit
                     </div>
-                    <div className="text-[11px] text-[#525854] mt-1">Di seluruh ekosistem tenant</div>
+                    <div className="text-[11px] text-[#525854] mt-1">Di seluruh merchant platform</div>
                   </div>
                   <div className="w-11 h-11 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center font-bold">
                     <Laptop size={22} />
@@ -679,327 +486,283 @@ function GodModeDashboard() {
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardContent className="p-5 flex items-center justify-between">
-                  <div>
-                    <div className="text-xs font-semibold text-[#818779]">Paket PRO / Custom PC</div>
-                    <div className="text-2xl font-black text-[#111413] mt-1">
-                      {tenants.filter((t) => t.plan === "PRO").length} Toko
-                    </div>
-                    <div className="text-[11px] text-[#cc252b] font-bold mt-1">Fitur PC Builder Aktif</div>
-                  </div>
-                  <div className="w-11 h-11 rounded-xl bg-red-50 text-red-700 flex items-center justify-center font-bold">
-                    <Cpu size={22} />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
+              {/* Estimated MRR */}
+              <Card className="border-[#e5e5e2] shadow-sm rounded-2xl">
                 <CardContent className="p-5 flex items-center justify-between">
                   <div>
                     <div className="text-xs font-semibold text-[#818779]">Estimasi Nilai SaaS (MRR)</div>
                     <div className="text-2xl font-black text-[#111413] mt-1">
-                      Rp {(tenants.length * 232500).toLocaleString("id-ID")}
+                      Rp {estimatedMRR.toLocaleString("id-ID")}
                     </div>
-                    <div className="text-[11px] text-green-700 font-bold mt-1">Berdasarkan paket tahunan</div>
+                    <div className="text-[11px] text-[#cc252b] font-bold mt-1">
+                      Rp {(estimatedMRR * 12).toLocaleString("id-ID")} / thn (ARR)
+                    </div>
+                  </div>
+                  <div className="w-11 h-11 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center font-bold">
+                    <TrendingUp size={22} />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Net Cashflow */}
+              <Card className="border-[#e5e5e2] shadow-sm rounded-2xl">
+                <CardContent className="p-5 flex items-center justify-between">
+                  <div>
+                    <div className="text-xs font-semibold text-[#818779]">Saldo Bersih Platform</div>
+                    <div className="text-2xl font-black text-green-700 mt-1">
+                      Rp {financeStats.netProfit.toLocaleString("id-ID")}
+                    </div>
+                    <div className="text-[11px] text-green-600 font-bold mt-1">
+                      {financeStats.count} transaksi tercatat
+                    </div>
                   </div>
                   <div className="w-11 h-11 rounded-xl bg-green-50 text-green-700 flex items-center justify-center font-bold">
-                    <TrendingUp size={22} />
+                    <DollarSign size={22} />
                   </div>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Tenants Data Table */}
-            <Card id="daftar-toko">
-              <CardHeader className="border-b border-[#e5e5e2] pb-4">
-                <CardTitle className="text-base flex items-center justify-between">
-                  <span>Daftar Tenant Toko Terdaftar</span>
-                  <span className="text-xs font-normal text-[#818779]">
-                    Menampilkan {tenants.length} toko
-                  </span>
-                </CardTitle>
-                <CardDescription>
-                  Setiap tenant memiliki ID SHA-1 unik, database terisolasi, dan fitur yang bisa di-toggle secara real-time.
-                </CardDescription>
+            {/* 2. Breakdown Section: Plan Distribution & Feature Adoption */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Plan Distribution */}
+              <Card className="border-[#e5e5e2] shadow-sm rounded-2xl">
+                <CardHeader className="p-6 pb-4 border-b border-[#e5e5e2]">
+                  <CardTitle className="text-base flex items-center justify-between">
+                    <span>Distribusi Paket Langganan</span>
+                    <Badge variant="outline" className="text-xs font-bold">
+                      {totalTenants} Total Tenant
+                    </Badge>
+                  </CardTitle>
+                  <CardDescription>
+                    Komposisi tier lisensi merchant yang aktif di ekosistem platform.
+                  </CardDescription>
+                </CardHeader>
+
+                <CardContent className="p-6 space-y-5">
+                  {/* Pro Plan */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-xs font-bold">
+                      <span className="flex items-center gap-2 text-red-700">
+                        <span className="w-2.5 h-2.5 rounded-full bg-red-600" />
+                        <span>Paket PRO (Rp 2,79 Jt / thn)</span>
+                      </span>
+                      <span>{proTenants} Toko ({totalTenants > 0 ? Math.round((proTenants / totalTenants) * 100) : 0}%)</span>
+                    </div>
+                    <div className="w-full bg-[#f0f0ee] h-2.5 rounded-full overflow-hidden">
+                      <div
+                        className="bg-red-600 h-full rounded-full transition-all"
+                        style={{ width: `${totalTenants > 0 ? (proTenants / totalTenants) * 100 : 0}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Starter Plan */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-xs font-bold">
+                      <span className="flex items-center gap-2 text-gray-700">
+                        <span className="w-2.5 h-2.5 rounded-full bg-gray-500" />
+                        <span>Paket STARTER (Rp 1,49 Jt / thn)</span>
+                      </span>
+                      <span>{starterTenants} Toko ({totalTenants > 0 ? Math.round((starterTenants / totalTenants) * 100) : 0}%)</span>
+                    </div>
+                    <div className="w-full bg-[#f0f0ee] h-2.5 rounded-full overflow-hidden">
+                      <div
+                        className="bg-gray-500 h-full rounded-full transition-all"
+                        style={{ width: `${totalTenants > 0 ? (starterTenants / totalTenants) * 100 : 0}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Enterprise Plan */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-xs font-bold">
+                      <span className="flex items-center gap-2 text-purple-700">
+                        <span className="w-2.5 h-2.5 rounded-full bg-purple-600" />
+                        <span>Paket ENTERPRISE (Rp 4,9 Jt / thn)</span>
+                      </span>
+                      <span>{enterpriseTenants} Toko ({totalTenants > 0 ? Math.round((enterpriseTenants / totalTenants) * 100) : 0}%)</span>
+                    </div>
+                    <div className="w-full bg-[#f0f0ee] h-2.5 rounded-full overflow-hidden">
+                      <div
+                        className="bg-purple-600 h-full rounded-full transition-all"
+                        style={{ width: `${totalTenants > 0 ? (enterpriseTenants / totalTenants) * 100 : 0}%` }}
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Killer Feature Adoption */}
+              <Card className="border-[#e5e5e2] shadow-sm rounded-2xl">
+                <CardHeader className="p-6 pb-4 border-b border-[#e5e5e2]">
+                  <CardTitle className="text-base flex items-center justify-between">
+                    <span>Adopsi Modul Unggulan (Killer Features)</span>
+                    <Badge variant="outline" className="text-xs font-bold border-green-300 text-green-700 bg-green-50">
+                      Real-time Modular
+                    </Badge>
+                  </CardTitle>
+                  <CardDescription>
+                    Tingkat aktivasi fitur diferensiasi vertikal komputer pada seluruh merchant.
+                  </CardDescription>
+                </CardHeader>
+
+                <CardContent className="p-6 space-y-4">
+                  <div className="flex items-center justify-between p-3.5 border border-[#e5e5e2] rounded-xl bg-[#fafafa]">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-lg bg-red-100 text-red-700 flex items-center justify-center font-bold">
+                        <Cpu size={18} />
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-[#111413]">PC Builder Simulator</div>
+                        <div className="text-[11px] text-[#525854]">Simulator rakit PC interaktif</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-black text-[#111413]">{pcBuilderActive} Toko</div>
+                      <div className="text-[10px] text-green-700 font-bold">
+                        {totalTenants > 0 ? Math.round((pcBuilderActive / totalTenants) * 100) : 0}% Aktif
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3.5 border border-[#e5e5e2] rounded-xl bg-[#fafafa]">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
+                        <Layers size={18} />
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-[#111413]">Kalkulator Trade-In Laptop</div>
+                        <div className="text-[11px] text-[#525854]">Estimasi tukar tambah perangkat bekas</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-black text-[#111413]">{tradeInActive} Toko</div>
+                      <div className="text-[10px] text-green-700 font-bold">
+                        {totalTenants > 0 ? Math.round((tradeInActive / totalTenants) * 100) : 0}% Aktif
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* 3. Financial Snapshot Banner */}
+            <Card className="border-[#e5e5e2] shadow-sm rounded-2xl overflow-hidden bg-gradient-to-r from-[#111413] to-[#252827] text-white">
+              <CardContent className="p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="space-y-2">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-red-600 text-white uppercase tracking-wider">
+                    Ringkasan Keuangan
+                  </div>
+                  <h3 className="text-xl font-bold tracking-tight text-white">
+                    Pemasukan Rp {financeStats.totalIncome.toLocaleString("id-ID")} vs Pengeluaran Rp {financeStats.totalExpense.toLocaleString("id-ID")}
+                  </h3>
+                  <p className="text-xs text-gray-300 max-w-xl">
+                    Arus kas platform dalam kondisi surplus positif dengan laba bersih operasional{" "}
+                    <strong className="text-green-400">Rp {financeStats.netProfit.toLocaleString("id-ID")}</strong>.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  <Link href="/god-mode/transactions">
+                    <Button className="bg-white text-[#111413] hover:bg-gray-100 font-bold text-xs h-9">
+                      <span>Buka Pembukuan Transaksi</span>
+                      <ArrowRight size={14} className="ml-1" />
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 4. Quick Merchant Spotlight */}
+            <Card className="border-[#e5e5e2] shadow-sm rounded-2xl">
+              <CardHeader className="p-6 pb-4 border-b border-[#e5e5e2] flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="text-base">Merchant Terdaftar Terbaru</CardTitle>
+                  <CardDescription>
+                    Akses instan untuk login ke mode CMS masing-masing merchant.
+                  </CardDescription>
+                </div>
+                <Link href="/god-mode/tenants">
+                  <Button variant="outline" size="sm" className="text-xs font-bold flex items-center gap-1">
+                    <span>Lihat Semua Merchant</span>
+                    <ArrowRight size={13} />
+                  </Button>
+                </Link>
               </CardHeader>
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Toko & Identitas</TableHead>
-                      <TableHead>ID SHA-1 (Hex)</TableHead>
-                      <TableHead>Paket</TableHead>
-                      <TableHead>Fitur Modular (Real-time Toggle)</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead style={{ textAlign: "right" }}>Aksi</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {loading ? (
-                      <TableRow>
-                        <TableCell colSpan={6} className="text-center py-10 text-sm text-[#818779]">
-                          Memuat data tenant...
-                        </TableCell>
-                      </TableRow>
-                    ) : tenants.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={6} className="text-center py-10 text-sm text-[#818779]">
-                          Belum ada tenant toko. Klik tombol &quot;+ Tambah Toko&quot; di atas.
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      tenants.map((t) => (
-                        <TableRow key={t.id}>
-                          {/* Nama & Domain */}
-                          <TableCell>
-                            <div className="flex items-center gap-3">
-                              <div
-                                style={{
-                                  width: "36px",
-                                  height: "36px",
-                                  borderRadius: "8px",
-                                  backgroundColor: t.settings?.primaryColor || "#cc252b",
-                                  color: "#ffffff",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  fontWeight: 800,
-                                  fontSize: "14px",
-                                  flexShrink: 0,
-                                }}
-                              >
-                                {t.name.charAt(0)}
-                              </div>
-                              <div>
-                                <div className="font-bold text-[#111413] text-sm flex items-center gap-2">
-                                  <span>{t.name}</span>
-                                  {t.slug === "hadicomputer" && (
-                                    <Badge variant="outline" className="text-[10px] bg-red-50 text-red-700 border-red-200">
-                                      Tenant #1
-                                    </Badge>
-                                  )}
-                                </div>
-                                <div className="text-xs text-[#818779] flex items-center gap-1.5 mt-0.5">
-                                  <Globe size={11} />
-                                  <span>{t.customDomain || `${t.slug}.tokopc.id`}</span>
-                                </div>
-                              </div>
-                            </div>
-                          </TableCell>
 
-                          {/* SHA-1 ID */}
-                          <TableCell>
-                            <div
-                              className="font-mono text-xs text-[#525854] bg-[#f6f6f4] px-2 py-1 rounded inline-flex items-center gap-1.5 max-w-[160px] truncate cursor-pointer hover:bg-gray-200 transition"
-                              title={`Klik untuk salin SHA-1: ${t.id}`}
-                              onClick={() => {
-                                navigator.clipboard.writeText(t.id);
-                                toast.success("ID SHA-1 disalin ke clipboard!");
-                              }}
-                            >
-                              <span className="truncate">{t.id}</span>
-                              <Copy size={11} className="flex-shrink-0 text-gray-500" />
-                            </div>
-                          </TableCell>
-
-                          {/* Plan */}
-                          <TableCell>
-                            <span
-                              className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                                t.plan === "PRO"
-                                  ? "bg-purple-100 text-purple-800"
-                                  : t.plan === "ENTERPRISE"
-                                  ? "bg-blue-100 text-blue-800"
-                                  : "bg-gray-100 text-gray-800"
-                              }`}
-                            >
-                              {t.plan}
-                            </span>
-                          </TableCell>
-
-                          {/* Features Toggle Switches */}
-                          <TableCell>
-                            <div className="flex items-center gap-4">
-                              <label className="flex items-center gap-1.5 cursor-pointer text-xs" title="Modul Simulasi Racik PC">
-                                <Switch
-                                  checked={!!t.features?.pcBuilder}
-                                  onCheckedChange={() =>
-                                    handleToggleFeature(t.id, "pcBuilder", !!t.features?.pcBuilder)
-                                  }
-                                />
-                                <span className={t.features?.pcBuilder ? "font-bold text-ink" : "text-gray-400"}>
-                                  PC Builder
+              <CardContent className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {tenants.map((t) => (
+                    <div
+                      key={t.id}
+                      className="border border-[#e5e5e2] rounded-xl p-4 flex flex-col justify-between gap-4 bg-white hover:border-gray-400 transition-all shadow-2xs"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="w-9 h-9 rounded-lg flex items-center justify-center text-white text-xs font-black shadow-xs flex-shrink-0"
+                            style={{ backgroundColor: t.settings?.primaryColor || "#cc252b" }}
+                          >
+                            {t.name.slice(0, 2).toUpperCase()}
+                          </div>
+                          <div>
+                            <div className="text-sm font-bold text-[#111413] flex items-center gap-1.5">
+                              <span>{t.name}</span>
+                              {t.slug === "hadicomputer" && (
+                                <span className="text-[9px] font-black uppercase bg-red-100 text-red-700 px-1 py-0.2 rounded">
+                                  #1
                                 </span>
-                              </label>
-
-                              <label className="flex items-center gap-1.5 cursor-pointer text-xs" title="Modul Kalkulator Tukar Tambah Laptop">
-                                <Switch
-                                  checked={!!t.features?.tradeIn}
-                                  onCheckedChange={() =>
-                                    handleToggleFeature(t.id, "tradeIn", !!t.features?.tradeIn)
-                                  }
-                                />
-                                <span className={t.features?.tradeIn ? "font-bold text-ink" : "text-gray-400"}>
-                                  Trade-in
-                                </span>
-                              </label>
+                              )}
                             </div>
-                          </TableCell>
-
-                          {/* Status */}
-                          <TableCell>
-                            <span className="inline-flex items-center gap-1 text-xs font-bold text-green-700">
-                              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                              <span>{t.status}</span>
-                            </span>
-                          </TableCell>
-
-                          {/* Actions */}
-                          <TableCell style={{ textAlign: "right" }}>
-                            <div className="flex items-center justify-end gap-2">
-                              <Link
-                                href="/admin"
-                                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-bold bg-[#f6f6f4] hover:bg-[#e8e8e4] text-[#111413] transition"
-                              >
-                                <Eye size={13} />
-                                <span>Masuk CMS</span>
-                              </Link>
+                            <div className="text-[11px] text-[#818779] mt-0.5">
+                              {t.customDomain || `${t.slug}.tokopc.id`}
                             </div>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
+                          </div>
+                        </div>
+
+                        <Badge
+                          variant="outline"
+                          className={
+                            t.plan === "PRO"
+                              ? "border-red-300 text-red-700 bg-red-50 text-[10px] font-black"
+                              : "text-[10px]"
+                          }
+                        >
+                          {t.plan}
+                        </Badge>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-3 border-t border-[#f0f0ee] text-xs">
+                        <span className="text-[#818779]">
+                          <strong>{t._count?.products || 0}</strong> Produk Katalog
+                        </span>
+
+                        <Button
+                          size="sm"
+                          onClick={() => handleImpersonate(t.id)}
+                          className="h-7 px-2.5 text-xs font-bold bg-[#111413] hover:bg-black text-white flex items-center gap-1"
+                        >
+                          <Zap size={11} className="text-amber-400 fill-amber-400" />
+                          <span>Masuk CMS</span>
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           </div>
         </main>
       </div>
-
-      {/* Modal Add New Tenant */}
-      <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Tambah Tenant Toko Baru</DialogTitle>
-            <DialogDescription>
-              Platform akan otomatis meng-generate ID SHA-1 unik 40-karakter dan mengisolasi database toko ini.
-            </DialogDescription>
-          </DialogHeader>
-
-          <form onSubmit={handleAddTenant} className="space-y-4 pt-2">
-            <div>
-              <Label htmlFor="t-name">Nama Toko *</Label>
-              <Input
-                id="t-name"
-                placeholder="e.g. Raja PC Surabaya"
-                required
-                value={newName}
-                onChange={(e) => handleNameChange(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="t-slug">Subdomain Identifier (Slug) *</Label>
-              <div className="flex items-center gap-2">
-                <Input
-                  id="t-slug"
-                  placeholder="rajapc"
-                  required
-                  value={newSlug}
-                  onChange={(e) => setNewSlug(e.target.value)}
-                />
-                <span className="text-xs text-[#818779] whitespace-nowrap">.tokopc.id</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label htmlFor="t-phone">Nomor WhatsApp</Label>
-                <Input
-                  id="t-phone"
-                  placeholder="628123456789"
-                  value={newPhone}
-                  onChange={(e) => setNewPhone(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="t-color">Warna Brand</Label>
-                <div className="flex items-center gap-2">
-                  <input
-                    id="t-color"
-                    type="color"
-                    value={newColor}
-                    onChange={(e) => setNewColor(e.target.value)}
-                    className="w-10 h-9 p-0.5 rounded border border-gray-300 cursor-pointer"
-                  />
-                  <Input
-                    value={newColor}
-                    onChange={(e) => setNewColor(e.target.value)}
-                    className="font-mono text-xs uppercase"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="t-plan">Paket Langganan</Label>
-              <Select
-                id="t-plan"
-                value={newPlan}
-                onChange={(e) => setNewPlan(e.target.value as any)}
-              >
-                <option value="STARTER">Starter — Rp 1.49jt/th (Katalog & WA)</option>
-                <option value="PRO">PRO — Rp 2.79jt/th (PC Builder & Trade-in)</option>
-                <option value="ENTERPRISE">Enterprise — Rp 4.9jt/th (Custom Domain & Instant Checkout)</option>
-              </Select>
-            </div>
-
-            {/* Checklist Features */}
-            <div className="p-3 bg-[#f6f6f4] rounded-lg space-y-2 border border-[#e5e5e2]">
-              <div className="text-xs font-bold text-[#111413]">Fitur Aktif Toko Ini:</div>
-              <label className="flex items-center justify-between text-xs cursor-pointer">
-                <span>Modul Simulasi Rakit PC</span>
-                <Switch
-                  checked={newFeatures.pcBuilder}
-                  onCheckedChange={(val) => setNewFeatures({ ...newFeatures, pcBuilder: val })}
-                />
-              </label>
-              <label className="flex items-center justify-between text-xs cursor-pointer">
-                <span>Modul Kalkulator Trade-in Laptop</span>
-                <Switch
-                  checked={newFeatures.tradeIn}
-                  onCheckedChange={(val) => setNewFeatures({ ...newFeatures, tradeIn: val })}
-                />
-              </label>
-            </div>
-
-            <DialogFooter className="pt-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsAddModalOpen(false)}
-                disabled={submitting}
-              >
-                Batal
-              </Button>
-              <Button type="submit" disabled={submitting}>
-                {submitting ? "Membuat..." : "Buat Toko Baru"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
 
-export default function GodModePage() {
+export default function GodModeDashboardPage() {
   return (
     <ToastProvider>
-      <GodModeDashboard />
+      <GodModeExecutiveSummary />
     </ToastProvider>
   );
 }

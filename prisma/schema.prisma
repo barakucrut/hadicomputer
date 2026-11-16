@@ -21,6 +21,46 @@ enum TenantStatus {
   SUSPENDED
 }
 
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+enum TransactionCategory {
+  SUBSCRIPTION
+  SETUP_FEE
+  ADDON
+  SERVER_INFRA
+  DOMAIN_REGISTRATION
+  WHATSAPP_GATEWAY
+  MARKETING
+  OPERATIONAL
+  OTHER
+}
+
+model PlatformTransaction {
+  id            String              @id @default(cuid())
+  type          TransactionType     // INCOME or EXPENSE
+  category      TransactionCategory // SUBSCRIPTION, SERVER_INFRA, etc.
+  title         String              @db.VarChar(200)
+  amount        Float
+  status        String              @default("SUCCESS") // SUCCESS, PENDING, FAILED
+  date          DateTime            @default(now())
+  description   String?             @db.Text
+  tenantId      String?             @db.VarChar(40)
+  tenantName    String?             @db.VarChar(150)
+  paymentMethod String?             @db.VarChar(50)
+  receiptUrl    String?             @db.VarChar(255)
+
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  @@index([tenantId])
+  @@index([type])
+  @@index([date])
+  @@map("platform_transactions")
+}
+
 model Tenant {
   id           String         @id @db.VarChar(40) // 40-char SHA-1 hex ID
   slug         String         @unique @db.VarChar(100)

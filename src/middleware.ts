@@ -56,6 +56,17 @@ export async function middleware(request: NextRequest) {
   // 2. Protect /admin routes (except /admin/login)
   if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
     const token = request.cookies.get(ADMIN_COOKIE_NAME)?.value;
+    const godToken = request.cookies.get(GOD_COOKIE_NAME)?.value;
+
+    // Superadmin in God Mode has master access to all tenant CMS
+    if (godToken) {
+      try {
+        await jwtVerify(godToken, GOD_JWT_SECRET);
+        return NextResponse.next();
+      } catch {
+        // invalid god token, fall through to regular admin session check
+      }
+    }
 
     if (!token) {
       const loginUrl = new URL("/admin/login", request.url);
