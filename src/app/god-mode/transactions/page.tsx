@@ -80,11 +80,20 @@ interface TransactionStats {
   count: number;
 }
 
+interface TenantOption {
+  id: string;
+  name: string;
+  slug: string;
+  customDomain: string | null;
+}
+
 function TransactionsContent() {
   const router = useRouter();
   const toast = useToast();
 
   const [transactions, setTransactions] = React.useState<TransactionItem[]>([]);
+  const [tenants, setTenants] = React.useState<TenantOption[]>([]);
+  const [selectedTenantId, setSelectedTenantId] = React.useState<string>("");
   const [stats, setStats] = React.useState<TransactionStats>({
     totalIncome: 0,
     totalExpense: 0,
@@ -108,7 +117,6 @@ function TransactionsContent() {
   const [newCategory, setNewCategory] = React.useState("SUBSCRIPTION");
   const [newTitle, setNewTitle] = React.useState("");
   const [newAmount, setNewAmount] = React.useState("");
-  const [newTenantName, setNewTenantName] = React.useState("");
   const [newPaymentMethod, setNewPaymentMethod] = React.useState("Transfer Bank");
   const [newDescription, setNewDescription] = React.useState("");
 
@@ -131,6 +139,14 @@ function TransactionsContent() {
 
   React.useEffect(() => {
     fetchTransactions();
+
+    // Fetch Tenants list for merchant selector
+    fetch("/api/god-mode/tenants")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.tenants) setTenants(d.tenants);
+      })
+      .catch(console.error);
   }, [fetchTransactions]);
 
   async function handleLogout() {
@@ -151,6 +167,8 @@ function TransactionsContent() {
       return;
     }
 
+    const selectedTenant = tenants.find((t) => t.id === selectedTenantId);
+
     try {
       setSubmitting(true);
       const res = await fetch("/api/god-mode/transactions", {
@@ -161,7 +179,8 @@ function TransactionsContent() {
           category: newCategory,
           title: newTitle.trim(),
           amount: Number(newAmount),
-          tenantName: newTenantName.trim() || null,
+          tenantId: selectedTenant ? selectedTenant.id : null,
+          tenantName: selectedTenant ? selectedTenant.name : "Infrastruktur Platform",
           paymentMethod: newPaymentMethod,
           description: newDescription.trim() || null,
         }),
@@ -174,7 +193,7 @@ function TransactionsContent() {
       setIsAddOpen(false);
       setNewTitle("");
       setNewAmount("");
-      setNewTenantName("");
+      setSelectedTenantId("");
       setNewDescription("");
       fetchTransactions();
     } catch (err: any) {
@@ -729,25 +748,23 @@ function TransactionsContent() {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Catat Mutasi Arus Kas</DialogTitle>
-            <DialogDescription>
-              Catat transaksi pemasukan atau pengeluaran operasional platform.
-            </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleCreateTransaction} className="space-y-4 pt-2">
+          <form onSubmit={handleCreateTransaction} className="space-y-4 pt-1">
+            {/* Segmented Tab Styling for Tipe Arus Kas */}
             <div>
-              <Label>Tipe Arus Kas *</Label>
-              <div className="grid grid-cols-2 gap-2 mt-1">
+              <Label className="text-xs font-bold text-[#111413] mb-1.5 block">Tipe Arus Kas *</Label>
+              <div className="flex bg-[#f1f5f9] p-1 rounded-xl border border-[#e2e8f0]">
                 <button
                   type="button"
                   onClick={() => {
                     setNewType("INCOME");
                     setNewCategory("SUBSCRIPTION");
                   }}
-                  className={`p-2.5 rounded-lg border text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
+                  className={`flex-1 py-2 text-xs font-bold rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                     newType === "INCOME"
-                      ? "border-green-600 bg-green-50 text-green-800 shadow-xs"
-                      : "border-[#e5e5e2] text-[#525854]"
+                      ? "bg-white text-green-700 shadow-sm border border-gray-200"
+                      : "text-[#525854] hover:text-[#111413] border border-transparent"
                   }`}
                 >
                   <ArrowUpRight size={14} />
@@ -760,10 +777,10 @@ function TransactionsContent() {
                     setNewType("EXPENSE");
                     setNewCategory("SERVER_INFRA");
                   }}
-                  className={`p-2.5 rounded-lg border text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
+                  className={`flex-1 py-2 text-xs font-bold rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                     newType === "EXPENSE"
-                      ? "border-red-600 bg-red-50 text-red-700 shadow-xs"
-                      : "border-[#e5e5e2] text-[#525854]"
+                      ? "bg-white text-red-600 shadow-sm border border-gray-200"
+                      : "text-[#525854] hover:text-[#111413] border border-transparent"
                   }`}
                 >
                   <ArrowDownLeft size={14} />
@@ -831,13 +848,19 @@ function TransactionsContent() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label htmlFor="tx-tenant">Merchant Terkait (Opsional)</Label>
-                <Input
+                <Label htmlFor="tx-tenant">Merchant Terkait</Label>
+                <Select
                   id="tx-tenant"
-                  value={newTenantName}
-                  onChange={(e) => setNewTenantName(e.target.value)}
-                  placeholder="e.g. Hadi Computer"
-                />
+                  value={selectedTenantId}
+                  onChange={(e) => setSelectedTenantId(e.target.value)}
+                >
+                  <option value="">-- Umum (Infrastruktur) --</option>
+                  {tenants.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.name}
+                    </option>
+                  ))}
+                </Select>
               </div>
 
               <div>

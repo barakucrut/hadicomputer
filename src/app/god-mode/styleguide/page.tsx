@@ -194,7 +194,7 @@ function GodModeStyleguideContent() {
 
         {/* Content Body */}
         <main className="admin-main-content">
-          <div className="w-full pb-20 space-y-12">
+          <div className="w-full pb-28 flex flex-col gap-12">
             {/* Header intro */}
             <div>
               <h1 className="text-2xl font-black text-[#111413] tracking-tight">
@@ -243,6 +243,8 @@ function GodModeStyleguideContent() {
                 ))}
               </div>
             </section>
+
+            <div className="border-t border-[#e5e5e2]" />
 
             {/* 2. Button System */}
             <section className="space-y-4">
@@ -293,6 +295,8 @@ function GodModeStyleguideContent() {
               </Card>
             </section>
 
+            <div className="border-t border-[#e5e5e2]" />
+
             {/* 3. Badge System */}
             <section className="space-y-4">
               <div>
@@ -323,6 +327,8 @@ function GodModeStyleguideContent() {
                 </CardContent>
               </Card>
             </section>
+
+            <div className="border-t border-[#e5e5e2]" />
 
             {/* 4. Form Controls */}
             <section className="space-y-4">
@@ -371,6 +377,8 @@ function GodModeStyleguideContent() {
                 </CardContent>
               </Card>
             </section>
+
+            <div className="border-t border-[#e5e5e2]" />
 
             {/* 5. Search Inputs & Filter Toolbars */}
             <section className="space-y-4">
@@ -483,6 +491,8 @@ function GodModeStyleguideContent() {
                 </CardContent>
               </Card>
             </section>
+
+            <div className="border-t border-[#e5e5e2]" />
 
             {/* 6. Data Tables */}
             <section className="space-y-4">
