@@ -405,6 +405,7 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                           src={img.url}
                           alt="product preview"
                           fill
+                          unoptimized
                           className="object-cover"
                           sizes="(max-width: 768px) 50vw, 25vw"
                         />

@@ -324,6 +324,7 @@ export default function AdminBannersPage() {
                             src={b.imageUrl || "/images/banners/promo-bundle.png"}
                             alt={b.title}
                             fill
+                            unoptimized={typeof b.imageUrl === "string" && b.imageUrl.startsWith("/uploads/")}
                             className="object-cover"
                             sizes="96px"
                           />

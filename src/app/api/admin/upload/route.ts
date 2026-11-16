@@ -32,14 +32,14 @@ export async function POST(request: Request) {
 
     const safeFolder = folder.replace(/[^a-z0-9_-]/gi, "");
     const uploadDir = path.join(process.cwd(), "public", "uploads", safeFolder);
-    await mkdir(uploadDir, { recursive: true });
+    await mkdir(uploadDir, { recursive: true, mode: 0o755 });
 
     const ext = path.extname(file.name) || ".jpg";
     const baseName = path.basename(file.name, ext).replace(/[^a-z0-9_-]/gi, "-");
     const uniqueName = `${baseName}-${Date.now()}${ext}`;
     const filePath = path.join(uploadDir, uniqueName);
 
-    await writeFile(filePath, buffer);
+    await writeFile(filePath, buffer, { mode: 0o644 });
 
     const publicUrl = `/uploads/${safeFolder}/${uniqueName}`;
     return NextResponse.json({ success: true, url: publicUrl });

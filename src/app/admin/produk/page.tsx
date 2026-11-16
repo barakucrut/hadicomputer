@@ -489,6 +489,7 @@ export default function AdminProductsPage() {
                           src={primaryImage}
                           alt={p.name}
                           fill
+                          unoptimized={typeof primaryImage === "string" && primaryImage.startsWith("/uploads/")}
                           sizes="52px"
                           className="object-cover"
                         />

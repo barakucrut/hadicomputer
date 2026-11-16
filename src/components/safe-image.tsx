@@ -17,6 +17,7 @@ export function SafeImage({
   sizes?: string;
 }) {
   const [failedSrc, setFailedSrc] = useState<string | null>(null);
+  const isUploaded = typeof src === "string" && src.startsWith("/uploads/");
   return failedSrc === src ? (
     <span role="img" aria-label={alt} className={`image-fallback ${className}`}>
       <ImageOff size={30} />
@@ -28,6 +29,7 @@ export function SafeImage({
       src={src}
       alt={alt}
       fill
+      unoptimized={isUploaded}
       sizes={sizes}
       loading={priority ? "eager" : "lazy"}
       fetchPriority={priority ? "high" : "auto"}
