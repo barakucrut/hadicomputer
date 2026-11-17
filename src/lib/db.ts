@@ -40,28 +40,8 @@ function createPrismaClient(): PrismaClient {
   return new PrismaClient({ adapter });
 }
 
-function getPrismaClient(): PrismaClient {
-  if (global.__prisma) {
-    // If cached client is missing newer models (e.g. platformTransaction, tenant), recreate it
-    if ("platformTransaction" in global.__prisma && "tenant" in global.__prisma) {
-      return global.__prisma;
-    }
-  }
+export const prisma = global.__prisma || createPrismaClient();
 
-  const client = createPrismaClient();
-  if (process.env.NODE_ENV !== "production") {
-    global.__prisma = client;
-  }
-  return client;
+if (process.env.NODE_ENV !== "production") {
+  global.__prisma = prisma;
 }
-
-export const prisma = new Proxy({} as PrismaClient, {
-  get(_target, prop, receiver) {
-    const client = getPrismaClient();
-    const val = Reflect.get(client, prop, receiver);
-    if (typeof val === "function") {
-      return val.bind(client);
-    }
-    return val;
-  },
-});

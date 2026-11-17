@@ -146,11 +146,10 @@ function TransactionsContent() {
       }
     } catch (err) {
       console.error("Failed to load transactions:", err);
-      toast.error("Gagal memuat daftar transaksi keuangan");
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, []);
 
   React.useEffect(() => {
     fetchTransactions();

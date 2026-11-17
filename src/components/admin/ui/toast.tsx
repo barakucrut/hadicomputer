@@ -73,8 +73,13 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
+  const contextValue = React.useMemo(
+    () => ({ showToast, success, error }),
+    [showToast, success, error]
+  );
+
   return (
-    <ToastContext.Provider value={{ showToast, success, error }}>
+    <ToastContext.Provider value={contextValue}>
       {children}
       {/* Flash Messages Container at Top of Screen */}
       {toasts.length > 0 && (
