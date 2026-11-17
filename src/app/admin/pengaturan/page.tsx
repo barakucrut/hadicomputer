@@ -18,6 +18,8 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/admin/ui/button";
+import { Badge } from "@/components/admin/ui/badge";
+import { Switch } from "@/components/admin/ui/switch";
 import {
   Card,
   CardContent,
@@ -260,18 +262,11 @@ export default function AdminSettingsPage() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <h1 className="text-2xl font-black text-[#111413] tracking-tight">Pengaturan Toko & Tampilan</h1>
-            <span
-              style={{
-                backgroundColor: `${settings.primaryColor}15`,
-                color: settings.primaryColor,
-                borderColor: `${settings.primaryColor}30`,
-              }}
-              className="px-2.5 py-0.5 rounded-full text-xs font-black border uppercase tracking-wider"
-            >
+            <Badge variant="secondary" className="font-bold text-xs">
               {settings.storeName}
-            </span>
+            </Badge>
           </div>
           <p className="text-sm text-[#525854] mt-1">
             Kustomisasi branding, tipografi font, warna tema, serta tata letak etalase publik toko.
@@ -283,7 +278,6 @@ export default function AdminSettingsPage() {
             onClick={handleSave}
             disabled={saving}
             className="flex items-center gap-2 h-10 px-5 text-xs font-bold"
-            style={{ backgroundColor: settings.primaryColor }}
           >
             <Save size={16} />
             <span>{saving ? "Menyimpan..." : "Simpan Perubahan"}</span>
@@ -291,57 +285,41 @@ export default function AdminSettingsPage() {
         </div>
       </div>
 
-      {/* Tabs Navigation (Shadcn UI Standard) */}
-      <div className="flex items-center gap-2 border-b border-[#e5e5e2] pb-px overflow-x-auto">
+      {/* Tabs Navigation (Design Guide Standard: .admin-tabs-list & .admin-tab-trigger) */}
+      <div className="admin-tabs-list" style={{ display: "inline-flex", backgroundColor: "#f1f3ed", padding: "4px", borderRadius: "10px", border: "1px solid var(--border)", gap: "4px" }}>
         <button
           type="button"
           onClick={() => setActiveTab("appearance")}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold border-b-2 transition-all whitespace-nowrap cursor-pointer ${
-            activeTab === "appearance"
-              ? "border-[#111413] text-[#111413] bg-white rounded-t-lg"
-              : "border-transparent text-[#525854] hover:text-[#111413]"
-          }`}
+          className={`admin-tab-trigger ${activeTab === "appearance" ? "active" : ""}`}
         >
-          <Palette size={16} style={{ color: activeTab === "appearance" ? settings.primaryColor : undefined }} />
+          <Palette size={15} />
           <span>Appearance & Tipografi</span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab("homepage")}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold border-b-2 transition-all whitespace-nowrap cursor-pointer ${
-            activeTab === "homepage"
-              ? "border-[#111413] text-[#111413] bg-white rounded-t-lg"
-              : "border-transparent text-[#525854] hover:text-[#111413]"
-          }`}
+          className={`admin-tab-trigger ${activeTab === "homepage" ? "active" : ""}`}
         >
-          <Layout size={16} style={{ color: activeTab === "homepage" ? settings.primaryColor : undefined }} />
+          <Layout size={15} />
           <span>Beranda & Section Builder</span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab("contact")}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold border-b-2 transition-all whitespace-nowrap cursor-pointer ${
-            activeTab === "contact"
-              ? "border-[#111413] text-[#111413] bg-white rounded-t-lg"
-              : "border-transparent text-[#525854] hover:text-[#111413]"
-          }`}
+          className={`admin-tab-trigger ${activeTab === "contact" ? "active" : ""}`}
         >
-          <Phone size={16} style={{ color: activeTab === "contact" ? settings.primaryColor : undefined }} />
+          <Phone size={15} />
           <span>Kontak & Lokasi Toko</span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab("security")}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold border-b-2 transition-all whitespace-nowrap cursor-pointer ${
-            activeTab === "security"
-              ? "border-[#111413] text-[#111413] bg-white rounded-t-lg"
-              : "border-transparent text-[#525854] hover:text-[#111413]"
-          }`}
+          className={`admin-tab-trigger ${activeTab === "security" ? "active" : ""}`}
         >
-          <Lock size={16} style={{ color: activeTab === "security" ? settings.primaryColor : undefined }} />
+          <Lock size={15} />
           <span>Keamanan & Password</span>
         </button>
       </div>
@@ -350,8 +328,8 @@ export default function AdminSettingsPage() {
       {activeTab === "appearance" && (
         <div className="space-y-6">
           {/* 1.1 Font Family Selection (Inspired by Dialog Settings) */}
-          <Card>
-            <CardHeader>
+          <Card className="border-[#e5e5e2] shadow-sm rounded-2xl overflow-hidden">
+            <CardHeader className="p-6 border-b border-[#e5e5e2] bg-[#fcfcfc]">
               <CardTitle className="text-base flex items-center gap-2">
                 <Type size={18} style={{ color: settings.primaryColor }} />
                 <span>Tipografi & Font Family</span>
@@ -360,7 +338,7 @@ export default function AdminSettingsPage() {
                 Pilih font utama yang akan digunakan di seluruh teks etalase, tombol, dan judul website toko.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-5">
+            <CardContent className="p-6 space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {FONT_OPTIONS.map((f) => {
                   const isSelected = settings.fontFamily === f.id;
@@ -420,8 +398,8 @@ export default function AdminSettingsPage() {
           </Card>
 
           {/* 1.2 Warna Identitas Toko (Theme Accent) */}
-          <Card>
-            <CardHeader>
+          <Card className="border-[#e5e5e2] shadow-sm rounded-2xl overflow-hidden">
+            <CardHeader className="p-6 border-b border-[#e5e5e2] bg-[#fcfcfc]">
               <CardTitle className="text-base flex items-center gap-2">
                 <Palette size={18} style={{ color: settings.primaryColor }} />
                 <span>Warna Tema & Identitas Toko</span>
@@ -430,7 +408,7 @@ export default function AdminSettingsPage() {
                 Warna primer menentukan warna tombol aksi utama (CTA), badge diskon, hover links, dan aksen navigasi.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="p-6 space-y-6">
               <div>
                 <Label className="mb-2 block">Pilihan Cepat Warna Preset:</Label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5">
@@ -441,8 +419,8 @@ export default function AdminSettingsPage() {
                         type="button"
                         key={p.hex}
                         onClick={() => setSettings({ ...settings, primaryColor: p.hex })}
-                        className={`p-2.5 rounded-lg border text-left flex items-center gap-2.5 transition-all cursor-pointer ${
-                          isSelected ? "ring-2 ring-offset-2 ring-black font-bold bg-gray-50" : "border-gray-200 hover:bg-gray-50"
+                        className={`p-2.5 rounded-xl border text-left flex items-center gap-2.5 transition-all cursor-pointer ${
+                          isSelected ? "border-[#111413] ring-2 ring-[#111413]/15 font-bold bg-[#f6f6f4]" : "border-[#e5e5e2] hover:bg-[#fafafa]"
                         }`}
                       >
                         <span
@@ -484,8 +462,8 @@ export default function AdminSettingsPage() {
           </Card>
 
           {/* 1.3 Branding & Logo */}
-          <Card>
-            <CardHeader>
+          <Card className="border-[#e5e5e2] shadow-sm rounded-2xl overflow-hidden">
+            <CardHeader className="p-6 border-b border-[#e5e5e2] bg-[#fcfcfc]">
               <CardTitle className="text-base flex items-center gap-2">
                 <Globe size={18} style={{ color: settings.primaryColor }} />
                 <span>Identitas Toko & Logo</span>
@@ -494,7 +472,7 @@ export default function AdminSettingsPage() {
                 Nama resmi dan gambar logo yang akan muncul di header atas dan footer etalase toko.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="set-name">Nama Toko *</Label>
@@ -555,8 +533,8 @@ export default function AdminSettingsPage() {
       {activeTab === "homepage" && (
         <div className="space-y-6">
           {/* 2.1 Custom Wording */}
-          <Card>
-            <CardHeader>
+          <Card className="border-[#e5e5e2] shadow-sm rounded-2xl overflow-hidden">
+            <CardHeader className="p-6 border-b border-[#e5e5e2] bg-[#fcfcfc]">
               <CardTitle className="text-base flex items-center gap-2">
                 <Sparkles size={18} style={{ color: settings.primaryColor }} />
                 <span>Kustomisasi Teks & Sapaan Toko</span>
@@ -565,7 +543,7 @@ export default function AdminSettingsPage() {
                 Ubah judul dan teks khas toko Anda agar etalase terasa sangat personal dan berkarakter.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="set-featured-title">Judul Section Pilihan Toko</Label>
@@ -659,8 +637,8 @@ export default function AdminSettingsPage() {
           </Card>
 
           {/* 2.2 Show / Hide Section Toggles */}
-          <Card>
-            <CardHeader>
+          <Card className="border-[#e5e5e2] shadow-sm rounded-2xl overflow-hidden">
+            <CardHeader className="p-6 border-b border-[#e5e5e2] bg-[#fcfcfc]">
               <CardTitle className="text-base flex items-center gap-2">
                 <Sliders size={18} style={{ color: settings.primaryColor }} />
                 <span>Saklar Tampilan Section Beranda (Show / Hide)</span>
@@ -669,7 +647,7 @@ export default function AdminSettingsPage() {
                 Aktifkan atau sembunyikan section yang ingin ditampilkan di etalase depan toko Anda.
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                 {[
                   {
@@ -728,29 +706,22 @@ export default function AdminSettingsPage() {
                     <div
                       key={s.key}
                       onClick={() => toggleSection(s.key)}
-                      className={`p-3.5 rounded-xl border flex items-center justify-between gap-3 cursor-pointer transition-all ${
+                      className={`p-4 rounded-xl border flex items-center justify-between gap-3 cursor-pointer transition-all ${
                         isActive
-                          ? "border-gray-300 bg-white shadow-xs"
-                          : "border-gray-200 bg-gray-50 opacity-60"
+                          ? "border-[#e5e5e2] bg-white shadow-xs"
+                          : "border-[#e5e5e2] bg-[#f6f6f4] opacity-60"
                       }`}
                     >
                       <div className="min-w-0 pr-2">
                         <span className="font-bold text-xs text-[#111413] block">{s.label}</span>
-                        <p className="text-[11px] text-gray-500 mt-0.5 leading-snug">{s.desc}</p>
+                        <p className="text-[11px] text-[#525854] mt-0.5 leading-snug">{s.desc}</p>
                       </div>
-                      <button
-                        type="button"
-                        style={{
-                          backgroundColor: isActive ? settings.primaryColor : "#cbd5e1",
-                        }}
-                        className="w-11 h-6 rounded-full p-1 transition-colors relative flex-shrink-0 cursor-pointer"
-                      >
-                        <div
-                          className={`w-4 h-4 rounded-full bg-white transition-transform ${
-                            isActive ? "translate-x-5" : "translate-x-0"
-                          }`}
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <Switch
+                          checked={isActive}
+                          onCheckedChange={() => toggleSection(s.key)}
                         />
-                      </button>
+                      </div>
                     </div>
                   );
                 })}
@@ -763,8 +734,8 @@ export default function AdminSettingsPage() {
       {/* TAB 3: KONTAK & LOKASI TOKO */}
       {activeTab === "contact" && (
         <div className="space-y-6">
-          <Card>
-            <CardHeader>
+          <Card className="border-[#e5e5e2] shadow-sm rounded-2xl overflow-hidden">
+            <CardHeader className="p-6 border-b border-[#e5e5e2] bg-[#fcfcfc]">
               <CardTitle className="text-base flex items-center gap-2">
                 <Phone size={18} style={{ color: settings.primaryColor }} />
                 <span>Kontak Resmi WhatsApp</span>
@@ -773,7 +744,7 @@ export default function AdminSettingsPage() {
                 Nomor ini digunakan di seluruh tombol WhatsApp toko untuk mengarahkan pembeli langsung ke customer service Anda.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="p-6 space-y-4">
               <div>
                 <Label htmlFor="set-wa">
                   Nomor WhatsApp Toko (Format Internasional: 628...) *
@@ -803,14 +774,14 @@ export default function AdminSettingsPage() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
+          <Card className="border-[#e5e5e2] shadow-sm rounded-2xl overflow-hidden">
+            <CardHeader className="p-6 border-b border-[#e5e5e2] bg-[#fcfcfc]">
               <CardTitle className="text-base flex items-center gap-2">
                 <MapPin size={18} style={{ color: settings.primaryColor }} />
                 <span>Alamat Fisik & Jam Buka</span>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="p-6 space-y-4">
               <div>
                 <Label htmlFor="set-address">Alamat Lengkap Toko</Label>
                 <textarea
@@ -852,14 +823,14 @@ export default function AdminSettingsPage() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
+          <Card className="border-[#e5e5e2] shadow-sm rounded-2xl overflow-hidden">
+            <CardHeader className="p-6 border-b border-[#e5e5e2] bg-[#fcfcfc]">
               <CardTitle className="text-base flex items-center gap-2">
                 <Globe size={18} style={{ color: settings.primaryColor }} />
                 <span>Media Sosial Resmi</span>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="set-ig">Akun Instagram</Label>
@@ -905,8 +876,8 @@ export default function AdminSettingsPage() {
       {/* TAB 4: KEAMANAN & PASSWORD */}
       {activeTab === "security" && (
         <form onSubmit={handleChangePassword}>
-          <Card>
-            <CardHeader>
+          <Card className="border-[#e5e5e2] shadow-sm rounded-2xl overflow-hidden max-w-2xl">
+            <CardHeader className="p-6 border-b border-[#e5e5e2] bg-[#fcfcfc]">
               <CardTitle className="text-base flex items-center gap-2">
                 <Lock size={18} style={{ color: settings.primaryColor }} />
                 <span>Ubah Password Akun Pengelola</span>
@@ -915,7 +886,7 @@ export default function AdminSettingsPage() {
                 Perbarui kata sandi akun untuk menjaga keamanan akses ke CMS toko ini.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4 max-w-xl">
+            <CardContent className="p-6 space-y-4">
               <div>
                 <Label htmlFor="curr-pass">Password Saat Ini *</Label>
                 <div className="relative mt-1">
@@ -968,14 +939,16 @@ export default function AdminSettingsPage() {
                 />
               </div>
 
-              <Button
-                type="submit"
-                disabled={passwordSaving}
-                className="flex items-center gap-2 mt-4"
-              >
-                <Lock size={16} />
-                <span>{passwordSaving ? "Memperbarui Password..." : "Update Password"}</span>
-              </Button>
+              <div className="pt-2">
+                <Button
+                  type="submit"
+                  disabled={passwordSaving}
+                  className="flex items-center gap-2"
+                >
+                  <Lock size={16} />
+                  <span>{passwordSaving ? "Memperbarui Password..." : "Update Password"}</span>
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </form>
