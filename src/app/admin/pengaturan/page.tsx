@@ -559,11 +559,8 @@ export default function AdminSettingsPage() {
 
               {/* Drag & Drop Logo Upload Area with 16px vertical distance */}
               <div className="space-y-3 pt-2">
-                <div className="flex items-center justify-between">
+                <div>
                   <Label className="text-xs font-bold text-[#111413]">Logo Toko (Header & Footer)</Label>
-                  <span className="text-[11px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-200">
-                    PNG Transparan / SVG / JPEG (Maks. 2MB)
-                  </span>
                 </div>
 
                 {/* Hidden File Input */}
