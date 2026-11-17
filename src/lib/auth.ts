@@ -35,6 +35,31 @@ export async function verifyAdminToken(token: string): Promise<AdminSessionPaylo
 }
 
 export async function getAdminSession(): Promise<AdminSessionPayload | null> {
+  // 1. Check if Superadmin God-Mode session is active (Priority)
+  const godSession = await getGodSession();
+  if (godSession) {
+    const cookieStore = await cookies();
+    const impersonatedTenantId = cookieStore.get("god_impersonated_tenant_id")?.value;
+
+    let tenantId = impersonatedTenantId || null;
+    if (!tenantId) {
+      const defaultTenant = await prisma.tenant.findFirst({
+        orderBy: { createdAt: "asc" },
+        select: { id: true },
+      });
+      tenantId = defaultTenant?.id || null;
+    }
+
+    return {
+      id: "god-mode-superadmin",
+      email: godSession.username,
+      name: "Superadmin God-Mode",
+      role: "SUPERADMIN",
+      tenantId,
+    };
+  }
+
+  // 2. Regular admin session
   const cookieStore = await cookies();
   const token = cookieStore.get(COOKIE_NAME)?.value;
   if (!token) return null;
@@ -42,35 +67,7 @@ export async function getAdminSession(): Promise<AdminSessionPayload | null> {
 }
 
 export async function requireAdminSession() {
-  const session = await getAdminSession();
-  if (session) {
-    const user = await prisma.adminUser.findUnique({
-      where: { id: session.id },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        tenantId: true,
-        tenant: {
-          select: { id: true, name: true, slug: true },
-        },
-      },
-    });
-    if (user) {
-      return {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        tenantId: user.tenantId,
-        tenantName: user.tenant?.name || "Hadi Computer",
-        isImpersonating: false,
-      };
-    }
-  }
-
-  // Check if Superadmin God-Mode session is active (Impersonation Mode)
+  // 1. Check if Superadmin God-Mode session is active (Impersonation Mode) - Priority
   const godSession = await getGodSession();
   if (godSession) {
     const cookieStore = await cookies();
@@ -97,9 +94,38 @@ export async function requireAdminSession() {
       name: "Superadmin God-Mode",
       role: "SUPERADMIN",
       tenantId: tenant?.id || null,
-      tenantName: tenant?.name || "Semua Merchant",
+      tenantName: tenant?.name || "Hadi Computer",
       isImpersonating: true,
     };
+  }
+
+  // 2. Otherwise check normal tenant admin session
+  const session = await getAdminSession();
+  if (session) {
+    const user = await prisma.adminUser.findUnique({
+      where: { id: session.id },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        tenantId: true,
+        tenant: {
+          select: { id: true, name: true, slug: true },
+        },
+      },
+    });
+    if (user) {
+      return {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        tenantId: user.tenantId,
+        tenantName: user.tenant?.name || "Hadi Computer",
+        isImpersonating: false,
+      };
+    }
   }
 
   return null;
