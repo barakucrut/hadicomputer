@@ -1988,6 +1988,65 @@ textarea.admin-input {
   object-fit: contain !important;
 }
 
+/* ==========================================================================
+   Admin Switch Toggle Component
+   ========================================================================== */
+.admin-switch {
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  width: 44px !important;
+  min-width: 44px !important;
+  max-width: 44px !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  max-height: 24px !important;
+  flex-shrink: 0 !important;
+  border-radius: 9999px !important;
+  background-color: #d1d5db !important;
+  border: 2px solid transparent !important;
+  cursor: pointer !important;
+  transition: background-color 0.2s ease, border-color 0.2s ease !important;
+  padding: 0 2px !important;
+  box-sizing: border-box !important;
+  outline: none !important;
+}
+
+.admin-switch:hover {
+  background-color: #9ca3af !important;
+}
+
+.admin-switch.is-checked {
+  background-color: var(--red, #cc252b) !important;
+}
+
+.admin-switch.is-checked:hover {
+  background-color: #b91c1c !important;
+}
+
+.admin-switch:disabled {
+  cursor: not-allowed !important;
+  opacity: 0.5 !important;
+}
+
+.admin-switch-thumb {
+  pointer-events: none !important;
+  display: block !important;
+  width: 18px !important;
+  min-width: 18px !important;
+  height: 18px !important;
+  min-height: 18px !important;
+  border-radius: 9999px !important;
+  background-color: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+  transition: transform 0.2s ease !important;
+  transform: translateX(0px) !important;
+}
+
+.admin-switch.is-checked .admin-switch-thumb {
+  transform: translateX(18px) !important;
+}
+
 
 
 

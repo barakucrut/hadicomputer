@@ -828,7 +828,7 @@ export default function AdminSettingsPage() {
                 <span>Saklar Tampilan Section Beranda (Show / Hide)</span>
               </CardTitle>
               <CardDescription>
-                Aktifkan atau sembunyikan section yang ingin ditampilkan di etalase depan toko Anda.
+                Aktifkan atau sembunyikan section yang ingin ditampilkan di etalase depan toko Anda. Klik pada kartu atau tombol saklar untuk mengubah status tampil.
               </CardDescription>
             </CardHeader>
             <CardContent className="p-6">
@@ -890,17 +890,28 @@ export default function AdminSettingsPage() {
                     <div
                       key={s.key}
                       onClick={() => toggleSection(s.key)}
-                      className={`p-4 rounded-xl border flex items-center justify-between gap-3 cursor-pointer transition-all ${
+                      className={`p-4 rounded-xl border flex items-center justify-between gap-4 cursor-pointer transition-all select-none ${
                         isActive
-                          ? "border-[#e5e5e2] bg-white shadow-xs"
-                          : "border-[#e5e5e2] bg-[#f6f6f4] opacity-60"
+                          ? "border-[#d8d8d4] bg-white shadow-xs hover:border-[#b0b0a8]"
+                          : "border-[#e5e5e2] bg-[#f9f9f8] opacity-70 hover:opacity-90"
                       }`}
                     >
-                      <div className="min-w-0 pr-2">
-                        <span className="font-bold text-xs text-[#111413] block">{s.label}</span>
-                        <p className="text-[11px] text-[#525854] mt-0.5 leading-snug">{s.desc}</p>
+                      <div className="min-w-0 flex-1 pr-2">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <span className="font-bold text-xs text-[#111413]">{s.label}</span>
+                          <span
+                            className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                              isActive
+                                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                : "bg-gray-100 text-gray-500 border border-gray-200"
+                            }`}
+                          >
+                            {isActive ? "Tampil" : "Nonaktif"}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-[#525854] leading-snug">{s.desc}</p>
                       </div>
-                      <div onClick={(e) => e.stopPropagation()}>
+                      <div onClick={(e) => e.stopPropagation()} className="shrink-0 flex items-center">
                         <Switch
                           checked={isActive}
                           onCheckedChange={() => toggleSection(s.key)}
