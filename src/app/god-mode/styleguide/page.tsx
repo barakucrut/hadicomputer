@@ -19,6 +19,8 @@ import {
   X,
   ArrowUpRight,
   ArrowDownLeft,
+  Trash2,
+  Pencil,
 } from "lucide-react";
 import { Button } from "@/components/admin/ui/button";
 import { Badge } from "@/components/admin/ui/badge";
@@ -28,6 +30,7 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { Switch } from "@/components/admin/ui/switch";
+import { AdminPagination } from "@/components/admin/ui/pagination";
 import {
   Table,
   TableHeader,
@@ -48,6 +51,8 @@ function GodModeStyleguideContent() {
   const [styleguideSearch, setStyleguideSearch] = React.useState("Lenovo Legion Pro 5");
   const [demoNavTab, setDemoNavTab] = React.useState<"ringkasan" | "mutasi" | "pengaturan">("ringkasan");
   const [demoTypeTab, setDemoTypeTab] = React.useState<"INCOME" | "EXPENSE">("INCOME");
+  const [tablePage, setTablePage] = React.useState(1);
+  const [tablePageSize, setTablePageSize] = React.useState(10);
 
   async function handleLogout() {
     try {
@@ -197,7 +202,7 @@ function GodModeStyleguideContent() {
 
         {/* Content Body */}
         <main className="admin-main-content">
-          <div className="w-full pb-28" style={{ display: "flex", flexDirection: "column", gap: "48px" }}>
+          <div className="w-full pb-28" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             {/* Header intro */}
             <div>
               <h1 className="text-2xl font-black text-[#111413] tracking-tight">
@@ -247,7 +252,7 @@ function GodModeStyleguideContent() {
               </div>
             </section>
 
-            <hr className="admin-section-divider" style={{ width: "100%", height: "1px", backgroundColor: "var(--border)", margin: "48px 0", border: "none" }} />
+            <hr className="admin-section-divider" style={{ width: "100%", height: "1px", backgroundColor: "var(--border)", margin: "0", border: "none" }} />
 
             {/* 2. Button System */}
             <section className="space-y-4">
@@ -301,7 +306,7 @@ function GodModeStyleguideContent() {
               </Card>
             </section>
 
-            <hr className="admin-section-divider" style={{ width: "100%", height: "1px", backgroundColor: "var(--border)", margin: "48px 0", border: "none" }} />
+            <hr className="admin-section-divider" style={{ width: "100%", height: "1px", backgroundColor: "var(--border)", margin: "0", border: "none" }} />
 
             {/* 3. Tabs Navigation System (Active vs Inactive) */}
             <section className="space-y-4">
@@ -388,7 +393,7 @@ function GodModeStyleguideContent() {
               </div>
             </section>
 
-            <hr className="admin-section-divider" style={{ width: "100%", height: "1px", backgroundColor: "var(--border)", margin: "48px 0", border: "none" }} />
+            <hr className="admin-section-divider" style={{ width: "100%", height: "1px", backgroundColor: "var(--border)", margin: "0", border: "none" }} />
 
             {/* 4. Status Badges */}
             <section className="space-y-4">
@@ -413,7 +418,7 @@ function GodModeStyleguideContent() {
               </Card>
             </section>
 
-            <hr className="admin-section-divider" style={{ width: "100%", height: "1px", backgroundColor: "var(--border)", margin: "48px 0", border: "none" }} />
+            <hr className="admin-section-divider" style={{ width: "100%", height: "1px", backgroundColor: "var(--border)", margin: "0", border: "none" }} />
 
             {/* 5. Form Inputs & Controls */}
             <section className="space-y-4">
@@ -477,7 +482,7 @@ function GodModeStyleguideContent() {
               </Card>
             </section>
 
-            <hr className="admin-section-divider" style={{ width: "100%", height: "1px", backgroundColor: "var(--border)", margin: "48px 0", border: "none" }} />
+            <hr className="admin-section-divider" style={{ width: "100%", height: "1px", backgroundColor: "var(--border)", margin: "0", border: "none" }} />
 
             {/* 6. Search Inputs & Filter Toolbars */}
             <section className="space-y-4">
@@ -593,14 +598,14 @@ function GodModeStyleguideContent() {
               </Card>
             </section>
 
-            <hr className="admin-section-divider" style={{ width: "100%", height: "1px", backgroundColor: "var(--border)", margin: "48px 0", border: "none" }} />
+            <hr className="admin-section-divider" style={{ width: "100%", height: "1px", backgroundColor: "var(--border)", margin: "0", border: "none" }} />
 
-            {/* 7. Data Tables */}
+            {/* 7. Data Tables & Pagination */}
             <section className="space-y-4">
               <div>
-                <h2 className="text-lg font-bold text-[#111413]">7. Data Tables</h2>
+                <h2 className="text-lg font-bold text-[#111413]">7. Data Tables & Pagination</h2>
                 <p className="text-xs text-[#525854] mt-0.5">
-                  Tabel data untuk manajemen produk, mutasi kas, dan database tenant toko.
+                  Tabel data baku untuk inventaris produk, mutasi kas, dan data merchant. Seluruh tabel wajib menyertakan action button 32x32px dan komponen pagination standar.
                 </p>
               </div>
 
@@ -617,30 +622,65 @@ function GodModeStyleguideContent() {
                   </TableHeader>
                   <TableBody>
                     {[
-                      { name: "Lenovo Legion Pro 5", cat: "Laptop Gaming", price: "Rp 24.500.000", status: "Tersedia", badge: "bg-green-100 text-green-800" },
-                      { name: "PC Rakitan Core i5 RTX 4060", cat: "PC Desktop", price: "Rp 13.800.000", status: "Tersedia", badge: "bg-green-100 text-green-800" },
-                      { name: "MacBook Air M2 256GB (Second)", cat: "Laptop Bekas", price: "Rp 12.200.000", status: "Habis", badge: "bg-red-100 text-red-800" },
+                      { name: "Lenovo Legion Pro 5", cat: "Laptop Gaming", price: "Rp 24.500.000", status: "Tersedia", variant: "success" as const },
+                      { name: "PC Rakitan Core i5 RTX 4060", cat: "PC Desktop", price: "Rp 13.800.000", status: "Tersedia", variant: "success" as const },
+                      { name: "MacBook Air M2 256GB (Second)", cat: "Laptop Bekas", price: "Rp 12.200.000", status: "Habis", variant: "destructive" as const },
                     ].map((row) => (
                       <TableRow key={row.name} className="hover:bg-[#fafafa]">
                         <TableCell className="py-4 px-6 font-bold text-[#111413]">{row.name}</TableCell>
                         <TableCell className="py-4 px-6 text-sm">{row.cat}</TableCell>
                         <TableCell className="py-4 px-6 font-black text-[#cc252b]">{row.price}</TableCell>
                         <TableCell className="py-4 px-6">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${row.badge}`}>
+                          <Badge variant={row.variant}>
                             {row.status}
-                          </span>
+                          </Badge>
                         </TableCell>
                         <TableCell className="py-4 px-6 text-right">
-                          <Button variant="outline" size="sm">Edit</Button>
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              type="button"
+                              className="admin-action-btn"
+                              title="Edit Perangkat"
+                              onClick={() => toast.success(`Edit ${row.name}`)}
+                            >
+                              <Pencil size={15} />
+                            </button>
+                            <button
+                              type="button"
+                              className="admin-action-btn delete"
+                              title="Hapus Perangkat"
+                              onClick={() => toast.error(`Hapus ${row.name}`)}
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
+
+                {/* Standard Admin Pagination Component */}
+                <AdminPagination
+                  currentPage={tablePage}
+                  totalPages={5}
+                  totalItems={48}
+                  pageSize={tablePageSize}
+                  onPageChange={(p) => setTablePage(p)}
+                  onPageSizeChange={(s) => {
+                    setTablePageSize(s);
+                    setTablePage(1);
+                  }}
+                  pageSizeOptions={[10, 20, 50]}
+                />
               </Card>
+
+              <div className="text-[11px] text-[#818779] bg-[#fafafa] p-3 rounded-lg border border-[#e5e5e2] leading-relaxed">
+                <strong>Standar Pagination:</strong> Seluruh tabel data wajib menyertakan footer <code className="font-mono font-bold text-red-600">&lt;AdminPagination /&gt;</code> dari <code className="font-mono">@/components/admin/ui/pagination</code> yang menyediakan navigasi page, info jumlah item, dan selector ukuran baris (10, 20, 50).
+              </div>
             </section>
 
-            <hr className="admin-section-divider" style={{ width: "100%", height: "1px", backgroundColor: "var(--border)", margin: "48px 0", border: "none" }} />
+            <hr className="admin-section-divider" style={{ width: "100%", height: "1px", backgroundColor: "var(--border)", margin: "0", border: "none" }} />
 
             {/* 8. Design Standards & Developer Guide */}
             <section className="space-y-4">
@@ -663,7 +703,7 @@ function GodModeStyleguideContent() {
                       <strong>Topbar & Toolbar:</strong> Wajib tinggi baku <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">h-10 (40px)</code>, padding <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">px-4</code>, font <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">text-xs font-bold</code>, radius <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">rounded-lg</code>.
                     </li>
                     <li>
-                      <strong>Table Action:</strong> <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">size="sm"</code> tinggi <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">h-8 (32px)</code> atau icon persegi <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">h-8 w-8 p-0</code>.
+                      <strong>Table Action:</strong> Kotak simetris <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">.admin-action-btn</code> ukuran <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">32x32px</code> dengan icon set terpadu (Edit, Delete, dll).
                     </li>
                   </ul>
                 </Card>
@@ -708,7 +748,7 @@ function GodModeStyleguideContent() {
                   </div>
                   <ul className="text-xs text-[#525854] space-y-2 leading-relaxed">
                     <li>
-                      <strong>Antar Section:</strong> Jarak vertikal wajib <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">48px</code> dengan divider pemisah <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">.admin-section-divider</code>.
+                      <strong>Antar Section:</strong> Jarak vertikal maksimal <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">32px</code> dengan divider pemisah <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">.admin-section-divider</code>.
                     </li>
                     <li>
                       <strong>Dalam Card / Form:</strong> Jarak grid kolom & baris wajib <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">24px</code>, jarak label ke field input <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">8px</code>.

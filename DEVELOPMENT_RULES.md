@@ -4,8 +4,9 @@
 
 ---
 
-## 1. Golden Rule: `/admin` adalah Standar Baku UI/UX
-Setiap kali membuat halaman baru di **God-Mode (`/god-mode/*`)**, **Merchant CMS (`/admin/*`)**, atau panel internal lainnya, **selalu gunakan komponen dan styling yang ada di `/admin` sebagai standar baku**. Jangan pernah mengimprovisasi komponen baru jika `/admin` sudah memiliki padanannya.
+## 1. Golden Rule: Design Guide & `/admin` adalah Standar Baku UI/UX
+- **Interactive Showcase & Design System**: Terletak di **`/god-mode/styleguide`** (source code: `src/app/god-mode/styleguide/page.tsx`).
+- Setiap kali membuat halaman baru di **God-Mode (`/god-mode/*`)**, **Merchant CMS (`/admin/*`)**, atau panel internal lainnya, **selalu tiru komponen dan visual token yang ada di `/god-mode/styleguide` dan `/admin` sebagai standar baku**. Jangan pernah mengimprovisasi styling atau komponen baru jika panduan sudah menyediakannya.
 
 ---
 
@@ -57,6 +58,11 @@ Setiap kali membuat halaman baru di **God-Mode (`/god-mode/*`)**, **Merchant CMS
   - `toast.success("Pesan berhasil")`
   - `toast.error("Pesan gagal")`
 - Setiap halaman yang memanggil `useToast` harus berada di dalam `<ToastProvider>`.
+
+### E. Tabel Data & Pagination
+- **Pagination Wajib**: Seluruh tabel data di `/god-mode/*` maupun `/admin/*` wajib menyertakan komponen `<AdminPagination>` dari `@/components/admin/ui/pagination`.
+- **Fitur Pagination Baku**: Menampilkan informasi total data (`Menampilkan 1 – 10 dari 48 data`), dropdown pemilihan ukuran halaman (`pageSizeOptions={[10, 20, 50]}`), tombol first/last/prev/next, dan tombol nomor halaman aktif.
+- **Spacing Antar Section**: Jarak vertikal antar section maksimal **32px** (menggunakan gap 16px dengan divider `.admin-section-divider` border halus tanpa margin ganda).
 
 ---
 

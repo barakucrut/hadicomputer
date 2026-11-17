@@ -10,9 +10,11 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 # RIGSPACE PLATFORM DEVELOPMENT RULES (MANDATORY)
 
-1. **STANDAR UTAMA: `/admin` ADALAH SINGLE SOURCE OF TRUTH (SSOT)**
-   - Setiap komponen di `/god-mode/*` atau panel baru WAJIB mengikuti standar komponen yang ada di `/admin`.
-   - Action buttons tabel wajib berukuran 32x32px (`.admin-action-btn`, `.admin-action-btn.delete`) menggunakan icon set terpadu (`HugeIconTrash`, `HugeIconEdit`, dll).
+1. **STANDAR UTAMA: DESIGN GUIDE & `/admin` ADALAH SINGLE SOURCE OF TRUTH (SSOT)**
+   - **DESIGN GUIDE RESMI & INTERACTIVE SHOWCASE TERLETAK DI: `/god-mode/styleguide` (file: `src/app/god-mode/styleguide/page.tsx`).**
+   - Setiap kali membuat komponen baru, form input, tabel data, tombol, modal dialog, status badge, atau pagination di seluruh halaman `/god-mode/*` maupun `/admin/*`, **WAJIB MENIRU & MENGIKUTI STANDAR YANG TERTAMPIL DI `/god-mode/styleguide` DAN `/admin`**.
+   - Action buttons tabel wajib berukuran 32x32px (`.admin-action-btn`, `.admin-action-btn.delete`) menggunakan icon set terpadu (`HugeIconTrash`, `HugeIconEdit`, `Trash2`, `Pencil`, dll).
+   - Seluruh tabel data wajib menyertakan pagination standar `<AdminPagination>` dari `@/components/admin/ui/pagination`.
 
 2. **STATUS & CATEGORY BADGES**
    - Selalu gunakan komponen `<Badge variant="...">` dari `@/components/admin/ui/badge`.
