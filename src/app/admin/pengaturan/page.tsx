@@ -510,67 +510,76 @@ export default function AdminSettingsPage() {
                 }}
               />
 
-              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              <div className="space-y-2">
                 <Label htmlFor="set-primary-color" className="text-xs font-bold text-[#111413]">
                   Custom Warna Primer (Hex Code)
                 </Label>
-                <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
-                  {/* Square color swatch button identical to presets */}
-                  <div
-                    style={{
-                      position: "relative",
-                      width: "36px",
-                      height: "36px",
-                      flexShrink: 0,
-                    }}
-                    title="Klik kotak warna untuk memilih warna custom"
-                  >
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+                  <div className="col-span-1 flex items-center gap-2.5">
+                    {/* Square color swatch button identical to presets */}
                     <div
-                      className="admin-color-preset-swatch"
                       style={{
-                        backgroundColor: settings.primaryColor,
+                        position: "relative",
                         width: "36px",
                         height: "36px",
-                        borderRadius: "8px",
-                        border: "1.5px solid var(--border)",
-                        boxShadow: "0 1px 3px rgba(0,0,0,0.08), inset 0 1px 2px rgba(0,0,0,0.15)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        cursor: "pointer",
+                        flexShrink: 0,
                       }}
+                      title="Klik kotak warna untuk memilih warna custom"
                     >
-                      <Palette size={16} className="text-white drop-shadow-xs" />
+                      <div
+                        className="admin-color-preset-swatch"
+                        style={{
+                          backgroundColor: settings.primaryColor,
+                          width: "36px",
+                          height: "36px",
+                          borderRadius: "8px",
+                          border: "1.5px solid var(--border)",
+                          boxShadow: "0 1px 3px rgba(0,0,0,0.08), inset 0 1px 2px rgba(0,0,0,0.15)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <Palette size={16} className="text-white drop-shadow-xs" />
+                      </div>
+                      <input
+                        type="color"
+                        id="set-primary-color-picker"
+                        value={settings.primaryColor}
+                        onChange={(e) => setSettings({ ...settings, primaryColor: e.target.value })}
+                        style={{
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          width: "100%",
+                          height: "100%",
+                          opacity: 0,
+                          cursor: "pointer",
+                        }}
+                      />
                     </div>
-                    <input
-                      type="color"
-                      id="set-primary-color-picker"
+
+                    <Input
+                      id="set-primary-color"
+                      type="text"
                       value={settings.primaryColor}
                       onChange={(e) => setSettings({ ...settings, primaryColor: e.target.value })}
+                      className="font-mono uppercase font-bold text-xs"
                       style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
+                        height: "36px",
                         width: "100%",
-                        height: "100%",
-                        opacity: 0,
-                        cursor: "pointer",
+                        minWidth: 0,
+                        flex: "1 1 0%",
                       }}
                     />
                   </div>
-
-                  <Input
-                    id="set-primary-color"
-                    type="text"
-                    value={settings.primaryColor}
-                    onChange={(e) => setSettings({ ...settings, primaryColor: e.target.value })}
-                    className="font-mono uppercase font-bold text-xs h-9 max-w-[140px]"
-                  />
-
-                  <span className="admin-form-hint">
-                    Format: #RRGGBB (misal: #0066CC untuk Plaza Bitcom)
-                  </span>
                 </div>
+
+                <span className="admin-form-hint">
+                  Format: #RRGGBB (misal: #0066CC untuk Plaza Bitcom)
+                </span>
               </div>
             </CardContent>
           </Card>
