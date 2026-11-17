@@ -679,7 +679,7 @@ function TenantsManagementContent() {
                   </span>
                   <input
                     type="text"
-                    placeholder="Cari toko, slug, domain, atau ID..."
+                    placeholder="Cari toko, subdomain, atau custom domain..."
                     value={searchQuery}
                     onChange={(e) => {
                       setSearchQuery(e.target.value);
@@ -747,7 +747,7 @@ function TenantsManagementContent() {
                   </span>
                 </CardTitle>
                 <CardDescription>
-                  Setiap tenant memiliki database terisolasi dengan ID SHA-1 unik dan fitur modular yang bisa di-toggle secara langsung.
+                  Setiap tenant memiliki database terisolasi dan fitur modular yang bisa di-toggle secara langsung.
                 </CardDescription>
               </CardHeader>
 
@@ -756,7 +756,6 @@ function TenantsManagementContent() {
                   <TableHeader>
                     <TableRow className="bg-[#fcfcfc]">
                       <TableHead className="py-3.5 px-6">Toko & Identitas</TableHead>
-                      <TableHead className="py-3.5 px-6">ID SHA-1 (Hex)</TableHead>
                       <TableHead className="py-3.5 px-6">Paket</TableHead>
                       <TableHead className="py-3.5 px-6">Fitur Modular (Real-time Toggle)</TableHead>
                       <TableHead className="py-3.5 px-6">Status</TableHead>
@@ -766,13 +765,13 @@ function TenantsManagementContent() {
                   <TableBody>
                     {loading ? (
                       <TableRow>
-                        <TableCell colSpan={6} className="text-center py-12 text-sm text-[#818779]">
+                        <TableCell colSpan={5} className="text-center py-12 text-sm text-[#818779]">
                           Memuat data merchant...
                         </TableCell>
                       </TableRow>
                     ) : paginatedTenants.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={6} className="text-center py-12 text-sm text-[#818779]">
+                        <TableCell colSpan={5} className="text-center py-12 text-sm text-[#818779]">
                           Tidak ada tenant toko yang sesuai dengan kriteria filter.
                         </TableCell>
                       </TableRow>
@@ -815,27 +814,6 @@ function TenantsManagementContent() {
                                   )}
                                 </div>
                               </div>
-                            </div>
-                          </TableCell>
-
-                          {/* ID SHA-1 */}
-                          <TableCell className="py-4 px-6">
-                            <div className="flex items-center gap-1.5">
-                              <code className="text-xs bg-[#f6f6f4] px-2 py-1 rounded font-mono text-[#111413] border border-[#e5e5e2]">
-                                {t.id.slice(0, 8)}...{t.id.slice(-6)}
-                              </code>
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigator.clipboard.writeText(t.id);
-                                  toast.success("ID SHA-1 disalin ke clipboard!");
-                                }}
-                                className="p-1 text-[#818779] hover:text-[#111413] transition-colors"
-                                title="Salin Full SHA-1 ID"
-                              >
-                                <Copy size={13} />
-                              </button>
                             </div>
                           </TableCell>
 
