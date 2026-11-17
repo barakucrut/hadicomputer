@@ -36,7 +36,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 6. **CHOICE CARDS, COLOR PRESETS & DRAG-DROP DROPZONE**
    - Kartu pilihan opsi (misal font, opsi paket) wajib menggunakan `.admin-choice-card` dengan icon centang aktif besar berukuran 16px (`.admin-choice-indicator`).
    - Preset warna tema wajib berupa tombol chip `.admin-color-preset-btn` dengan swatch kotak dan outline aktif.
-   - Form unggah file/logo wajib menyediakan dropzone drag-and-drop `.admin-dropzone` dan preview transparan catur `.admin-logo-preview-box`.
+   - Form unggah file/logo wajib menggunakan dropzone `.admin-dropzone` terpadu: saat file terunggah, kotak menampilkan thumbnail di tengah, nama file, dan tombol `[ ✕ Remove file ]` untuk menghapus dan mengunggah kembali.
 
 7. **SPACING, FORM CONTROLS & MINIMALIST BORDER RULES**
    - **Jarak Antar Komponen**: Setiap komponen WAJIB memiliki jarak minimal 8px – 16px (dilarang dempet). Jarak vertikal antar baris input form wajib tepat 16px (`gap: 16px` / `space-y-4`).

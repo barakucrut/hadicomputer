@@ -736,49 +736,31 @@ function GodModeStyleguideContent() {
 
                   {/* Uploaded / Preview State */}
                   <div className="space-y-2">
-                    <Label className="text-xs font-bold text-[#111413]">State 2: File Terunggah (Preview Card)</Label>
-                    <div className="p-4 border border-[#e5e5e2] rounded-xl bg-[#fafafa] flex flex-col sm:flex-row items-center justify-between gap-4">
-                      <div className="flex items-center gap-3.5 min-w-0">
-                        <div className="admin-logo-preview-box w-28 h-16 flex-shrink-0">
-                          <span className="text-xs font-black text-[#111413] tracking-tighter">HADICOMPUTER</span>
-                        </div>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-[#111413]">logo-official.png</span>
-                            <Badge variant="success" className="text-[10px]">Aktif</Badge>
-                          </div>
-                          <p className="text-[10.5px] text-[#818779] mt-0.5">
-                            Latar catur menampilkan transparansi asset.
-                          </p>
-                        </div>
+                    <Label className="text-xs font-bold text-[#111413]">State 2: File Terunggah (Thumbnail + Remove File)</Label>
+                    <div className="admin-dropzone flex flex-col items-center justify-center py-5 text-center" style={{ cursor: "default" }}>
+                      <div className="admin-logo-preview-box w-16 h-16 mb-2.5 shadow-xs">
+                        <span className="text-[11px] font-black text-[#111413] tracking-tighter">HADICOMPUTER</span>
                       </div>
-
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-8 text-xs font-bold flex items-center gap-1.5"
-                          onClick={() => toast.success("Simulasi: Ganti file logo")}
-                        >
-                          <Upload size={13} />
-                          <span>Ganti</span>
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-8 text-xs font-bold text-red-600 hover:text-red-700 flex items-center gap-1.5"
-                          onClick={() => toast.error("Simulasi: Hapus logo")}
-                        >
-                          <Trash2 size={13} />
-                          <span>Hapus</span>
-                        </Button>
-                      </div>
+                      <p className="text-sm font-bold text-[#111413] max-w-xs truncate">
+                        Modern Bitcom Plaza Hardware ...
+                      </p>
+                      <p className="text-xs text-[#525854] mt-0.5 font-medium">
+                        0.99 MB
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => toast.success("File dihapus, dropzone kembali siap upload")}
+                        className="mt-3.5 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-[#d1d5c9] bg-white hover:bg-gray-50 text-xs font-bold text-[#111413] shadow-xs transition-colors cursor-pointer"
+                      >
+                        <X size={14} />
+                        <span>Remove file</span>
+                      </button>
                     </div>
                   </div>
                 </div>
 
                 <div className="text-[11px] text-[#818779] bg-[#fafafa] p-3 rounded-lg border border-[#e5e5e2] leading-relaxed">
-                  <strong>Aturan Dropzone:</strong> Area drag-and-drop wajib memiliki border putus-putus (<code className="font-mono text-red-600 font-bold">border: 2px dashed #d1d5c9</code>), bereaksi saat dragover (<code className="font-mono font-bold">.is-dragging</code>), dan menampilkan preview motif catur (<code className="font-mono">.admin-logo-preview-box</code>) saat logo terpasang.
+                  <strong>Aturan Dropzone Terpadu:</strong> Kotak dropzone wajib menyatu. Saat kosong, menampilkan icon upload dan instruksi drag-and-drop. Begitu file terunggah, kotak awal yang sama menampilkan thumbnail preview di tengah, nama file, ukuran file, serta tombol <code className="font-mono font-bold">[ ✕ Remove file ]</code>. Saat tombol di-klik, kotak kembali siap menerima upload file baru.
                 </div>
               </Card>
             </section>

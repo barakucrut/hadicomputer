@@ -19,6 +19,7 @@ import {
   UploadCloud,
   Upload,
   Trash2,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/admin/ui/button";
 import { Badge } from "@/components/admin/ui/badge";
@@ -145,6 +146,8 @@ export default function AdminSettingsPage() {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = React.useState(false);
   const [uploadingLogo, setUploadingLogo] = React.useState(false);
+  const [logoFileName, setLogoFileName] = React.useState<string>("");
+  const [logoFileSize, setLogoFileSize] = React.useState<string>("");
 
   async function handleLogoUpload(file: File) {
     if (!file) return;
@@ -156,6 +159,10 @@ export default function AdminSettingsPage() {
       toast.error("Ukuran file maksimal 2MB!");
       return;
     }
+
+    setLogoFileName(file.name);
+    const sizeInMb = (file.size / (1024 * 1024)).toFixed(2);
+    setLogoFileSize(`${sizeInMb} MB`);
 
     setUploadingLogo(true);
     try {
@@ -623,52 +630,43 @@ export default function AdminSettingsPage() {
                 />
 
                 {settings.logoUrl ? (
-                  <div className="p-4 border border-[#e5e5e2] rounded-xl bg-[#fafafa] flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="flex items-center gap-4 min-w-0">
-                      <div className="admin-logo-preview-box w-36 h-20 flex-shrink-0">
-                        <img
-                          src={settings.logoUrl}
-                          alt="Logo Toko"
-                          className="max-h-14 max-w-full object-contain"
-                        />
-                      </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-[#111413]">Logo Aktif Toko</span>
-                          <Badge variant="success" className="text-[10px]">Terpasang</Badge>
-                        </div>
-                        <p className="text-[11px] font-mono text-[#525854] truncate mt-1 max-w-md">
-                          {settings.logoUrl}
-                        </p>
-                        <p className="text-[10px] text-[#818779] mt-0.5">
-                          Latar motif catur menampilkan transparansi logo.
-                        </p>
-                      </div>
+                  <div
+                    className="admin-dropzone flex flex-col items-center justify-center py-6 text-center"
+                    style={{ cursor: "default" }}
+                  >
+                    {/* Centered Thumbnail Image Preview */}
+                    <div className="admin-logo-preview-box w-20 h-20 mb-3 shadow-xs">
+                      <img
+                        src={settings.logoUrl}
+                        alt="Logo Toko"
+                        className="max-h-16 max-w-full object-contain"
+                      />
                     </div>
 
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        disabled={uploadingLogo}
-                        onClick={() => fileInputRef.current?.click()}
-                        className="flex items-center gap-1.5 h-8 text-xs font-bold"
-                      >
-                        <Upload size={14} />
-                        <span>Ganti Logo</span>
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setSettings({ ...settings, logoUrl: "" })}
-                        className="flex items-center gap-1.5 h-8 text-xs font-bold text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Trash2 size={14} />
-                        <span>Hapus Logo</span>
-                      </Button>
-                    </div>
+                    {/* Centered File Name */}
+                    <p className="text-sm font-bold text-[#111413] max-w-sm truncate">
+                      {logoFileName || settings.logoUrl.split("/").pop() || "Logo Toko"}
+                    </p>
+
+                    {/* Centered File Size / Meta */}
+                    <p className="text-xs text-[#525854] mt-1 font-medium">
+                      {logoFileSize || "Logo Toko Aktif"}
+                    </p>
+
+                    {/* Remove File Button */}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSettings((prev: any) => ({ ...prev, logoUrl: "" }));
+                        setLogoFileName("");
+                        setLogoFileSize("");
+                      }}
+                      className="mt-4 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-[#d1d5c9] bg-white hover:bg-gray-50 text-xs font-bold text-[#111413] shadow-xs transition-colors cursor-pointer"
+                    >
+                      <X size={14} />
+                      <span>Remove file</span>
+                    </button>
                   </div>
                 ) : (
                   <div
@@ -687,7 +685,7 @@ export default function AdminSettingsPage() {
                     }}
                     onClick={() => fileInputRef.current?.click()}
                   >
-                    <UploadCloud size={38} className="text-[#818779] mx-auto mb-2" />
+                    <UploadCloud size={36} className="text-[#818779] mx-auto mb-2" />
                     <p className="text-sm font-bold text-[#111413]">
                       {uploadingLogo ? "Mengunggah Logo..." : "Tarik & Lepas File Logo ke Sini"}
                     </p>

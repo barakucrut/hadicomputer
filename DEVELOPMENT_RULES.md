@@ -69,8 +69,8 @@
 - **Color Preset Chips**: Pilihan preset warna tema wajib menggunakan button `.admin-color-preset-btn` dan `.admin-color-preset-btn.is-active` yang memiliki swatch warna persegi (`.admin-color-preset-swatch`), label nama warna, dan kode hex uppercase.
 
 ### G. Drag & Drop File Upload Dropzone
-- **Area Dropzone**: Input unggah file/logo wajib menyediakan area drag-and-drop `.admin-dropzone` dengan garis batas putus-putus (`border: 2px dashed #d1d5c9`), icon upload besar, dan reaksi visual saat berkas diseret ke atasnya (`.is-dragging`).
-- **Preview Asset Transparan**: Berkas yang berhasil terunggah wajib ditampilkan dalam box preview dengan motif catur (`.admin-logo-preview-box`) agar transparansi gambar tetap terlihat jelas, disertai tombol aksi Ganti dan Hapus.
+- **Area Dropzone Terpadu**: Input unggah file/logo wajib menyediakan area drag-and-drop `.admin-dropzone` dengan garis batas putus-putus (`border: 1.5px dashed #c9cdbf`), icon upload, dan reaksi visual saat berkas diseret ke atasnya (`.is-dragging`).
+- **State File Terunggah (Thumbnail + Remove File)**: Saat file berhasil diunggah, kotak dropzone awal yang sama langsung menampilkan thumbnail gambar di tengah (dengan latar motif catur `.admin-logo-preview-box`), nama file, ukuran file, dan tombol `[ ✕ Remove file ]`. Ketika tombol remove ditekan, kotak otomatis kembali ke state siap menerima file baru.
 
 ### H. Spacing, Jarak Vertikal Form, & Border Minimalis
 - **Jarak Antar Komponen**: Setiap komponen WAJIB memiliki jarak minimal 8px – 16px (dilarang dempet). Jarak vertikal antar baris input form wajib tepat 16px (`gap: 16px` / `space-y-4`).
