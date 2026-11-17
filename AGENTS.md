@@ -33,4 +33,9 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 5. **MULTI-TENANT DATA ISOLATION**
    - Seluruh query database untuk data toko wajib menyertakan filter `where: { tenantId }`.
 
+6. **CHOICE CARDS, COLOR PRESETS & DRAG-DROP DROPZONE**
+   - Kartu pilihan opsi (misal font, opsi paket) wajib menggunakan `.admin-choice-card` dengan icon centang aktif besar berukuran 16px (`.admin-choice-indicator`).
+   - Preset warna tema wajib berupa tombol chip `.admin-color-preset-btn` dengan swatch kotak dan outline aktif.
+   - Form unggah file/logo wajib menyediakan dropzone drag-and-drop `.admin-dropzone` dan preview transparan catur `.admin-logo-preview-box`.
+
 *Detail lengkap terdokumentasi di file `DEVELOPMENT_RULES.md`.*

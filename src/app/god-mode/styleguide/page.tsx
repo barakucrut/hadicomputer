@@ -21,6 +21,9 @@ import {
   ArrowDownLeft,
   Trash2,
   Pencil,
+  Check,
+  UploadCloud,
+  Upload,
 } from "lucide-react";
 import { Button } from "@/components/admin/ui/button";
 import { Badge } from "@/components/admin/ui/badge";
@@ -53,6 +56,8 @@ function GodModeStyleguideContent() {
   const [demoTypeTab, setDemoTypeTab] = React.useState<"INCOME" | "EXPENSE">("INCOME");
   const [tablePage, setTablePage] = React.useState(1);
   const [tablePageSize, setTablePageSize] = React.useState(10);
+  const [demoChoiceFont, setDemoChoiceFont] = React.useState("Plus Jakarta Sans");
+  const [demoPresetColor, setDemoPresetColor] = React.useState("#cc252b");
 
   async function handleLogout() {
     try {
@@ -600,10 +605,188 @@ function GodModeStyleguideContent() {
 
             <hr className="admin-section-divider" style={{ width: "100%", height: "1px", backgroundColor: "var(--border)", margin: "0", border: "none" }} />
 
-            {/* 7. Data Tables & Pagination */}
+            {/* 7. Selectable Option Cards & Color Presets */}
             <section className="space-y-4">
               <div>
-                <h2 className="text-lg font-bold text-[#111413]">7. Data Tables & Pagination</h2>
+                <h2 className="text-lg font-bold text-[#111413]">7. Selectable Option Cards & Color Presets</h2>
+                <p className="text-xs text-[#525854] mt-0.5">
+                  Standar kartu pilihan opsi (Radio Choice Cards) dengan indikator centang besar dan tombol preset swatch warna tema.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* 7.A Selectable Choice Cards */}
+                <Card className="shadow-sm border-[#e5e5e2] rounded-2xl p-6 flex flex-col gap-4">
+                  <div>
+                    <h3 className="text-xs font-bold text-[#111413] uppercase tracking-wide">A. Selectable Choice Cards (.admin-choice-card)</h3>
+                    <p className="text-[11px] text-[#525854] mt-0.5">Klik salah satu kartu untuk mengaktifkan opsi. Item aktif memiliki border merah dan centang putih menonjol.</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {[
+                      { id: "Plus Jakarta Sans", name: "Plus Jakarta Sans", cat: "Modern & Clean", desc: "Sangat nyaman dibaca di mobile dan seimbang." },
+                      { id: "Outfit", name: "Outfit", cat: "Tech-Forward", desc: "Karakter tajam cocok untuk PC gaming." },
+                    ].map((f) => {
+                      const isSelected = demoChoiceFont === f.id;
+                      return (
+                        <div
+                          key={f.id}
+                          onClick={() => setDemoChoiceFont(f.id)}
+                          className={`admin-choice-card ${isSelected ? "is-active" : ""}`}
+                          role="button"
+                          tabIndex={0}
+                        >
+                          <div className="pr-7">
+                            <span className="font-bold text-sm text-[#111413] block">{f.name}</span>
+                            <span className="text-[10px] font-bold text-[#818779] block mt-0.5">{f.cat}</span>
+                          </div>
+                          <div className="admin-choice-indicator" title={isSelected ? "Item Aktif" : "Klik untuk Pilih"}>
+                            {isSelected && <Check size={16} strokeWidth={3} className="text-white" />}
+                          </div>
+                          <p className="text-[11.5px] text-[#525854] mt-2.5 leading-relaxed">{f.desc}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="text-[11px] text-[#818779] bg-[#fafafa] p-3 rounded-lg border border-[#e5e5e2] leading-relaxed">
+                    <strong>Aturan Visual:</strong> Wajib menggunakan class <code className="font-mono text-red-600 font-bold">.admin-choice-card</code> dan <code className="font-mono text-red-600 font-bold">.is-active</code>. Icon centang aktif berukuran besar (lingkaran 24px, icon 16px) dengan background solid merah platform.
+                  </div>
+                </Card>
+
+                {/* 7.B Color Preset Chips */}
+                <Card className="shadow-sm border-[#e5e5e2] rounded-2xl p-6 flex flex-col gap-4">
+                  <div>
+                    <h3 className="text-xs font-bold text-[#111413] uppercase tracking-wide">B. Color Preset Selector Chips (.admin-color-preset-btn)</h3>
+                    <p className="text-[11px] text-[#525854] mt-0.5">Tombol chip preset warna tema dengan swatch kotak dan hex label terformat.</p>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                    {[
+                      { name: "Hadi Crimson", hex: "#cc252b" },
+                      { name: "Bitcom Cobalt", hex: "#0066cc" },
+                      { name: "Emerald GeForce", hex: "#10b981" },
+                      { name: "Cyber Violet", hex: "#8b5cf6" },
+                      { name: "Deep Obsidian", hex: "#0f172a" },
+                      { name: "Amber Gold", hex: "#f59e0b" },
+                    ].map((p) => {
+                      const isSelected = demoPresetColor === p.hex;
+                      return (
+                        <button
+                          type="button"
+                          key={p.hex}
+                          onClick={() => setDemoPresetColor(p.hex)}
+                          className={`admin-color-preset-btn ${isSelected ? "is-active" : ""}`}
+                          title={`Pilih tema ${p.name}`}
+                        >
+                          <div
+                            className="admin-color-preset-swatch"
+                            style={{ backgroundColor: p.hex }}
+                          >
+                            {isSelected && <Check size={14} strokeWidth={3} className="text-white drop-shadow-xs" />}
+                          </div>
+                          <div className="flex flex-col min-w-0 flex-1">
+                            <span className="text-xs font-bold text-[#111413] truncate">{p.name}</span>
+                            <span className="text-[10px] font-mono text-[#525854] uppercase tracking-wider">{p.hex}</span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="text-[11px] text-[#818779] bg-[#fafafa] p-3 rounded-lg border border-[#e5e5e2] leading-relaxed">
+                    <strong>Aturan Visual:</strong> Menggunakan class <code className="font-mono text-red-600 font-bold">.admin-color-preset-btn</code>. Preset aktif ditandai outline tebal (#111413), background abu netral halus, dan centang putih di dalam kotak swatch warna.
+                  </div>
+                </Card>
+              </div>
+            </section>
+
+            <hr className="admin-section-divider" style={{ width: "100%", height: "1px", backgroundColor: "var(--border)", margin: "0", border: "none" }} />
+
+            {/* 8. Drag & Drop File Upload Dropzone */}
+            <section className="space-y-4">
+              <div>
+                <h2 className="text-lg font-bold text-[#111413]">8. Drag & Drop File Upload Dropzone</h2>
+                <p className="text-xs text-[#525854] mt-0.5">
+                  Standar area unggah gambar dan logo dengan dukungan drag-and-drop file, status dragover, serta preview transparansi bermotif catur.
+                </p>
+              </div>
+
+              <Card className="shadow-sm border-[#e5e5e2] rounded-2xl p-6 flex flex-col gap-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                  {/* Dropzone Idle */}
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold text-[#111413]">State 1: Dropzone Area (.admin-dropzone)</Label>
+                    <div
+                      className="admin-dropzone"
+                      onClick={() => toast.success("Simulasi klik: Pemilih file sistem dibuka")}
+                    >
+                      <UploadCloud size={36} className="text-[#818779] mx-auto mb-2" />
+                      <p className="text-sm font-bold text-[#111413]">Tarik & Lepas File ke Sini</p>
+                      <p className="text-xs text-[#525854] mt-1">
+                        atau <span className="text-red-600 font-bold underline">klik untuk memilih dari komputer</span>
+                      </p>
+                      <p className="text-[10.5px] text-[#818779] mt-2">
+                        Format: PNG transparan, JPEG, WebP, SVG (Maksimal 2MB)
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Uploaded / Preview State */}
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold text-[#111413]">State 2: File Terunggah (Preview Card)</Label>
+                    <div className="p-4 border border-[#e5e5e2] rounded-xl bg-[#fafafa] flex flex-col sm:flex-row items-center justify-between gap-4">
+                      <div className="flex items-center gap-3.5 min-w-0">
+                        <div className="admin-logo-preview-box w-28 h-16 flex-shrink-0">
+                          <span className="text-xs font-black text-[#111413] tracking-tighter">HADICOMPUTER</span>
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-[#111413]">logo-official.png</span>
+                            <Badge variant="success" className="text-[10px]">Aktif</Badge>
+                          </div>
+                          <p className="text-[10.5px] text-[#818779] mt-0.5">
+                            Latar catur menampilkan transparansi asset.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 text-xs font-bold flex items-center gap-1.5"
+                          onClick={() => toast.success("Simulasi: Ganti file logo")}
+                        >
+                          <Upload size={13} />
+                          <span>Ganti</span>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 text-xs font-bold text-red-600 hover:text-red-700 flex items-center gap-1.5"
+                          onClick={() => toast.error("Simulasi: Hapus logo")}
+                        >
+                          <Trash2 size={13} />
+                          <span>Hapus</span>
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-[11px] text-[#818779] bg-[#fafafa] p-3 rounded-lg border border-[#e5e5e2] leading-relaxed">
+                  <strong>Aturan Dropzone:</strong> Area drag-and-drop wajib memiliki border putus-putus (<code className="font-mono text-red-600 font-bold">border: 2px dashed #d1d5c9</code>), bereaksi saat dragover (<code className="font-mono font-bold">.is-dragging</code>), dan menampilkan preview motif catur (<code className="font-mono">.admin-logo-preview-box</code>) saat logo terpasang.
+                </div>
+              </Card>
+            </section>
+
+            <hr className="admin-section-divider" style={{ width: "100%", height: "1px", backgroundColor: "var(--border)", margin: "0", border: "none" }} />
+
+            {/* 9. Data Tables & Pagination */}
+            <section className="space-y-4">
+              <div>
+                <h2 className="text-lg font-bold text-[#111413]">9. Data Tables & Pagination</h2>
                 <p className="text-xs text-[#525854] mt-0.5">
                   Tabel data baku untuk inventaris produk, mutasi kas, dan data merchant. Seluruh tabel wajib menyertakan action button 32x32px dan komponen pagination standar.
                 </p>
@@ -682,16 +865,16 @@ function GodModeStyleguideContent() {
 
             <hr className="admin-section-divider" style={{ width: "100%", height: "1px", backgroundColor: "var(--border)", margin: "0", border: "none" }} />
 
-            {/* 8. Design Standards & Developer Guide */}
+            {/* 10. Design Standards & Developer Guide */}
             <section className="space-y-4">
               <div>
-                <h2 className="text-lg font-bold text-[#111413]">8. Aturan Baku Developer Guide & UI Standards</h2>
+                <h2 className="text-lg font-bold text-[#111413]">10. Aturan Baku Developer Guide & UI Standards</h2>
                 <p className="text-xs text-[#525854] mt-0.5">
                   Standar wajib yang harus dipatuhi oleh siapapun pengembang / AI agent saat menambahkan fitur baru agar konsistensi desain tetap terjaga.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {/* 1. Button Standards */}
                 <Card className="shadow-sm border-[#e5e5e2] rounded-2xl p-6 flex flex-col gap-3">
                   <div className="flex items-center gap-2 font-bold text-sm text-[#111413]">
@@ -752,6 +935,38 @@ function GodModeStyleguideContent() {
                     </li>
                     <li>
                       <strong>Dalam Card / Form:</strong> Jarak grid kolom & baris wajib <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">24px</code>, jarak label ke field input <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">8px</code>.
+                    </li>
+                  </ul>
+                </Card>
+
+                {/* 5. Choice Cards & Preset Swatches */}
+                <Card className="shadow-sm border-[#e5e5e2] rounded-2xl p-6 flex flex-col gap-3">
+                  <div className="flex items-center gap-2 font-bold text-sm text-[#111413]">
+                    <span className="w-6 h-6 rounded-md bg-amber-100 text-amber-700 flex items-center justify-center text-xs">5</span>
+                    <span>Choice Cards & Swatches</span>
+                  </div>
+                  <ul className="text-xs text-[#525854] space-y-2 leading-relaxed">
+                    <li>
+                      <strong>Choice Card:</strong> Wajib <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">.admin-choice-card</code> dengan icon centang aktif besar (<code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">size 16px</code>).
+                    </li>
+                    <li>
+                      <strong>Color Presets:</strong> Wajib <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">.admin-color-preset-btn</code> dengan kotak swatch dan outline tebal saat terpilih.
+                    </li>
+                  </ul>
+                </Card>
+
+                {/* 6. Drag & Drop File Upload */}
+                <Card className="shadow-sm border-[#e5e5e2] rounded-2xl p-6 flex flex-col gap-3">
+                  <div className="flex items-center gap-2 font-bold text-sm text-[#111413]">
+                    <span className="w-6 h-6 rounded-md bg-teal-100 text-teal-700 flex items-center justify-center text-xs">6</span>
+                    <span>Drag & Drop File Upload</span>
+                  </div>
+                  <ul className="text-xs text-[#525854] space-y-2 leading-relaxed">
+                    <li>
+                      <strong>Area Dropzone:</strong> Wajib <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">.admin-dropzone</code> bergaris putus-putus, responsif terhadap event drag-over.
+                    </li>
+                    <li>
+                      <strong>Preview Logo:</strong> Wajib menampilkan motif kotak catur transparan (<code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">.admin-logo-preview-box</code>) dengan tombol ganti/hapus.
                     </li>
                   </ul>
                 </Card>

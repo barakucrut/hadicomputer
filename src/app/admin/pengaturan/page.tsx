@@ -16,6 +16,9 @@ import {
   Sparkles,
   Sliders,
   ExternalLink,
+  UploadCloud,
+  Upload,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/admin/ui/button";
 import { Badge } from "@/components/admin/ui/badge";
@@ -137,6 +140,49 @@ export default function AdminSettingsPage() {
   const [showCurrentPassword, setShowCurrentPassword] = React.useState(false);
   const [showNewPassword, setShowNewPassword] = React.useState(false);
   const [passwordSaving, setPasswordSaving] = React.useState(false);
+
+  // Logo upload state
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = React.useState(false);
+  const [uploadingLogo, setUploadingLogo] = React.useState(false);
+  const [showManualUrl, setShowManualUrl] = React.useState(false);
+
+  async function handleLogoUpload(file: File) {
+    if (!file) return;
+    if (!["image/png", "image/jpeg", "image/webp", "image/svg+xml"].includes(file.type)) {
+      toast.error("Format file harus PNG, JPG, WebP, atau SVG!");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Ukuran file maksimal 2MB!");
+      return;
+    }
+
+    setUploadingLogo(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("folder", "logos");
+
+      const res = await fetch("/api/admin/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Gagal mengunggah logo");
+      }
+
+      setSettings((prev: any) => ({ ...prev, logoUrl: data.url }));
+      toast.success("Logo toko berhasil diunggah!");
+    } catch (err: any) {
+      console.error("Upload logo error:", err);
+      toast.error(err.message || "Gagal mengunggah logo");
+    } finally {
+      setUploadingLogo(false);
+    }
+  }
 
   React.useEffect(() => {
     fetch("/api/admin/settings")
@@ -327,7 +373,7 @@ export default function AdminSettingsPage() {
       {/* TAB 1: APPEARANCE & TYPOGRAPHY */}
       {activeTab === "appearance" && (
         <div className="space-y-6">
-          {/* 1.1 Font Family Selection (Inspired by Dialog Settings) */}
+          {/* 1.1 Font Family Selection (Selectable Choice Cards with Prominent Checkmark) */}
           <Card className="border-[#e5e5e2] shadow-sm rounded-2xl overflow-hidden">
             <CardHeader className="p-6 border-b border-[#e5e5e2] bg-[#fcfcfc]">
               <CardTitle className="text-base flex items-center gap-2">
@@ -339,38 +385,44 @@ export default function AdminSettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="p-6 space-y-5">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
                 {FONT_OPTIONS.map((f) => {
                   const isSelected = settings.fontFamily === f.id;
                   return (
                     <div
                       key={f.id}
                       onClick={() => setSettings({ ...settings, fontFamily: f.id })}
-                      style={{
-                        borderColor: isSelected ? settings.primaryColor : "#e5e5e2",
-                        backgroundColor: isSelected ? `${settings.primaryColor}08` : "#ffffff",
-                      }}
-                      className="p-4 rounded-xl border-2 cursor-pointer transition-all hover:shadow-xs relative"
+                      className={`admin-choice-card ${isSelected ? "is-active" : ""}`}
+                      role="button"
+                      tabIndex={0}
+                      aria-pressed={isSelected}
                     >
-                      <div className="flex items-center justify-between">
-                        <span
-                          data-preview-font="true"
-                          style={{ fontFamily: `'${f.id}', sans-serif` }}
-                          className="font-bold text-sm text-[#111413]"
-                        >
-                          {f.name}
-                        </span>
-                        {isSelected && (
+                      <div className="flex items-start justify-between gap-3 pr-8">
+                        <div>
                           <span
-                            style={{ backgroundColor: settings.primaryColor }}
-                            className="w-5 h-5 rounded-full flex items-center justify-center text-white"
+                            data-preview-font="true"
+                            style={{ fontFamily: `'${f.id}', sans-serif` }}
+                            className="font-bold text-base text-[#111413] block"
                           >
-                            <Check size={12} strokeWidth={3} />
+                            {f.name}
                           </span>
-                        )}
+                          <span className="text-[11px] font-bold text-[#818779] block mt-0.5">
+                            {f.category}
+                          </span>
+                        </div>
                       </div>
-                      <span className="text-[11px] font-bold text-gray-500 block mt-0.5">{f.category}</span>
-                      <p className="text-[11.5px] text-gray-600 mt-2 leading-relaxed">{f.description}</p>
+
+                      {/* Large Prominent Checkmark Indicator */}
+                      <div
+                        className="admin-choice-indicator"
+                        title={isSelected ? "Font Sedang Aktif" : "Pilih Font Ini"}
+                      >
+                        {isSelected && <Check size={16} strokeWidth={3} className="text-white" />}
+                      </div>
+
+                      <p className="text-xs text-[#525854] mt-3 leading-relaxed">
+                        {f.description}
+                      </p>
                     </div>
                   );
                 })}
@@ -397,7 +449,7 @@ export default function AdminSettingsPage() {
             </CardContent>
           </Card>
 
-          {/* 1.2 Warna Identitas Toko (Theme Accent) */}
+          {/* 1.2 Warna Identitas Toko (Theme Accent & Color Preset Selector) */}
           <Card className="border-[#e5e5e2] shadow-sm rounded-2xl overflow-hidden">
             <CardHeader className="p-6 border-b border-[#e5e5e2] bg-[#fcfcfc]">
               <CardTitle className="text-base flex items-center gap-2">
@@ -410,7 +462,10 @@ export default function AdminSettingsPage() {
             </CardHeader>
             <CardContent className="p-6 space-y-6">
               <div>
-                <Label className="mb-2 block">Pilihan Cepat Warna Preset:</Label>
+                <div className="flex items-center justify-between mb-2.5">
+                  <Label className="text-xs font-bold text-[#111413]">Pilihan Cepat Warna Preset:</Label>
+                  <span className="text-[11px] text-[#818779]">Klik kotak warna untuk memilih tema</span>
+                </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5">
                   {COLOR_PRESETS.map((p) => {
                     const isSelected = settings.primaryColor?.toLowerCase() === p.hex.toLowerCase();
@@ -419,31 +474,35 @@ export default function AdminSettingsPage() {
                         type="button"
                         key={p.hex}
                         onClick={() => setSettings({ ...settings, primaryColor: p.hex })}
-                        className={`p-2.5 rounded-xl border text-left flex items-center gap-2.5 transition-all cursor-pointer ${
-                          isSelected ? "border-[#111413] ring-2 ring-[#111413]/15 font-bold bg-[#f6f6f4]" : "border-[#e5e5e2] hover:bg-[#fafafa]"
-                        }`}
+                        className={`admin-color-preset-btn ${isSelected ? "is-active" : ""}`}
+                        title={`Pilih tema ${p.name} (${p.hex})`}
                       >
-                        <span
+                        <div
+                          className="admin-color-preset-swatch"
                           style={{ backgroundColor: p.hex }}
-                          className="w-5 h-5 rounded-md flex-shrink-0 shadow-xs"
-                        />
-                        <span className="text-xs truncate text-[#111413]">{p.name}</span>
+                        >
+                          {isSelected && <Check size={14} strokeWidth={3} className="text-white drop-shadow-xs" />}
+                        </div>
+                        <div className="flex flex-col min-w-0 flex-1">
+                          <span className="text-xs font-bold text-[#111413] truncate">{p.name}</span>
+                          <span className="text-[10px] font-mono text-[#525854] uppercase tracking-wider">{p.hex}</span>
+                        </div>
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row sm:items-center gap-4 pt-2">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4 pt-2 border-t border-[#e5e5e2]">
                 <div className="flex-1">
-                  <Label htmlFor="set-primary-color">Custom Warna Primer (Hex Code)</Label>
+                  <Label htmlFor="set-primary-color" className="text-xs font-bold text-[#111413]">Custom Warna Primer (Hex Code)</Label>
                   <div className="flex items-center gap-3 mt-1.5">
                     <input
                       type="color"
                       id="set-primary-color-picker"
                       value={settings.primaryColor}
                       onChange={(e) => setSettings({ ...settings, primaryColor: e.target.value })}
-                      className="w-10 h-10 p-1 rounded-lg border border-gray-300 cursor-pointer"
+                      className="w-10 h-10 p-1 rounded-lg border border-gray-300 cursor-pointer shadow-xs"
                     />
                     <Input
                       id="set-primary-color"
@@ -461,7 +520,7 @@ export default function AdminSettingsPage() {
             </CardContent>
           </Card>
 
-          {/* 1.3 Branding & Logo */}
+          {/* 1.3 Branding & Logo (Drag & Drop Dropzone) */}
           <Card className="border-[#e5e5e2] shadow-sm rounded-2xl overflow-hidden">
             <CardHeader className="p-6 border-b border-[#e5e5e2] bg-[#fcfcfc]">
               <CardTitle className="text-base flex items-center gap-2">
@@ -472,10 +531,10 @@ export default function AdminSettingsPage() {
                 Nama resmi dan gambar logo yang akan muncul di header atas dan footer etalase toko.
               </CardDescription>
             </CardHeader>
-            <CardContent className="p-6 space-y-4">
+            <CardContent className="p-6 space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="set-name">Nama Toko *</Label>
+                  <Label htmlFor="set-name" className="text-xs font-bold text-[#111413]">Nama Toko *</Label>
                   <Input
                     id="set-name"
                     type="text"
@@ -487,7 +546,7 @@ export default function AdminSettingsPage() {
                 </div>
 
                 <div>
-                  <Label htmlFor="set-tagline">Tagline Singkat Toko</Label>
+                  <Label htmlFor="set-tagline" className="text-xs font-bold text-[#111413]">Tagline Singkat Toko</Label>
                   <Input
                     id="set-tagline"
                     type="text"
@@ -499,31 +558,135 @@ export default function AdminSettingsPage() {
                 </div>
               </div>
 
-              <div>
-                <Label htmlFor="set-logo">URL Logo Toko (PNG / JPEG transparan)</Label>
-                <Input
-                  id="set-logo"
-                  type="text"
-                  value={settings.logoUrl || ""}
-                  onChange={(e) => setSettings({ ...settings, logoUrl: e.target.value })}
-                  placeholder="https://... atau /images/logo.png"
-                  className="mt-1 font-mono text-xs"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Jika dikosongkan, etalase otomatis menampilkan nama toko dengan tipografi modern dan aksen warna toko.
-                </p>
-              </div>
-
-              {settings.logoUrl && (
-                <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 inline-block">
-                  <span className="text-[11px] font-bold text-gray-500 block mb-1">Preview Logo Toko:</span>
-                  <img
-                    src={settings.logoUrl}
-                    alt={settings.storeName}
-                    className="h-10 object-contain max-w-[200px]"
-                  />
+              {/* Drag & Drop Logo Upload Area */}
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs font-bold text-[#111413]">Logo Toko (Header & Footer)</Label>
+                  <span className="text-[11px] text-[#818779]">PNG Transparan / SVG / JPEG (Maks. 2MB)</span>
                 </div>
-              )}
+
+                {/* Hidden File Input */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                  onChange={(e) => {
+                    if (e.target.files?.[0]) handleLogoUpload(e.target.files[0]);
+                  }}
+                  className="hidden"
+                />
+
+                {settings.logoUrl ? (
+                  <div className="p-4 border border-[#e5e5e2] rounded-xl bg-[#fafafa] flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center gap-4 min-w-0">
+                      <div className="admin-logo-preview-box w-36 h-20 flex-shrink-0">
+                        <img
+                          src={settings.logoUrl}
+                          alt="Logo Toko"
+                          className="max-h-14 max-w-full object-contain"
+                        />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-[#111413]">Logo Aktif Toko</span>
+                          <Badge variant="success" className="text-[10px]">Terpasang</Badge>
+                        </div>
+                        <p className="text-[11px] font-mono text-[#525854] truncate mt-1 max-w-md">
+                          {settings.logoUrl}
+                        </p>
+                        <p className="text-[10px] text-[#818779] mt-0.5">
+                          Latar motif catur menampilkan transparansi logo.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={uploadingLogo}
+                        onClick={() => fileInputRef.current?.click()}
+                        className="flex items-center gap-1.5 h-8 text-xs font-bold"
+                      >
+                        <Upload size={14} />
+                        <span>Ganti Logo</span>
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSettings({ ...settings, logoUrl: "" })}
+                        className="flex items-center gap-1.5 h-8 text-xs font-bold text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 size={14} />
+                        <span>Hapus Logo</span>
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    className={`admin-dropzone ${isDragging ? "is-dragging" : ""}`}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      setIsDragging(true);
+                    }}
+                    onDragLeave={() => setIsDragging(false)}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setIsDragging(false);
+                      if (e.dataTransfer.files?.[0]) {
+                        handleLogoUpload(e.dataTransfer.files[0]);
+                      }
+                    }}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <UploadCloud size={38} className="text-[#818779] mx-auto mb-2" />
+                    <p className="text-sm font-bold text-[#111413]">
+                      {uploadingLogo ? "Mengunggah Logo..." : "Tarik & Lepas File Logo ke Sini"}
+                    </p>
+                    <p className="text-xs text-[#525854] mt-1">
+                      atau <span className="text-red-600 font-bold underline">klik untuk memilih dari komputer</span>
+                    </p>
+                    <p className="text-[11px] text-[#818779] mt-2">
+                      Format yang didukung: PNG transparan, JPEG, WebP, SVG (Maksimal 2MB)
+                    </p>
+                  </div>
+                )}
+
+                {/* Optional Manual URL Accordion */}
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowManualUrl(!showManualUrl)}
+                    className="text-[11px] font-bold text-[#525854] hover:text-[#111413] flex items-center gap-1"
+                  >
+                    <span>{showManualUrl ? "▲ Sembunyikan Input URL Manual" : "▼ Atau gunakan URL eksternal secara langsung"}</span>
+                  </button>
+                  {showManualUrl && (
+                    <div className="mt-2 p-3 bg-white border border-[#e5e5e2] rounded-xl flex items-center gap-2">
+                      <Input
+                        type="text"
+                        value={settings.logoUrl || ""}
+                        onChange={(e) => setSettings({ ...settings, logoUrl: e.target.value })}
+                        placeholder="https://... atau /uploads/logos/logo.png"
+                        className="font-mono text-xs h-9"
+                      />
+                      {settings.logoUrl && (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setSettings({ ...settings, logoUrl: "" })}
+                          className="h-9 px-2 text-xs"
+                        >
+                          Reset
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>

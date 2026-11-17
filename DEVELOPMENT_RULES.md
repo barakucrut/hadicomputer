@@ -64,6 +64,14 @@
 - **Fitur Pagination Baku**: Menampilkan informasi total data (`Menampilkan 1 – 10 dari 48 data`), dropdown pemilihan ukuran halaman (`pageSizeOptions={[10, 20, 50]}`), tombol first/last/prev/next, dan tombol nomor halaman aktif.
 - **Spacing Antar Section**: Jarak vertikal antar section maksimal **32px** (menggunakan gap 16px dengan divider `.admin-section-divider` border halus tanpa margin ganda).
 
+### F. Kartu Pilihan Opsi & Preset Warna (Choice Cards & Swatches)
+- **Selectable Choice Card**: Opsi pilihan kartu (misal: pemilihan font, metode, atau paket) wajib menggunakan class `.admin-choice-card` dan `.admin-choice-card.is-active`. Wajib menyertakan indikator centang besar berukuran lingkaran 24px dengan icon check 16px (`.admin-choice-indicator`).
+- **Color Preset Chips**: Pilihan preset warna tema wajib menggunakan button `.admin-color-preset-btn` dan `.admin-color-preset-btn.is-active` yang memiliki swatch warna persegi (`.admin-color-preset-swatch`), label nama warna, dan kode hex uppercase.
+
+### G. Drag & Drop File Upload Dropzone
+- **Area Dropzone**: Input unggah file/logo wajib menyediakan area drag-and-drop `.admin-dropzone` dengan garis batas putus-putus (`border: 2px dashed #d1d5c9`), icon upload besar, dan reaksi visual saat berkas diseret ke atasnya (`.is-dragging`).
+- **Preview Asset Transparan**: Berkas yang berhasil terunggah wajib ditampilkan dalam box preview dengan motif catur (`.admin-logo-preview-box`) agar transparansi gambar tetap terlihat jelas, disertai tombol aksi Ganti dan Hapus.
+
 ---
 
 ## 3. Tipografi & Font Locking
