@@ -59,8 +59,44 @@ export type Banner = {
   theme: "light" | "dark" | "sage";
   hotspots?: BannerHotspot[];
 };
+export type HomepageSectionToggles = {
+  heroSlider?: boolean;
+  valueStrip?: boolean;
+  categories?: boolean;
+  promoWeek?: boolean;
+  featured?: boolean;
+  needs?: boolean;
+  latest?: boolean;
+  pcGaming?: boolean;
+  services?: boolean;
+  storeLocation?: boolean;
+};
+
+export type HomepageConfig = {
+  featuredTitle?: string;
+  featuredEyebrow?: string;
+  featuredDescription?: string;
+  bestSellerTitle?: string;
+  bestSellerEyebrow?: string;
+  bestSellerDescription?: string;
+  waConsultLabel?: string;
+  waFloatingLabel?: string;
+  storeSectionTitle?: string;
+  storeSectionEyebrow?: string;
+  storeSectionDescription?: string;
+  sections?: HomepageSectionToggles;
+};
+
 export type StoreSettings = {
+  id?: string;
+  slug?: string;
   name: string;
+  tagline?: string | null;
+  logoUrl?: string | null;
+  faviconUrl?: string | null;
+  primaryColor?: string;
+  secondaryColor?: string;
+  fontFamily?: string;
   whatsapp: string | null;
   address: string | null;
   hours: string | null;
@@ -69,4 +105,5 @@ export type StoreSettings = {
   tiktok: string | null;
   facebook: string | null;
   mapsUrl: string | null;
+  homepageConfig?: HomepageConfig | null;
 };

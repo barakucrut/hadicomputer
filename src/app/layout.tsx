@@ -4,7 +4,8 @@ import "./globals.css";
 import "./mobile.css";
 import { Header, Footer } from "@/components/site-shell";
 import { StoreProvider } from "@/components/store-context";
-import { getLiveStoreSettings, getLiveCategories } from "@/lib/live-repository";
+import { getLiveCategories } from "@/lib/live-repository";
+import { resolveStorefrontTenant } from "@/lib/tenant-resolver";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
@@ -76,10 +77,12 @@ export const metadata: Metadata = {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const [store, liveCategories] = await Promise.all([
-    getLiveStoreSettings(),
-    getLiveCategories(),
-  ]);
+  const tenant = await resolveStorefrontTenant();
+  const store = tenant.settings;
+  const liveCategories = await getLiveCategories(tenant.id);
+
+  const fontFamily = store.fontFamily || "Plus Jakarta Sans";
+  const primaryColor = store.primaryColor || "#dd2028";
 
   const storeSchema = {
     "@context": "https://schema.org",
@@ -113,8 +116,30 @@ export default async function RootLayout({
   };
 
   return (
-    <html lang="id" data-scroll-behavior="smooth">
+    <html
+      lang="id"
+      data-scroll-behavior="smooth"
+      style={
+        {
+          "--font": `'${fontFamily}', "Plus Jakarta Sans", sans-serif`,
+          "--red": primaryColor,
+          "--red-dark": primaryColor,
+          "--border-focus": primaryColor,
+          "--ring": `${primaryColor}33`,
+        } as React.CSSProperties
+      }
+    >
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap"
+          rel="stylesheet"
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(storeSchema) }}

@@ -1,5 +1,6 @@
 import { prisma } from "./db";
 import type { Banner, Product, Service, StoreSettings } from "./types";
+import { resolveStorefrontTenant } from "./tenant-resolver";
 import {
   banners,
   categories,
@@ -22,11 +23,16 @@ async function withTimeout<T>(promise: Promise<T>, ms = 2000): Promise<T> {
   }
 }
 
-export async function getLiveProducts(): Promise<Product[]> {
+export async function getLiveProducts(tenantId?: string): Promise<Product[]> {
   try {
+    const whereClause: any = { publicationStatus: "PUBLISHED" };
+    if (tenantId) {
+      whereClause.tenantId = tenantId;
+    }
+
     const dbProducts = await withTimeout(
       prisma.product.findMany({
-        where: { publicationStatus: "PUBLISHED" },
+        where: whereClause,
         include: {
           category: true,
           brand: true,
@@ -41,7 +47,7 @@ export async function getLiveProducts(): Promise<Product[]> {
     if (dbProducts && dbProducts.length > 0) {
       return dbProducts.map((p) => {
         const labels: string[] = [];
-        if (p.isFeatured) labels.push("Pilihan Hadi");
+        if (p.isFeatured) labels.push("Pilihan Toko");
         if (p.isBestSeller) labels.push("Terlaris");
         const hasDiscount =
           (p.originalPrice !== null && p.basePrice !== null && p.originalPrice > p.basePrice) ||
@@ -95,9 +101,9 @@ export async function getLiveProducts(): Promise<Product[]> {
   return getProducts();
 }
 
-export async function getLiveProduct(slug: string): Promise<Product | undefined> {
+export async function getLiveProduct(slug: string, tenantId?: string): Promise<Product | undefined> {
   try {
-    const products = await getLiveProducts();
+    const products = await getLiveProducts(tenantId);
     const found = products.find((p) => p.slug === slug);
     if (found) return found;
   } catch {
@@ -106,11 +112,16 @@ export async function getLiveProduct(slug: string): Promise<Product | undefined>
   return getProduct(slug);
 }
 
-export async function getLiveBanners(): Promise<Banner[]> {
+export async function getLiveBanners(tenantId?: string): Promise<Banner[]> {
   try {
+    const whereClause: any = { isActive: true };
+    if (tenantId) {
+      whereClause.tenantId = tenantId;
+    }
+
     const dbBanners = await withTimeout(
       prisma.banner.findMany({
-        where: { isActive: true },
+        where: whereClause,
         include: { hotspots: true },
         orderBy: { sortOrder: "asc" },
       })
@@ -141,11 +152,16 @@ export async function getLiveBanners(): Promise<Banner[]> {
   return banners;
 }
 
-export async function getLiveCategories() {
+export async function getLiveCategories(tenantId?: string) {
   try {
+    const whereClause: any = { isActive: true };
+    if (tenantId) {
+      whereClause.tenantId = tenantId;
+    }
+
     const dbCats = await withTimeout(
       prisma.category.findMany({
-        where: { isActive: true },
+        where: whereClause,
         orderBy: { sortOrder: "asc" },
       })
     );
@@ -163,40 +179,25 @@ export async function getLiveCategories() {
   return categories;
 }
 
-export async function getLiveStoreSettings(): Promise<StoreSettings> {
+export async function getLiveStoreSettings(tenantId?: string): Promise<StoreSettings> {
   try {
-    const s = await withTimeout(
-      prisma.storeSetting.findUnique({ where: { id: "default" } })
-    );
-    if (s) {
-      let waDigits = (s.whatsappNumber || "").replace(/\D/g, "");
-      if (waDigits.startsWith("0")) {
-        waDigits = "62" + waDigits.slice(1);
-      }
-      const wa = waDigits ? `+${waDigits}` : store.whatsapp;
-      return {
-        name: s.storeName,
-        whatsapp: wa,
-        address: s.address,
-        hours: s.openHours,
-        email: null,
-        instagram: s.socialInstagram,
-        tiktok: s.socialTiktok,
-        facebook: s.socialFacebook,
-        mapsUrl: s.mapsEmbedUrl,
-      };
-    }
+    const storefront = await resolveStorefrontTenant(tenantId);
+    return storefront.settings;
   } catch {
-    // Fallback
+    return store;
   }
-  return store;
 }
 
-export async function getLiveServices(): Promise<Service[]> {
+export async function getLiveServices(tenantId?: string): Promise<Service[]> {
   try {
+    const whereClause: any = { isActive: true };
+    if (tenantId) {
+      whereClause.tenantId = tenantId;
+    }
+
     const dbServices = await withTimeout(
       prisma.service.findMany({
-        where: { isActive: true },
+        where: whereClause,
         orderBy: { sortOrder: "asc" },
       })
     );
@@ -204,7 +205,7 @@ export async function getLiveServices(): Promise<Service[]> {
       return dbServices.map((s) => ({
         slug: s.slug,
         name: s.title,
-        eyebrow: "ADA HADI YANG BANTU",
+        eyebrow: "LAYANAN PROFESIONAL",
         summary: s.summary,
         description: s.description,
         image: s.imageUrl || "/images/banners/work.png",
@@ -229,9 +230,9 @@ export async function getLiveServices(): Promise<Service[]> {
   return services;
 }
 
-export async function getLiveService(slug: string): Promise<Service | undefined> {
+export async function getLiveService(slug: string, tenantId?: string): Promise<Service | undefined> {
   try {
-    const all = await getLiveServices();
+    const all = await getLiveServices(tenantId);
     const found = all.find((s) => s.slug === slug);
     if (found) return found;
   } catch {
@@ -240,11 +241,16 @@ export async function getLiveService(slug: string): Promise<Service | undefined>
   return getService(slug);
 }
 
-export async function getLiveBrands(): Promise<Array<{ id: string; name: string; slug: string }>> {
+export async function getLiveBrands(tenantId?: string): Promise<Array<{ id: string; name: string; slug: string }>> {
   try {
+    const whereClause: any = { isActive: true };
+    if (tenantId) {
+      whereClause.tenantId = tenantId;
+    }
+
     const dbBrands = await withTimeout(
       prisma.brand.findMany({
-        where: { isActive: true },
+        where: whereClause,
         orderBy: { sortOrder: "asc" },
       })
     );
@@ -269,11 +275,16 @@ const DEFAULT_NEEDS = [
   { id: "need-harian", name: "Harian", slug: "harian", description: "Aktivitas ringan & santai setiap hari", icon: "home" },
 ];
 
-export async function getLiveNeeds(): Promise<Array<{ id: string; name: string; slug: string; description: string; icon: string }>> {
+export async function getLiveNeeds(tenantId?: string): Promise<Array<{ id: string; name: string; slug: string; description: string; icon: string }>> {
   try {
+    const whereClause: any = { isActive: true };
+    if (tenantId) {
+      whereClause.tenantId = tenantId;
+    }
+
     const dbNeeds = await withTimeout<any[]>(
       (prisma as any).productNeed.findMany({
-        where: { isActive: true },
+        where: whereClause,
         orderBy: { sortOrder: "asc" },
       })
     );

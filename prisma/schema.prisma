@@ -98,6 +98,10 @@ model TenantSetting {
   faviconUrl              String?  @db.VarChar(255)
   primaryColor            String   @default("#cc252b") @db.VarChar(20)
   secondaryColor          String   @default("#111413") @db.VarChar(20)
+  fontFamily              String   @default("Plus Jakarta Sans") @db.VarChar(50)
+  
+  // Custom Homepage Wording & Section Toggles
+  homepageConfig          Json?    // { "featuredTitle": "...", "sections": { "heroSlider": true, ... } }
   
   // Kontak & Lokasi
   whatsappNumber          String   @default("6285769000007") @db.VarChar(30)

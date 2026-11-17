@@ -356,9 +356,9 @@ function TenantsManagementContent() {
               ⚡
             </div>
             <div style={{ display: "flex", flexDirection: "column" }}>
-              <span style={{ lineHeight: 1.2 }}>Platform CMS</span>
+              <span style={{ lineHeight: 1.2, fontWeight: 900, fontSize: "16px", letterSpacing: "-0.3px" }}>Rigspace</span>
               <span style={{ fontSize: "10px", color: "var(--red)", fontWeight: 800 }}>
-                GOD-MODE CONTROL
+                MASTER ENGINE
               </span>
             </div>
           </Link>
@@ -415,9 +415,9 @@ function TenantsManagementContent() {
           </button>
 
           <div style={{ fontSize: "11px", color: "var(--muted)", lineHeight: 1.4 }}>
-            Multi-Tenant Platform SaaS
+            Rigspace.id
             <br />
-            <strong>Version 2.0 (Live)</strong>
+            <strong>The OS for PC Retailers</strong>
           </div>
         </div>
       </aside>

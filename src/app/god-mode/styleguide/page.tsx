@@ -95,9 +95,9 @@ function GodModeStyleguideContent() {
               ⚡
             </div>
             <div style={{ display: "flex", flexDirection: "column" }}>
-              <span style={{ lineHeight: 1.2 }}>Platform CMS</span>
+              <span style={{ lineHeight: 1.2, fontWeight: 900, fontSize: "16px", letterSpacing: "-0.3px" }}>Rigspace</span>
               <span style={{ fontSize: "10px", color: "var(--red)", fontWeight: 800 }}>
-                GOD-MODE CONTROL
+                MASTER ENGINE
               </span>
             </div>
           </Link>

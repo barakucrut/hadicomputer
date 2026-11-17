@@ -19,15 +19,46 @@ import { HeaderSearch } from "./header-search";
 import { SocialLinks } from "./social-links";
 import { NavLinks } from "./nav-links";
 
-export function Logo() {
+export function Logo({ store }: { store?: StoreSettings }) {
+  if (store?.logoUrl) {
+    return (
+      <Link href="/" aria-label={`${store.name || "Toko"} — Beranda`} className="logo">
+        <img
+          src={store.logoUrl}
+          alt={store.name || "Logo Toko"}
+          width="160"
+          height="50"
+          style={{ objectFit: "contain", maxHeight: "46px", width: "auto" }}
+        />
+      </Link>
+    );
+  }
+
   return (
-    <Link href="/" aria-label="Hadi Computer — Beranda" className="logo">
-      <img
-        src="/images/hadi-logo.jpeg"
-        alt="Hadi Computer"
-        width="160"
-        height="107"
-      />
+    <Link href="/" aria-label={`${store?.name || "Hadi Computer"} — Beranda`} className="logo">
+      <span
+        style={{
+          fontSize: "18px",
+          fontWeight: 900,
+          letterSpacing: "-0.5px",
+          color: "var(--ink)",
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "8px",
+        }}
+      >
+        <span
+          style={{
+            width: "10px",
+            height: "10px",
+            borderRadius: "3px",
+            backgroundColor: "var(--red)",
+            display: "inline-block",
+            flexShrink: 0,
+          }}
+        />
+        <span>{store?.name || "Hadi Computer"}</span>
+      </span>
     </Link>
   );
 }
@@ -98,10 +129,13 @@ export function Header({
         data-home={path === "/"}
       >
         <div className="container header-main">
-          <Logo />
+          <Logo store={store} />
           <HeaderSearch />
           <div className="header-contact">
-            <WhatsAppButton label="Tanya Hadi" phone={store?.whatsapp} />
+            <WhatsAppButton
+              label={store?.homepageConfig?.waConsultLabel || `Tanya ${store?.name || "Hadi"}`}
+              phone={store?.whatsapp}
+            />
           </div>
           <button
             className="icon-button mobile-menu-button"
@@ -155,7 +189,7 @@ export function Header({
             aria-label="Navigasi Menu Ponsel"
           >
             <div className="mobile-nav-header container">
-              <Logo />
+              <Logo store={store} />
               <button
                 className="icon-button mobile-menu-close"
                 aria-label="Tutup menu"
@@ -245,18 +279,21 @@ export function Footer({ store }: { store?: StoreSettings }) {
     return null;
   }
 
+  const storeName = store?.name || "Hadi Computer";
+  const featuredTitle = store?.homepageConfig?.featuredTitle || `Pilihan ${storeName}`;
+
   return (
     <footer className="site-footer">
       <div className="container footer-grid">
         <div className="footer-brand">
-          <Logo />
+          <Logo store={store} />
           <p>
             Perangkat yang tepat.
             <br />
             Teman untuk setiap kebutuhan.
           </p>
           <WhatsAppButton
-            label="Mari ngobrol dengan Hadi"
+            label={store?.homepageConfig?.waConsultLabel || `Mari ngobrol dengan ${storeName}`}
             className="footer-wa"
             phone={store?.whatsapp}
           />
@@ -266,7 +303,7 @@ export function Footer({ store }: { store?: StoreSettings }) {
           <h3>Jelajahi</h3>
           <Link href="/katalog">Semua produk</Link>
           <Link href="/katalog?kondisi=bekas">Produk bekas</Link>
-          <Link href="/katalog?koleksi=Pilihan%20Hadi">Pilihan Hadi</Link>
+          <Link href="/katalog?koleksi=Pilihan%20Toko">{featuredTitle}</Link>
         </div>
         <div>
           <h3>Kami siap membantu</h3>
@@ -275,7 +312,7 @@ export function Footer({ store }: { store?: StoreSettings }) {
           <Link href="/kontak">Kontak kami</Link>
         </div>
         <div>
-          <h3>Kenali Hadi Computer</h3>
+          <h3>Kenali {storeName}</h3>
           <Link href="/lokasi">
             Lokasi toko
             <ArrowUpRight size={13} />
@@ -289,10 +326,18 @@ export function Footer({ store }: { store?: StoreSettings }) {
       </div>
       <div className="container footer-bottom">
         <span>
-          © {new Date().getFullYear()} Hadi Computer. All rights reserved.
+          © {new Date().getFullYear()} {storeName}. All rights reserved.
         </span>
-        <span>
-          Dibuat untuk kebutuhanmu <MessageCircle size={13} />
+        <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+          <span>Powered by</span>
+          <a
+            href="https://rigspace.id"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ fontWeight: 800, color: "var(--red)", textDecoration: "none" }}
+          >
+            ⚡ rigspace.id
+          </a>
         </span>
       </div>
     </footer>
