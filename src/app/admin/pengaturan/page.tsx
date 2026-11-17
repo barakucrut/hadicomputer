@@ -490,29 +490,78 @@ export default function AdminSettingsPage() {
                 </div>
               </div>
 
-              {/* Explicit 16px spacing above and below border-t */}
-              <div className="border-t border-[#e5e5e2] pt-4 mt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="set-primary-color" className="text-xs font-bold text-[#111413]">Custom Warna Primer (Hex Code)</Label>
-                  <div className="flex items-center gap-3">
+              {/* Divider with strictly guaranteed 16px spacing above and below */}
+              <hr
+                style={{
+                  width: "100%",
+                  height: "1px",
+                  backgroundColor: "var(--border)",
+                  border: "none",
+                  margin: "16px 0",
+                  display: "block",
+                }}
+              />
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                <Label htmlFor="set-primary-color" className="text-xs font-bold text-[#111413]">
+                  Custom Warna Primer (Hex Code)
+                </Label>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+                  {/* Square color swatch button identical to presets */}
+                  <div
+                    style={{
+                      position: "relative",
+                      width: "36px",
+                      height: "36px",
+                      flexShrink: 0,
+                    }}
+                    title="Klik kotak warna untuk memilih warna custom"
+                  >
+                    <div
+                      className="admin-color-preset-swatch"
+                      style={{
+                        backgroundColor: settings.primaryColor,
+                        width: "36px",
+                        height: "36px",
+                        borderRadius: "8px",
+                        border: "1.5px solid var(--border)",
+                        boxShadow: "0 1px 3px rgba(0,0,0,0.08), inset 0 1px 2px rgba(0,0,0,0.15)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <Palette size={16} className="text-white drop-shadow-xs" />
+                    </div>
                     <input
                       type="color"
                       id="set-primary-color-picker"
                       value={settings.primaryColor}
                       onChange={(e) => setSettings({ ...settings, primaryColor: e.target.value })}
-                      className="w-9 h-9 p-0.5 rounded-lg border border-gray-300 cursor-pointer shadow-xs"
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        height: "100%",
+                        opacity: 0,
+                        cursor: "pointer",
+                      }}
                     />
-                    <Input
-                      id="set-primary-color"
-                      type="text"
-                      value={settings.primaryColor}
-                      onChange={(e) => setSettings({ ...settings, primaryColor: e.target.value })}
-                      className="font-mono uppercase font-bold text-xs h-9 max-w-[140px]"
-                    />
-                    <span className="text-xs text-gray-500">
-                      Format: #RRGGBB (misal: #0066CC untuk Plaza Bitcom)
-                    </span>
                   </div>
+
+                  <Input
+                    id="set-primary-color"
+                    type="text"
+                    value={settings.primaryColor}
+                    onChange={(e) => setSettings({ ...settings, primaryColor: e.target.value })}
+                    className="font-mono uppercase font-bold text-xs h-9 max-w-[140px]"
+                  />
+
+                  <span className="text-xs text-[#818779]">
+                    Format: #RRGGBB (misal: #0066CC untuk Plaza Bitcom)
+                  </span>
                 </div>
               </div>
             </CardContent>
