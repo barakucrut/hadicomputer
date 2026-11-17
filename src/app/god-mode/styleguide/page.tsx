@@ -738,23 +738,25 @@ function GodModeStyleguideContent() {
                   <div className="space-y-2">
                     <Label className="text-xs font-bold text-[#111413]">State 2: File Terunggah (Thumbnail + Remove File)</Label>
                     <div className="admin-dropzone flex flex-col items-center justify-center py-5 text-center" style={{ cursor: "default" }}>
-                      <div className="admin-logo-preview-box w-16 h-16 mb-2.5 shadow-xs">
-                        <span className="text-[11px] font-black text-[#111413] tracking-tighter">HADICOMPUTER</span>
+                      <div className="admin-logo-preview-box mb-2 shadow-xs">
+                        <span className="text-[10px] font-black text-[#111413] tracking-tighter">HADICOMPUTER</span>
                       </div>
-                      <p className="text-sm font-bold text-[#111413] max-w-xs truncate">
+                      <p className="text-xs font-bold text-[#111413] max-w-xs truncate">
                         Modern Bitcom Plaza Hardware ...
                       </p>
-                      <p className="text-xs text-[#525854] mt-0.5 font-medium">
+                      <p className="text-[11px] text-[#525854] mt-0.5 font-medium">
                         0.99 MB
                       </p>
-                      <button
+                      <Button
                         type="button"
+                        variant="outline"
+                        size="sm"
                         onClick={() => toast.success("File dihapus, dropzone kembali siap upload")}
-                        className="mt-3.5 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-[#d1d5c9] bg-white hover:bg-gray-50 text-xs font-bold text-[#111413] shadow-xs transition-colors cursor-pointer"
+                        className="mt-3 flex items-center gap-1.5 h-8 px-3.5 text-xs font-bold"
                       >
-                        <X size={14} />
+                        <X size={13} />
                         <span>Remove file</span>
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -950,7 +952,7 @@ function GodModeStyleguideContent() {
                       <strong>Area Dropzone:</strong> Wajib <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">.admin-dropzone</code> bergaris putus-putus, responsif terhadap event drag-over.
                     </li>
                     <li>
-                      <strong>Preview Logo:</strong> Wajib menampilkan motif kotak catur transparan (<code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">.admin-logo-preview-box</code>) dengan tombol ganti/hapus.
+                      <strong>Preview Logo:</strong> Wajib menampilkan motif kotak catur transparan compact (<code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">.admin-logo-preview-box</code>) dengan tombol standar outline sm <code className="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold">[ ✕ Remove file ]</code>.
                     </li>
                   </ul>
                 </Card>

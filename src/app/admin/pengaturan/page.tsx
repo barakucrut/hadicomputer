@@ -631,42 +631,44 @@ export default function AdminSettingsPage() {
 
                 {settings.logoUrl ? (
                   <div
-                    className="admin-dropzone flex flex-col items-center justify-center py-6 text-center"
+                    className="admin-dropzone flex flex-col items-center justify-center py-5 text-center"
                     style={{ cursor: "default" }}
                   >
-                    {/* Centered Thumbnail Image Preview */}
-                    <div className="admin-logo-preview-box w-20 h-20 mb-3 shadow-xs">
+                    {/* Centered Thumbnail Image Preview (Compact 50%) */}
+                    <div className="admin-logo-preview-box mb-2 shadow-xs">
                       <img
                         src={settings.logoUrl}
                         alt="Logo Toko"
-                        className="max-h-16 max-w-full object-contain"
+                        className="object-contain"
                       />
                     </div>
 
                     {/* Centered File Name */}
-                    <p className="text-sm font-bold text-[#111413] max-w-sm truncate">
+                    <p className="text-xs font-bold text-[#111413] max-w-sm truncate">
                       {logoFileName || settings.logoUrl.split("/").pop() || "Logo Toko"}
                     </p>
 
                     {/* Centered File Size / Meta */}
-                    <p className="text-xs text-[#525854] mt-1 font-medium">
+                    <p className="text-[11px] text-[#525854] mt-0.5 font-medium">
                       {logoFileSize || "Logo Toko Aktif"}
                     </p>
 
-                    {/* Remove File Button */}
-                    <button
+                    {/* Standard Remove File Button */}
+                    <Button
                       type="button"
+                      variant="outline"
+                      size="sm"
                       onClick={(e) => {
                         e.stopPropagation();
                         setSettings((prev: any) => ({ ...prev, logoUrl: "" }));
                         setLogoFileName("");
                         setLogoFileSize("");
                       }}
-                      className="mt-4 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-[#d1d5c9] bg-white hover:bg-gray-50 text-xs font-bold text-[#111413] shadow-xs transition-colors cursor-pointer"
+                      className="mt-3 flex items-center gap-1.5 h-8 px-3.5 text-xs font-bold"
                     >
-                      <X size={14} />
+                      <X size={13} />
                       <span>Remove file</span>
-                    </button>
+                    </Button>
                   </div>
                 ) : (
                   <div
@@ -720,7 +722,9 @@ export default function AdminSettingsPage() {
             <CardContent className="p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="set-featured-title">Judul Section Pilihan Toko</Label>
+                  <Label htmlFor="set-featured-title" className="text-xs font-bold text-[#111413]">
+                    Judul Section Pilihan Toko
+                  </Label>
                   <Input
                     id="set-featured-title"
                     type="text"
@@ -735,15 +739,17 @@ export default function AdminSettingsPage() {
                       })
                     }
                     placeholder={`Pilihan ${settings.storeName}, untuk harimu.`}
-                    className="mt-1 font-bold"
+                    className="text-xs h-10 mt-1 font-bold"
                   />
-                  <span className="text-[11px] text-gray-500 mt-0.5 block">
+                  <span className="text-[11px] text-[#818779] mt-1 block">
                     Muncul di atas daftar produk rekomendasi utama.
                   </span>
                 </div>
 
                 <div>
-                  <Label htmlFor="set-bestseller-title">Judul Section Produk Terpopuler</Label>
+                  <Label htmlFor="set-bestseller-title" className="text-xs font-bold text-[#111413]">
+                    Judul Section Produk Terpopuler
+                  </Label>
                   <Input
                     id="set-bestseller-title"
                     type="text"
@@ -758,17 +764,19 @@ export default function AdminSettingsPage() {
                       })
                     }
                     placeholder={`Favorit di ${settings.storeName}.`}
-                    className="mt-1 font-bold"
+                    className="text-xs h-10 mt-1 font-bold"
                   />
-                  <span className="text-[11px] text-gray-500 mt-0.5 block">
+                  <span className="text-[11px] text-[#818779] mt-1 block">
                     Muncul di atas daftar produk terlaris / kurasi owner.
                   </span>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="set-wa-header">Label Tombol WhatsApp Header</Label>
+                  <Label htmlFor="set-wa-header" className="text-xs font-bold text-[#111413]">
+                    Label Tombol WhatsApp Header
+                  </Label>
                   <Input
                     id="set-wa-header"
                     type="text"
@@ -783,12 +791,14 @@ export default function AdminSettingsPage() {
                       })
                     }
                     placeholder={`Tanya ${settings.storeName}`}
-                    className="mt-1"
+                    className="text-xs h-10 mt-1"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="set-wa-floating">Label Tombol WA Melayang Mobile</Label>
+                  <Label htmlFor="set-wa-floating" className="text-xs font-bold text-[#111413]">
+                    Label Tombol WA Melayang Mobile
+                  </Label>
                   <Input
                     id="set-wa-floating"
                     type="text"
@@ -803,7 +813,7 @@ export default function AdminSettingsPage() {
                       })
                     }
                     placeholder={`Tanya ${settings.storeName} via WhatsApp`}
-                    className="mt-1"
+                    className="text-xs h-10 mt-1"
                   />
                 </div>
               </div>
@@ -822,7 +832,7 @@ export default function AdminSettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[
                   {
                     key: "heroSlider",
@@ -920,7 +930,7 @@ export default function AdminSettingsPage() {
             </CardHeader>
             <CardContent className="p-6 space-y-4">
               <div>
-                <Label htmlFor="set-wa">
+                <Label htmlFor="set-wa" className="text-xs font-bold text-[#111413]">
                   Nomor WhatsApp Toko (Format Internasional: 628...) *
                 </Label>
                 <Input
@@ -929,12 +939,14 @@ export default function AdminSettingsPage() {
                   required
                   value={settings.whatsappNumber}
                   onChange={(e) => setSettings({ ...settings, whatsappNumber: e.target.value })}
-                  className="font-mono font-bold mt-1"
+                  className="font-mono font-bold text-xs h-10 mt-1"
                 />
               </div>
 
               <div>
-                <Label htmlFor="set-wa-tpl">Template Pesan WhatsApp Default</Label>
+                <Label htmlFor="set-wa-tpl" className="text-xs font-bold text-[#111413]">
+                  Template Pesan WhatsApp Default
+                </Label>
                 <textarea
                   id="set-wa-tpl"
                   rows={2}
@@ -942,7 +954,7 @@ export default function AdminSettingsPage() {
                   onChange={(e) =>
                     setSettings({ ...settings, whatsappDefaultTemplate: e.target.value })
                   }
-                  className="shadcn-input h-auto py-2.5 mt-1"
+                  className="shadcn-input text-xs h-auto py-2.5 mt-1"
                 />
               </div>
             </CardContent>
@@ -957,40 +969,46 @@ export default function AdminSettingsPage() {
             </CardHeader>
             <CardContent className="p-6 space-y-4">
               <div>
-                <Label htmlFor="set-address">Alamat Lengkap Toko</Label>
+                <Label htmlFor="set-address" className="text-xs font-bold text-[#111413]">
+                  Alamat Lengkap Toko
+                </Label>
                 <textarea
                   id="set-address"
                   rows={2}
                   value={settings.address}
                   onChange={(e) => setSettings({ ...settings, address: e.target.value })}
-                  className="shadcn-input h-auto py-2.5 mt-1"
+                  className="shadcn-input text-xs h-auto py-2.5 mt-1"
                   placeholder="e.g. Jl. PB Sudirman No. 12, Jember"
                 />
               </div>
 
               <div>
-                <Label htmlFor="set-hours">Jam Operasional / Buka Toko</Label>
+                <Label htmlFor="set-hours" className="text-xs font-bold text-[#111413]">
+                  Jam Operasional / Buka Toko
+                </Label>
                 <Input
                   id="set-hours"
                   type="text"
                   value={settings.openHours}
                   onChange={(e) => setSettings({ ...settings, openHours: e.target.value })}
-                  className="mt-1"
+                  className="text-xs h-10 mt-1"
                   placeholder="e.g. Buka setiap hari: 08.00 – 21.00 WIB"
                 />
               </div>
 
               <div>
-                <Label htmlFor="set-maps">Google Maps Embed URL</Label>
+                <Label htmlFor="set-maps" className="text-xs font-bold text-[#111413]">
+                  Google Maps Embed URL
+                </Label>
                 <Input
                   id="set-maps"
                   type="text"
                   value={settings.mapsEmbedUrl || ""}
                   onChange={(e) => setSettings({ ...settings, mapsEmbedUrl: e.target.value })}
                   placeholder="https://www.google.com/maps/embed?..."
-                  className="mt-1 font-mono text-xs"
+                  className="font-mono text-xs h-10 mt-1"
                 />
-                <span className="text-[11px] text-gray-500 mt-1 block">
+                <span className="text-[11px] text-[#818779] mt-1 block">
                   Buka Google Maps → Bagikan → Sematkan peta → Salin link src iframe.
                 </span>
               </div>
@@ -1007,38 +1025,44 @@ export default function AdminSettingsPage() {
             <CardContent className="p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <Label htmlFor="set-ig">Akun Instagram</Label>
+                  <Label htmlFor="set-ig" className="text-xs font-bold text-[#111413]">
+                    Akun Instagram
+                  </Label>
                   <Input
                     id="set-ig"
                     type="text"
                     value={settings.socialInstagram || ""}
                     onChange={(e) => setSettings({ ...settings, socialInstagram: e.target.value })}
                     placeholder="@plazabitcom"
-                    className="mt-1"
+                    className="text-xs h-10 mt-1"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="set-tiktok">Akun TikTok</Label>
+                  <Label htmlFor="set-tiktok" className="text-xs font-bold text-[#111413]">
+                    Akun TikTok
+                  </Label>
                   <Input
                     id="set-tiktok"
                     type="text"
                     value={settings.socialTiktok || ""}
                     onChange={(e) => setSettings({ ...settings, socialTiktok: e.target.value })}
                     placeholder="@plazabitcom"
-                    className="mt-1"
+                    className="text-xs h-10 mt-1"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="set-fb">Halaman Facebook</Label>
+                  <Label htmlFor="set-fb" className="text-xs font-bold text-[#111413]">
+                    Halaman Facebook
+                  </Label>
                   <Input
                     id="set-fb"
                     type="text"
                     value={settings.socialFacebook || ""}
                     onChange={(e) => setSettings({ ...settings, socialFacebook: e.target.value })}
                     placeholder="Plaza Bitcom Jember"
-                    className="mt-1"
+                    className="text-xs h-10 mt-1"
                   />
                 </div>
               </div>
@@ -1062,7 +1086,9 @@ export default function AdminSettingsPage() {
             </CardHeader>
             <CardContent className="p-6 space-y-4">
               <div>
-                <Label htmlFor="curr-pass">Password Saat Ini *</Label>
+                <Label htmlFor="curr-pass" className="text-xs font-bold text-[#111413]">
+                  Password Saat Ini *
+                </Label>
                 <div className="relative mt-1">
                   <Input
                     id="curr-pass"
@@ -1070,6 +1096,7 @@ export default function AdminSettingsPage() {
                     required
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
+                    className="text-xs h-10 pr-10"
                   />
                   <button
                     type="button"
@@ -1082,7 +1109,9 @@ export default function AdminSettingsPage() {
               </div>
 
               <div>
-                <Label htmlFor="new-pass">Password Baru (Minimal 6 Karakter) *</Label>
+                <Label htmlFor="new-pass" className="text-xs font-bold text-[#111413]">
+                  Password Baru (Minimal 6 Karakter) *
+                </Label>
                 <div className="relative mt-1">
                   <Input
                     id="new-pass"
@@ -1090,6 +1119,7 @@ export default function AdminSettingsPage() {
                     required
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
+                    className="text-xs h-10 pr-10"
                   />
                   <button
                     type="button"
@@ -1102,24 +1132,26 @@ export default function AdminSettingsPage() {
               </div>
 
               <div>
-                <Label htmlFor="confirm-pass">Konfirmasi Password Baru *</Label>
+                <Label htmlFor="confirm-pass" className="text-xs font-bold text-[#111413]">
+                  Konfirmasi Password Baru *
+                </Label>
                 <Input
                   id="confirm-pass"
                   type="password"
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="mt-1"
+                  className="text-xs h-10 mt-1"
                 />
               </div>
 
-              <div className="pt-2">
+              <div className="pt-4">
                 <Button
                   type="submit"
                   disabled={passwordSaving}
-                  className="flex items-center gap-2"
+                  className="h-10 px-5 text-xs font-bold flex items-center gap-2"
                 >
-                  <Lock size={16} />
+                  <Lock size={15} />
                   <span>{passwordSaving ? "Memperbarui Password..." : "Update Password"}</span>
                 </Button>
               </div>
