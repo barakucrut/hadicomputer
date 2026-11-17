@@ -545,8 +545,8 @@ function TransactionsContent() {
                     className="text-xs h-10 w-44 bg-white"
                   >
                     <option value="ALL">Semua Tipe Arus Kas</option>
-                    <option value="INCOME">Pemasukan (+)</option>
-                    <option value="EXPENSE">Pengeluaran (-)</option>
+                    <option value="INCOME">Pemasukan</option>
+                    <option value="EXPENSE">Pengeluaran</option>
                   </Select>
 
                   <Select
@@ -785,7 +785,7 @@ function TransactionsContent() {
                   }}
                 >
                   <ArrowUpRight size={15} />
-                  <span>Pemasukan (+)</span>
+                  <span>Pemasukan</span>
                 </button>
 
                 <button
@@ -803,7 +803,7 @@ function TransactionsContent() {
                   }}
                 >
                   <ArrowDownLeft size={15} />
-                  <span>Pengeluaran (-)</span>
+                  <span>Pengeluaran</span>
                 </button>
               </div>
             </div>
