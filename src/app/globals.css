@@ -342,27 +342,34 @@ fieldset {
   padding-block: 10px;
 }
 .logo {
-  display: block;
-  position: relative;
-  overflow: hidden;
-  width: 155px;
-  height: 56px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  height: 48px;
+  max-height: 48px;
+  max-width: 200px;
   flex-shrink: 0;
   background: transparent;
+  text-decoration: none;
   transition: transform 0.25s ease;
 }
 .site-header.is-sticky .logo {
-  height: 56px;
-  transform: scale(0.92);
+  height: 42px;
+  max-height: 42px;
+  transform: scale(0.95);
   transform-origin: left center;
 }
 .logo img {
-  position: absolute;
-  width: 170px;
-  max-width: none;
+  display: block;
+  width: auto;
+  max-width: 100%;
   height: auto;
-  left: -11px;
-  top: -29px;
+  max-height: 44px;
+  object-fit: contain;
+  object-position: left center;
+}
+.site-header.is-sticky .logo img {
+  max-height: 38px;
 }
 .header-search-wrap {
   position: relative;
@@ -1466,8 +1473,11 @@ fieldset {
   padding-bottom: 40px;
 }
 .footer-brand .logo {
-  margin-top: -13px;
-  margin-left: -2px;
+  margin: 0;
+  height: 44px;
+}
+.footer-brand .logo img {
+  max-height: 40px;
 }
 .footer-brand > p {
   font-size: 12px;
@@ -2762,13 +2772,12 @@ fieldset {
     padding-inline: 12px;
   }
   .logo {
-    width: 135px;
-    height: 50px;
+    height: 42px;
+    max-height: 42px;
+    max-width: 160px;
   }
   .logo img {
-    width: 150px;
-    left: -10px;
-    top: -26px;
+    max-height: 38px;
   }
   .category-grid {
     grid-template-columns: repeat(3, 1fr);
@@ -2993,13 +3002,12 @@ fieldset {
     padding-block: 14px;
   }
   .logo {
-    width: 125px;
-    height: 46px;
+    height: 38px;
+    max-height: 38px;
+    max-width: 140px;
   }
   .logo img {
-    width: 140px;
-    left: -17px;
-    top: -24px;
+    max-height: 34px;
   }
   .header-contact {
     display: none;

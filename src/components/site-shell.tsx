@@ -26,9 +26,7 @@ export function Logo({ store }: { store?: StoreSettings }) {
         <img
           src={store.logoUrl}
           alt={store.name || "Logo Toko"}
-          width="160"
-          height="50"
-          style={{ objectFit: "contain", maxHeight: "46px", width: "auto" }}
+          style={{ objectFit: "contain", maxHeight: "44px", width: "auto", maxWidth: "100%" }}
         />
       </Link>
     );
