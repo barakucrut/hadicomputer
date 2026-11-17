@@ -145,7 +145,6 @@ export default function AdminSettingsPage() {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = React.useState(false);
   const [uploadingLogo, setUploadingLogo] = React.useState(false);
-  const [showManualUrl, setShowManualUrl] = React.useState(false);
 
   async function handleLogoUpload(file: File) {
     if (!file) return;
@@ -651,39 +650,6 @@ export default function AdminSettingsPage() {
                     </p>
                   </div>
                 )}
-
-                {/* Optional Manual URL Accordion */}
-                <div className="pt-1">
-                  <button
-                    type="button"
-                    onClick={() => setShowManualUrl(!showManualUrl)}
-                    className="text-[11px] font-bold text-[#525854] hover:text-[#111413] flex items-center gap-1"
-                  >
-                    <span>{showManualUrl ? "▲ Sembunyikan Input URL Manual" : "▼ Atau gunakan URL eksternal secara langsung"}</span>
-                  </button>
-                  {showManualUrl && (
-                    <div className="mt-2 p-3 bg-white border border-[#e5e5e2] rounded-xl flex items-center gap-2">
-                      <Input
-                        type="text"
-                        value={settings.logoUrl || ""}
-                        onChange={(e) => setSettings({ ...settings, logoUrl: e.target.value })}
-                        placeholder="https://... atau /uploads/logos/logo.png"
-                        className="font-mono text-xs h-9"
-                      />
-                      {settings.logoUrl && (
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => setSettings({ ...settings, logoUrl: "" })}
-                          className="h-9 px-2 text-xs"
-                        >
-                          Reset
-                        </Button>
-                      )}
-                    </div>
-                  )}
-                </div>
               </div>
             </CardContent>
           </Card>
