@@ -44,8 +44,14 @@ const mobilePcSlugs = new Set([
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export default async function HomePage() {
-  const tenant = await resolveStorefrontTenant();
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ store?: string; preview?: string }>;
+}) {
+  const resolvedParams = searchParams ? await searchParams : {};
+  const explicitStore = resolvedParams.store || resolvedParams.preview;
+  const tenant = await resolveStorefrontTenant(explicitStore);
   const storeSettings = tenant.settings;
   const config = storeSettings.homepageConfig || {};
   const sections = config.sections || {};

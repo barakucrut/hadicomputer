@@ -44,11 +44,31 @@ export async function resolveStorefrontTenant(explicitSlugOrId?: string): Promis
 
   let targetSlugOrId = explicitSlugOrId;
 
-  // 1. Check preview / override from cookie
+  // 1. Check preview / override from cookie or active admin impersonation
   if (!targetSlugOrId) {
     targetSlugOrId =
       cookieStore.get("rigspace_store_slug")?.value ||
-      cookieStore.get("preview_tenant_slug")?.value;
+      cookieStore.get("preview_tenant_slug")?.value ||
+      cookieStore.get("god_impersonated_tenant_id")?.value;
+  }
+
+  // 1.b Check if logged in as a normal tenant admin
+  if (!targetSlugOrId) {
+    const adminToken = cookieStore.get("hadi_admin_session")?.value;
+    if (adminToken) {
+      try {
+        const { jwtVerify } = await import("jose");
+        const ADMIN_JWT_SECRET = new TextEncoder().encode(
+          process.env.ADMIN_JWT_SECRET || "hadi-computer-cms-secret-key-32-chars-long-2026"
+        );
+        const { payload } = await jwtVerify(adminToken, ADMIN_JWT_SECRET);
+        if (payload?.tenantId) {
+          targetSlugOrId = payload.tenantId as string;
+        }
+      } catch {
+        // ignore invalid token
+      }
+    }
   }
 
   // 2. Check host header if not in override
