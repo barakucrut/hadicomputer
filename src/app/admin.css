@@ -2047,6 +2047,51 @@ textarea.admin-input {
   transform: translateX(18px) !important;
 }
 
+/* ==========================================================================
+   Admin Form Password Input & Toggle Eye
+   ========================================================================== */
+.admin-password-wrapper {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+}
+
+.admin-password-toggle-btn {
+  position: absolute !important;
+  top: 50% !important;
+  right: 12px !important;
+  transform: translateY(-50%) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 24px !important;
+  height: 24px !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  color: #818779 !important;
+  cursor: pointer !important;
+  z-index: 2 !important;
+  outline: none !important;
+  transition: color 0.15s ease !important;
+}
+
+.admin-password-toggle-btn:hover {
+  color: #111413 !important;
+}
+
+/* ==========================================================================
+   Admin Form Subtitle / Helper Hint Component (Standard: 11px & Red)
+   ========================================================================== */
+.admin-form-hint {
+  font-size: 11px !important;
+  color: #dc2626 !important;
+  margin-top: 4px !important;
+  display: block !important;
+  line-height: 1.4 !important;
+  font-weight: 500 !important;
+}
+
 
 
 

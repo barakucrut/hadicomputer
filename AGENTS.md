@@ -43,6 +43,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
    - **Border Bottom / Divider Spacing**: Setiap garis pemisah (`border-t`, `border-b`, divider), konten di atas dan di bawahnya WAJIB berjarak 16px.
    - **Border State Aktif**: Garis border state aktif wajib tipis, minimalis, dan clean (maksimal `1.5px`), dilarang menggunakan ring/shadow tebal berlebih.
    - **Tipografi Form**: Seluruh teks input, select, dan label form wajib berukuran 12px (`text-xs`).
+   - **Form Subtitle & Helper Hint**: Seluruh teks keterangan, subtitle, atau instruksi pembantu di bawah form input WAJIB berukuran 11px dan berwarna merah (`.admin-form-hint` / `text-red-600 text-[11px]`).
    - **Notice / Warning Alert**: Keterangan batasan format atau peringatan (seperti batasan 'PNG / SVG Maks 2MB') WAJIB berwarna merah (`text-red-600`).
+   - **Password Input**: Input password dengan tombol intip mata wajib dibungkus `.admin-password-wrapper` dengan tombol toggle `.admin-password-toggle-btn` yang presisi di tengah vertikal kanan input (`pr-10`).
 
 *Detail lengkap terdokumentasi di file `DEVELOPMENT_RULES.md`.*

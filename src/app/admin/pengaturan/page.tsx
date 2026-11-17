@@ -140,6 +140,7 @@ export default function AdminSettingsPage() {
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [showCurrentPassword, setShowCurrentPassword] = React.useState(false);
   const [showNewPassword, setShowNewPassword] = React.useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
   const [passwordSaving, setPasswordSaving] = React.useState(false);
 
   // Logo upload state
@@ -566,7 +567,7 @@ export default function AdminSettingsPage() {
                     className="font-mono uppercase font-bold text-xs h-9 max-w-[140px]"
                   />
 
-                  <span className="text-xs text-[#818779]">
+                  <span className="admin-form-hint">
                     Format: #RRGGBB (misal: #0066CC untuk Plaza Bitcom)
                   </span>
                 </div>
@@ -694,7 +695,7 @@ export default function AdminSettingsPage() {
                     <p className="text-xs text-[#525854] mt-1">
                       atau <span className="text-red-600 font-bold underline">klik untuk memilih dari komputer</span>
                     </p>
-                    <p className="text-[11px] text-[#818779] mt-2">
+                    <p className="admin-form-hint mt-2">
                       Format yang didukung: PNG transparan, JPEG, WebP, SVG (Maksimal 2MB)
                     </p>
                   </div>
@@ -741,7 +742,7 @@ export default function AdminSettingsPage() {
                     placeholder={`Pilihan ${settings.storeName}, untuk harimu.`}
                     className="text-xs h-10 mt-1 font-bold"
                   />
-                  <span className="text-[11px] text-[#818779] mt-1 block">
+                  <span className="admin-form-hint">
                     Muncul di atas daftar produk rekomendasi utama.
                   </span>
                 </div>
@@ -766,7 +767,7 @@ export default function AdminSettingsPage() {
                     placeholder={`Favorit di ${settings.storeName}.`}
                     className="text-xs h-10 mt-1 font-bold"
                   />
-                  <span className="text-[11px] text-[#818779] mt-1 block">
+                  <span className="admin-form-hint">
                     Muncul di atas daftar produk terlaris / kurasi owner.
                   </span>
                 </div>
@@ -899,15 +900,12 @@ export default function AdminSettingsPage() {
                       <div className="min-w-0 flex-1 pr-2">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
                           <span className="font-bold text-xs text-[#111413]">{s.label}</span>
-                          <span
-                            className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                              isActive
-                                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                                : "bg-gray-100 text-gray-500 border border-gray-200"
-                            }`}
+                          <Badge
+                            variant={isActive ? "success" : "secondary"}
+                            className="text-[10px] px-2 py-0.5"
                           >
                             {isActive ? "Tampil" : "Nonaktif"}
-                          </span>
+                          </Badge>
                         </div>
                         <p className="text-[11px] text-[#525854] leading-snug">{s.desc}</p>
                       </div>
@@ -1019,7 +1017,7 @@ export default function AdminSettingsPage() {
                   placeholder="https://www.google.com/maps/embed?..."
                   className="font-mono text-xs h-10 mt-1"
                 />
-                <span className="text-[11px] text-[#818779] mt-1 block">
+                <span className="admin-form-hint">
                   Buka Google Maps → Bagikan → Sematkan peta → Salin link src iframe.
                 </span>
               </div>
@@ -1100,19 +1098,21 @@ export default function AdminSettingsPage() {
                 <Label htmlFor="curr-pass" className="text-xs font-bold text-[#111413]">
                   Password Saat Ini *
                 </Label>
-                <div className="relative mt-1">
+                <div className="admin-password-wrapper mt-1">
                   <Input
                     id="curr-pass"
                     type={showCurrentPassword ? "text" : "password"}
                     required
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="text-xs h-10 pr-10"
+                    className="text-xs h-10 pr-10 w-full"
+                    placeholder="Masukkan password saat ini"
                   />
                   <button
                     type="button"
                     onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                    className="admin-password-toggle-btn"
+                    title={showCurrentPassword ? "Sembunyikan password" : "Lihat password"}
                   >
                     {showCurrentPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
@@ -1123,19 +1123,21 @@ export default function AdminSettingsPage() {
                 <Label htmlFor="new-pass" className="text-xs font-bold text-[#111413]">
                   Password Baru (Minimal 6 Karakter) *
                 </Label>
-                <div className="relative mt-1">
+                <div className="admin-password-wrapper mt-1">
                   <Input
                     id="new-pass"
                     type={showNewPassword ? "text" : "password"}
                     required
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="text-xs h-10 pr-10"
+                    className="text-xs h-10 pr-10 w-full"
+                    placeholder="Masukkan password baru"
                   />
                   <button
                     type="button"
                     onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                    className="admin-password-toggle-btn"
+                    title={showNewPassword ? "Sembunyikan password" : "Lihat password"}
                   >
                     {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
@@ -1146,14 +1148,25 @@ export default function AdminSettingsPage() {
                 <Label htmlFor="confirm-pass" className="text-xs font-bold text-[#111413]">
                   Konfirmasi Password Baru *
                 </Label>
-                <Input
-                  id="confirm-pass"
-                  type="password"
-                  required
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="text-xs h-10 mt-1"
-                />
+                <div className="admin-password-wrapper mt-1">
+                  <Input
+                    id="confirm-pass"
+                    type={showConfirmPassword ? "text" : "password"}
+                    required
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="text-xs h-10 pr-10 w-full"
+                    placeholder="Ulangi password baru"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="admin-password-toggle-btn"
+                    title={showConfirmPassword ? "Sembunyikan password" : "Lihat password"}
+                  >
+                    {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
               </div>
 
               <div className="pt-4">

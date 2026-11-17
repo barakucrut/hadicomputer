@@ -457,7 +457,7 @@ function GodModeStyleguideContent() {
                         onValueChange={(val) => setCurrencyVal(val)}
                         placeholder="Rp 0"
                       />
-                      <p className="text-[11px] text-[#818779]">
+                      <p className="admin-form-hint">
                         Mengetik angka otomatis diberi pemisah ribuan titik (<code className="font-mono">Rp 12.500.000</code>).
                       </p>
                     </div>
