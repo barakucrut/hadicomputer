@@ -385,7 +385,7 @@ export default function AdminSettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="p-6 space-y-5">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {FONT_OPTIONS.map((f) => {
                   const isSelected = settings.fontFamily === f.id;
                   return (
@@ -397,18 +397,16 @@ export default function AdminSettingsPage() {
                       tabIndex={0}
                       aria-pressed={isSelected}
                     >
-                      <div className="flex items-start justify-between gap-3 pr-8">
-                        <div>
-                          <span
-                            data-preview-font="true"
-                            style={{ fontFamily: `'${f.id}', sans-serif` }}
-                            className="font-bold text-base text-[#111413] block"
-                          >
-                            {f.name}
-                          </span>
-                          <span className="text-[11px] font-bold text-[#818779] block mt-0.5">
-                            {f.category}
-                          </span>
+                      <div className="flex flex-col gap-1 pr-8">
+                        <div
+                          data-preview-font="true"
+                          style={{ fontFamily: `'${f.id}', sans-serif` }}
+                          className="font-bold text-sm text-[#111413] leading-tight"
+                        >
+                          {f.name}
+                        </div>
+                        <div className="text-[11px] font-semibold text-[#818779] leading-tight">
+                          {f.category}
                         </div>
                       </div>
 
@@ -417,10 +415,10 @@ export default function AdminSettingsPage() {
                         className="admin-choice-indicator"
                         title={isSelected ? "Font Sedang Aktif" : "Pilih Font Ini"}
                       >
-                        {isSelected && <Check size={16} strokeWidth={3} className="text-white" />}
+                        {isSelected && <Check size={14} strokeWidth={2.5} className="text-white" />}
                       </div>
 
-                      <p className="text-xs text-[#525854] mt-3 leading-relaxed">
+                      <p className="text-xs text-[#525854] mt-2.5 leading-relaxed">
                         {f.description}
                       </p>
                     </div>
@@ -460,13 +458,13 @@ export default function AdminSettingsPage() {
                 Warna primer menentukan warna tombol aksi utama (CTA), badge diskon, hover links, dan aksen navigasi.
               </CardDescription>
             </CardHeader>
-            <CardContent className="p-6 space-y-6">
+            <CardContent className="p-6 space-y-4">
               <div>
-                <div className="flex items-center justify-between mb-2.5">
+                <div className="flex items-center justify-between mb-3">
                   <Label className="text-xs font-bold text-[#111413]">Pilihan Cepat Warna Preset:</Label>
                   <span className="text-[11px] text-[#818779]">Klik kotak warna untuk memilih tema</span>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
                   {COLOR_PRESETS.map((p) => {
                     const isSelected = settings.primaryColor?.toLowerCase() === p.hex.toLowerCase();
                     return (
@@ -481,7 +479,7 @@ export default function AdminSettingsPage() {
                           className="admin-color-preset-swatch"
                           style={{ backgroundColor: p.hex }}
                         >
-                          {isSelected && <Check size={14} strokeWidth={3} className="text-white drop-shadow-xs" />}
+                          {isSelected && <Check size={13} strokeWidth={2.5} className="text-white drop-shadow-xs" />}
                         </div>
                         <div className="flex flex-col min-w-0 flex-1">
                           <span className="text-xs font-bold text-[#111413] truncate">{p.name}</span>
@@ -493,23 +491,24 @@ export default function AdminSettingsPage() {
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row sm:items-center gap-4 pt-2 border-t border-[#e5e5e2]">
-                <div className="flex-1">
+              {/* Explicit 16px spacing above and below border-t */}
+              <div className="border-t border-[#e5e5e2] pt-4 mt-4">
+                <div className="space-y-2">
                   <Label htmlFor="set-primary-color" className="text-xs font-bold text-[#111413]">Custom Warna Primer (Hex Code)</Label>
-                  <div className="flex items-center gap-3 mt-1.5">
+                  <div className="flex items-center gap-3">
                     <input
                       type="color"
                       id="set-primary-color-picker"
                       value={settings.primaryColor}
                       onChange={(e) => setSettings({ ...settings, primaryColor: e.target.value })}
-                      className="w-10 h-10 p-1 rounded-lg border border-gray-300 cursor-pointer shadow-xs"
+                      className="w-9 h-9 p-0.5 rounded-lg border border-gray-300 cursor-pointer shadow-xs"
                     />
                     <Input
                       id="set-primary-color"
                       type="text"
                       value={settings.primaryColor}
                       onChange={(e) => setSettings({ ...settings, primaryColor: e.target.value })}
-                      className="font-mono uppercase font-bold max-w-[160px]"
+                      className="font-mono uppercase font-bold text-xs h-9 max-w-[140px]"
                     />
                     <span className="text-xs text-gray-500">
                       Format: #RRGGBB (misal: #0066CC untuk Plaza Bitcom)
@@ -531,9 +530,9 @@ export default function AdminSettingsPage() {
                 Nama resmi dan gambar logo yang akan muncul di header atas dan footer etalase toko.
               </CardDescription>
             </CardHeader>
-            <CardContent className="p-6 space-y-5">
+            <CardContent className="p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
+                <div className="space-y-1.5">
                   <Label htmlFor="set-name" className="text-xs font-bold text-[#111413]">Nama Toko *</Label>
                   <Input
                     id="set-name"
@@ -541,28 +540,30 @@ export default function AdminSettingsPage() {
                     required
                     value={settings.storeName}
                     onChange={(e) => setSettings({ ...settings, storeName: e.target.value })}
-                    className="font-bold text-base mt-1"
+                    className="text-xs font-bold h-10 mt-1"
                   />
                 </div>
 
-                <div>
+                <div className="space-y-1.5">
                   <Label htmlFor="set-tagline" className="text-xs font-bold text-[#111413]">Tagline Singkat Toko</Label>
                   <Input
                     id="set-tagline"
                     type="text"
                     value={settings.tagline}
                     onChange={(e) => setSettings({ ...settings, tagline: e.target.value })}
-                    className="mt-1"
+                    className="text-xs h-10 mt-1"
                     placeholder="e.g. Solusi Lengkap Komputer & Laptop Terpercaya"
                   />
                 </div>
               </div>
 
-              {/* Drag & Drop Logo Upload Area */}
+              {/* Drag & Drop Logo Upload Area with 16px vertical distance */}
               <div className="space-y-3 pt-2">
                 <div className="flex items-center justify-between">
                   <Label className="text-xs font-bold text-[#111413]">Logo Toko (Header & Footer)</Label>
-                  <span className="text-[11px] text-[#818779]">PNG Transparan / SVG / JPEG (Maks. 2MB)</span>
+                  <span className="text-[11px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-200">
+                    PNG Transparan / SVG / JPEG (Maks. 2MB)
+                  </span>
                 </div>
 
                 {/* Hidden File Input */}

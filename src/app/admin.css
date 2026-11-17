@@ -1830,6 +1830,9 @@ textarea.admin-input {
   border: none !important;
 }
 
+.block { display: block !important; }
+.inline-block { display: inline-block !important; }
+
 /* ==========================================================================
    Interactive Selectable Option Cards (Choice Cards)
    ========================================================================== */
@@ -1838,12 +1841,12 @@ textarea.admin-input {
   display: flex;
   flex-direction: column;
   background-color: #ffffff;
-  border: 1.5px solid var(--border);
-  border-radius: 14px;
-  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
   cursor: pointer;
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  transition: all 0.16s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
   text-align: left;
   user-select: none;
   box-sizing: border-box;
@@ -1851,30 +1854,29 @@ textarea.admin-input {
 
 .admin-choice-card:hover {
   border-color: #c4c8bc;
-  background-color: #fcfcfb;
+  background-color: #fafaf8;
   transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
 }
 
 .admin-choice-card.is-active {
-  border-color: var(--red) !important;
-  background-color: #fffbfa !important;
-  box-shadow: 0 0 0 1.5px var(--red), 0 4px 14px rgba(204, 37, 43, 0.09) !important;
+  border: 1.5px solid var(--red) !important;
+  background-color: #ffffff !important;
+  box-shadow: 0 2px 6px rgba(204, 37, 43, 0.06) !important;
 }
 
 .admin-choice-indicator {
   position: absolute;
   top: 14px;
   right: 14px;
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   border: 1.5px solid #d1d5c9;
   background-color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.16s ease;
   color: transparent;
 }
 
@@ -1882,8 +1884,7 @@ textarea.admin-input {
   border-color: var(--red) !important;
   background-color: var(--red) !important;
   color: #ffffff !important;
-  transform: scale(1.1);
-  box-shadow: 0 2px 6px rgba(204, 37, 43, 0.35);
+  box-shadow: 0 1px 4px rgba(204, 37, 43, 0.3);
 }
 
 /* ==========================================================================
@@ -1895,11 +1896,11 @@ textarea.admin-input {
   gap: 10px !important;
   padding: 8px 12px !important;
   background-color: #ffffff !important;
-  border: 1.5px solid var(--border) !important;
-  border-radius: 12px !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 10px !important;
   cursor: pointer !important;
   transition: all 0.15s ease !important;
-  box-shadow: var(--shadow-xs) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
   text-align: left !important;
   width: 100% !important;
   box-sizing: border-box !important;
@@ -1912,34 +1913,34 @@ textarea.admin-input {
 }
 
 .admin-color-preset-btn.is-active {
-  border-color: var(--ink) !important;
-  background-color: #f5f6f2 !important;
-  box-shadow: 0 0 0 2px var(--ink), var(--shadow-xs) !important;
+  border: 1.5px solid var(--ink) !important;
+  background-color: #ffffff !important;
+  box-shadow: 0 1px 4px rgba(17, 20, 19, 0.08) !important;
 }
 
 .admin-color-preset-swatch {
-  width: 24px;
-  height: 24px;
-  border-radius: 7px;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
   flex-shrink: 0;
   border: 1px solid rgba(0, 0, 0, 0.12);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.18);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
 }
 
 /* ==========================================================================
    Drag & Drop File Upload Dropzone
    ========================================================================== */
 .admin-dropzone {
-  border: 2px dashed #d1d5c9;
+  border: 1.5px dashed #c9cdbf;
   background-color: #fafafa;
-  border-radius: 16px;
-  padding: 28px 20px;
+  border-radius: 14px;
+  padding: 24px 20px;
   text-align: center;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
   user-select: none;
@@ -1947,24 +1948,23 @@ textarea.admin-input {
 
 .admin-dropzone:hover {
   border-color: var(--muted);
-  background-color: #f6f6f4;
+  background-color: #f5f6f2;
 }
 
 .admin-dropzone.is-dragging {
   border-color: var(--red) !important;
-  background-color: #fff5f5 !important;
-  transform: scale(1.005);
+  background-color: #fff8f8 !important;
 }
 
 .admin-logo-preview-box {
-  background: repeating-conic-gradient(#e5e7e1 0% 25%, #ffffff 0% 50%) 50% / 16px 16px;
-  border: 1.5px solid var(--border);
-  border-radius: 12px;
-  padding: 16px;
+  background: repeating-conic-gradient(#e5e7e1 0% 25%, #ffffff 0% 50%) 50% / 14px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 80px;
+  min-height: 72px;
 }
 
 

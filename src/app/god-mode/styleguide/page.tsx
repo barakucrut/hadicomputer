@@ -636,9 +636,9 @@ function GodModeStyleguideContent() {
                           role="button"
                           tabIndex={0}
                         >
-                          <div className="pr-7">
-                            <span className="font-bold text-sm text-[#111413] block">{f.name}</span>
-                            <span className="text-[10px] font-bold text-[#818779] block mt-0.5">{f.cat}</span>
+                          <div className="flex flex-col gap-1 pr-7">
+                            <span className="font-bold text-sm text-[#111413] leading-tight">{f.name}</span>
+                            <span className="text-[10px] font-bold text-[#818779] leading-tight">{f.cat}</span>
                           </div>
                           <div className="admin-choice-indicator" title={isSelected ? "Item Aktif" : "Klik untuk Pilih"}>
                             {isSelected && <Check size={16} strokeWidth={3} className="text-white" />}
@@ -726,9 +726,11 @@ function GodModeStyleguideContent() {
                       <p className="text-xs text-[#525854] mt-1">
                         atau <span className="text-red-600 font-bold underline">klik untuk memilih dari komputer</span>
                       </p>
-                      <p className="text-[10.5px] text-[#818779] mt-2">
-                        Format: PNG transparan, JPEG, WebP, SVG (Maksimal 2MB)
-                      </p>
+                      <div className="mt-2">
+                        <span className="text-[10.5px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-200">
+                          Format: PNG transparan, JPEG, WebP, SVG (Maksimal 2MB)
+                        </span>
+                      </div>
                     </div>
                   </div>
 

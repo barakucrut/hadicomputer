@@ -72,6 +72,13 @@
 - **Area Dropzone**: Input unggah file/logo wajib menyediakan area drag-and-drop `.admin-dropzone` dengan garis batas putus-putus (`border: 2px dashed #d1d5c9`), icon upload besar, dan reaksi visual saat berkas diseret ke atasnya (`.is-dragging`).
 - **Preview Asset Transparan**: Berkas yang berhasil terunggah wajib ditampilkan dalam box preview dengan motif catur (`.admin-logo-preview-box`) agar transparansi gambar tetap terlihat jelas, disertai tombol aksi Ganti dan Hapus.
 
+### H. Spacing, Jarak Vertikal Form, & Border Minimalis
+- **Jarak Antar Komponen**: Setiap komponen WAJIB memiliki jarak minimal 8px – 16px (dilarang dempet). Jarak vertikal antar baris input form wajib tepat 16px (`gap: 16px` / `space-y-4`).
+- **Border Bottom / Divider Spacing**: Setiap garis pemisah (`border-t`, `border-b`, divider), konten di atas dan di bawahnya WAJIB berjarak 16px.
+- **Border State Aktif**: Garis border state aktif wajib tipis, minimalis, dan clean (maksimal `1.5px`), dilarang menggunakan ring/shadow tebal bertumpuk.
+- **Tipografi Form**: Seluruh teks input, select, dan label form wajib berukuran 12px (`text-xs`).
+- **Notice / Warning Alert**: Keterangan batasan format atau peringatan (seperti batasan 'PNG / SVG Maks 2MB') WAJIB berwarna merah (`text-red-600`).
+
 ---
 
 ## 3. Tipografi & Font Locking

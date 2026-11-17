@@ -38,4 +38,11 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
    - Preset warna tema wajib berupa tombol chip `.admin-color-preset-btn` dengan swatch kotak dan outline aktif.
    - Form unggah file/logo wajib menyediakan dropzone drag-and-drop `.admin-dropzone` dan preview transparan catur `.admin-logo-preview-box`.
 
+7. **SPACING, FORM CONTROLS & MINIMALIST BORDER RULES**
+   - **Jarak Antar Komponen**: Setiap komponen WAJIB memiliki jarak minimal 8px – 16px (dilarang dempet). Jarak vertikal antar baris input form wajib tepat 16px (`gap: 16px` / `space-y-4`).
+   - **Border Bottom / Divider Spacing**: Setiap garis pemisah (`border-t`, `border-b`, divider), konten di atas dan di bawahnya WAJIB berjarak 16px.
+   - **Border State Aktif**: Garis border state aktif wajib tipis, minimalis, dan clean (maksimal `1.5px`), dilarang menggunakan ring/shadow tebal berlebih.
+   - **Tipografi Form**: Seluruh teks input, select, dan label form wajib berukuran 12px (`text-xs`).
+   - **Notice / Warning Alert**: Keterangan batasan format atau peringatan (seperti batasan 'PNG / SVG Maks 2MB') WAJIB berwarna merah (`text-red-600`).
+
 *Detail lengkap terdokumentasi di file `DEVELOPMENT_RULES.md`.*
