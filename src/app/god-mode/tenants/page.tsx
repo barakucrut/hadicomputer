@@ -62,7 +62,7 @@ import {
   DialogFooter,
 } from "@/components/admin/ui/dialog";
 import { ConfirmDialog } from "@/components/admin/ui/confirm-dialog";
-import { HugeIconTrash } from "@/components/admin/ui/huge-icons";
+import { HugeIconTrash, HugeIconEdit } from "@/components/admin/ui/huge-icons";
 import { useToast, ToastProvider } from "@/components/admin/ui/toast";
 import "@/app/admin.css";
 
@@ -137,6 +137,73 @@ function TenantsManagementContent() {
     tradeIn: true,
     instantCheckout: false,
   });
+
+  // Edit Form State
+  const [editName, setEditName] = React.useState("");
+  const [editDomain, setEditDomain] = React.useState("");
+  const [editPlan, setEditPlan] = React.useState<"STARTER" | "PRO" | "ENTERPRISE">("PRO");
+  const [editStatus, setEditStatus] = React.useState<"ACTIVE" | "TRIAL" | "SUSPENDED">("ACTIVE");
+  const [editPhone, setEditPhone] = React.useState("");
+  const [editColor, setEditColor] = React.useState("#cc252b");
+  const [editAddress, setEditAddress] = React.useState("");
+  const [editOpenHours, setEditOpenHours] = React.useState("");
+  const [editFeatures, setEditFeatures] = React.useState({
+    pcBuilder: true,
+    tradeIn: true,
+  });
+
+  function handleOpenEdit(t: TenantData) {
+    setEditingTenant(t);
+    setEditName(t.name);
+    setEditDomain(t.customDomain || "");
+    setEditPlan(t.plan);
+    setEditStatus(t.status);
+    setEditColor(t.settings?.primaryColor || "#cc252b");
+    setEditPhone(t.settings?.whatsappNumber || "628");
+    setEditAddress(t.settings?.address || "");
+    setEditOpenHours(t.settings?.openHours || "Senin - Sabtu: 09:00 - 20:00");
+    setEditFeatures({
+      pcBuilder: !!t.features.pcBuilder,
+      tradeIn: !!t.features.tradeIn,
+    });
+    setIsEditModalOpen(true);
+  }
+
+  async function handleSaveEdit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingTenant) return;
+
+    try {
+      setSubmitting(true);
+      const res = await fetch(`/api/god-mode/tenants/${editingTenant.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: editName,
+          customDomain: editDomain || null,
+          plan: editPlan,
+          status: editStatus,
+          primaryColor: editColor,
+          whatsappNumber: editPhone,
+          address: editAddress,
+          openHours: editOpenHours,
+          features: editFeatures,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Gagal memperbarui data tenant");
+
+      toast.success(`Data tenant "${editName}" berhasil diperbarui!`);
+      setIsEditModalOpen(false);
+      setEditingTenant(null);
+      fetchTenants();
+    } catch (err: any) {
+      toast.error(err.message || "Gagal menyimpan perubahan");
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   const fetchTenants = React.useCallback(async () => {
     try {
@@ -711,13 +778,21 @@ function TenantsManagementContent() {
                       </TableRow>
                     ) : (
                       paginatedTenants.map((t) => (
-                        <TableRow key={t.id} className="hover:bg-[#fafafa] transition-colors">
+                        <TableRow
+                          key={t.id}
+                          onClick={() => handleOpenEdit(t)}
+                          className="hover:bg-[#fafafa] transition-colors cursor-pointer"
+                        >
                           {/* Nama & Domain */}
                           <TableCell className="py-4 px-6">
                             <div className="flex items-center gap-3">
                               <div
-                                className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-black shadow-sm flex-shrink-0"
-                                style={{ backgroundColor: t.settings?.primaryColor || "#cc252b" }}
+                                className="w-10 h-10 rounded-[10px] flex items-center justify-center text-white text-xs font-black shadow-sm flex-shrink-0"
+                                style={{
+                                  backgroundColor: t.settings?.primaryColor || "#cc252b",
+                                  boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
+                                  border: "1px solid rgba(0, 0, 0, 0.08)",
+                                }}
                               >
                                 {t.name.slice(0, 2).toUpperCase()}
                               </div>
@@ -751,7 +826,8 @@ function TenantsManagementContent() {
                               </code>
                               <button
                                 type="button"
-                                onClick={() => {
+                                onClick={(e) => {
+                                  e.stopPropagation();
                                   navigator.clipboard.writeText(t.id);
                                   toast.success("ID SHA-1 disalin ke clipboard!");
                                 }}
@@ -779,9 +855,9 @@ function TenantsManagementContent() {
                           </TableCell>
 
                           {/* Modular Switches */}
-                          <TableCell className="py-4 px-6">
+                          <TableCell className="py-4 px-6" onClick={(e) => e.stopPropagation()}>
                             <div className="flex flex-col gap-2">
-                              <label className="flex items-center gap-2 cursor-pointer text-xs">
+                              <label className="flex items-center gap-2 cursor-pointer text-xs" onClick={(e) => e.stopPropagation()}>
                                 <Switch
                                   checked={!!t.features.pcBuilder}
                                   onCheckedChange={() =>
@@ -793,7 +869,7 @@ function TenantsManagementContent() {
                                 </span>
                               </label>
 
-                              <label className="flex items-center gap-2 cursor-pointer text-xs">
+                              <label className="flex items-center gap-2 cursor-pointer text-xs" onClick={(e) => e.stopPropagation()}>
                                 <Switch
                                   checked={!!t.features.tradeIn}
                                   onCheckedChange={() =>
@@ -823,24 +899,42 @@ function TenantsManagementContent() {
                           </TableCell>
 
                           {/* Actions */}
-                          <TableCell className="py-4 px-6 text-right">
-                            <div className="flex items-center justify-end gap-2">
-                              {/* Impersonate Button */}
-                              <Button
-                                size="sm"
-                                onClick={() => handleImpersonate(t.id)}
-                                className="bg-[#111413] hover:bg-black text-white text-xs h-8 px-3 font-bold flex items-center gap-1.5 shadow-sm"
-                                title={`Login ke mode CMS ${t.name}`}
+                          <TableCell className="py-4 px-6 text-right" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center justify-end gap-1.5">
+                              {/* Impersonate Button - Icon Only */}
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleImpersonate(t.id);
+                                }}
+                                className="admin-action-btn"
+                                title={`Masuk CMS ${t.name}`}
                               >
-                                <Zap size={13} className="text-amber-400 fill-amber-400" />
-                                <span>Masuk CMS</span>
-                              </Button>
+                                <Zap size={16} className="text-amber-500 fill-amber-500" />
+                              </button>
+
+                              {/* Edit Button */}
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleOpenEdit(t);
+                                }}
+                                className="admin-action-btn"
+                                title="Edit Detail Tenant"
+                              >
+                                <HugeIconEdit size={16} />
+                              </button>
 
                               {/* Delete button (except Hadi Computer) */}
                               {t.slug !== "hadicomputer" && (
                                 <button
                                   type="button"
-                                  onClick={() => setDeleteTarget(t)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setDeleteTarget(t);
+                                  }}
                                   className="admin-action-btn delete"
                                   title="Hapus Toko"
                                 >
@@ -1052,6 +1146,164 @@ function TenantsManagementContent() {
               </Button>
               <Button type="submit" disabled={submitting}>
                 {submitting ? "Membuat Tenant..." : "Daftarkan Tenant"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Tenant Modal */}
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Store size={18} className="text-red-600" />
+              <span>Edit Detail Tenant: {editingTenant?.name}</span>
+            </DialogTitle>
+            <DialogDescription>
+              Perbarui konfigurasi domain, paket subscription, status, dan fitur modular merchant ini.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSaveEdit} className="space-y-4 pt-2">
+            <div>
+              <Label htmlFor="edit-name">Nama Toko Merchant *</Label>
+              <Input
+                id="edit-name"
+                required
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                placeholder="e.g. Plaza Bitcom Jember"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label>Subdomain (Locked ID)</Label>
+                <div className="mt-1 flex items-center h-10 px-3 rounded-lg border border-[#e5e5e2] bg-[#f9f9f8] text-xs font-mono text-[#525854]">
+                  {editingTenant?.slug}.tokopc.id
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="edit-domain">Custom Domain (Opsional)</Label>
+                <Input
+                  id="edit-domain"
+                  value={editDomain}
+                  onChange={(e) => setEditDomain(e.target.value)}
+                  placeholder="e.g. plazabitcom.com"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="edit-plan">Paket Subscription</Label>
+                <Select
+                  id="edit-plan"
+                  value={editPlan}
+                  onChange={(e) => setEditPlan(e.target.value as any)}
+                >
+                  <option value="STARTER">STARTER (Katalog Standar)</option>
+                  <option value="PRO">PRO (Racik PC + Trade-in)</option>
+                  <option value="ENTERPRISE">ENTERPRISE (Full Custom Domain + Multi Cabang)</option>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="edit-status">Status Operasional</Label>
+                <Select
+                  id="edit-status"
+                  value={editStatus}
+                  onChange={(e) => setEditStatus(e.target.value as any)}
+                >
+                  <option value="ACTIVE">ACTIVE (Toko Buka & Aktif)</option>
+                  <option value="TRIAL">TRIAL (Masa Uji Coba)</option>
+                  <option value="SUSPENDED">SUSPENDED (Ditangguhkan)</option>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="edit-phone">Nomor WhatsApp Toko</Label>
+                <Input
+                  id="edit-phone"
+                  value={editPhone}
+                  onChange={(e) => setEditPhone(e.target.value)}
+                  placeholder="628xxxxxxxxxx"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="edit-color">Warna Aksen Brand</Label>
+                <div className="flex items-center gap-2 mt-1">
+                  <input
+                    type="color"
+                    id="edit-color"
+                    value={editColor}
+                    onChange={(e) => setEditColor(e.target.value)}
+                    className="w-10 h-10 rounded cursor-pointer border border-[#e5e5e2] p-1 bg-white"
+                  />
+                  <Input
+                    value={editColor}
+                    onChange={(e) => setEditColor(e.target.value)}
+                    placeholder="#cc252b"
+                    className="font-mono text-xs uppercase"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="edit-address">Alamat Toko</Label>
+              <Input
+                id="edit-address"
+                value={editAddress}
+                onChange={(e) => setEditAddress(e.target.value)}
+                placeholder="Jl. Jawa No. 12, Jember"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="edit-open-hours">Jam Operasional</Label>
+              <Input
+                id="edit-open-hours"
+                value={editOpenHours}
+                onChange={(e) => setEditOpenHours(e.target.value)}
+                placeholder="Senin - Sabtu: 09:00 - 20:00"
+              />
+            </div>
+
+            <div className="border border-[#e5e5e2] rounded-lg p-3 space-y-2 bg-[#fcfcfc]">
+              <div className="text-xs font-bold text-[#111413]">Fitur Modular Toko:</div>
+              <label className="flex items-center gap-2 text-xs cursor-pointer">
+                <Switch
+                  checked={editFeatures.pcBuilder}
+                  onCheckedChange={(c) => setEditFeatures({ ...editFeatures, pcBuilder: c })}
+                />
+                <span>Simulasi Racik PC (Interactive PC Builder)</span>
+              </label>
+              <label className="flex items-center gap-2 text-xs cursor-pointer">
+                <Switch
+                  checked={editFeatures.tradeIn}
+                  onCheckedChange={(c) => setEditFeatures({ ...editFeatures, tradeIn: c })}
+                />
+                <span>Kalkulator Tukar Tambah Laptop (Trade-In)</span>
+              </label>
+            </div>
+
+            <DialogFooter className="pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsEditModalOpen(false)}
+                disabled={submitting}
+              >
+                Batal
+              </Button>
+              <Button type="submit" disabled={submitting}>
+                {submitting ? "Menyimpan..." : "Simpan Perubahan"}
               </Button>
             </DialogFooter>
           </form>

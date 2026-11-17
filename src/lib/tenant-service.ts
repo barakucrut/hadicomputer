@@ -168,6 +168,57 @@ export async function updateTenantStatus(
   });
 }
 
+export interface UpdateTenantInput {
+  name?: string;
+  customDomain?: string | null;
+  plan?: "STARTER" | "PRO" | "ENTERPRISE";
+  status?: "ACTIVE" | "TRIAL" | "SUSPENDED";
+  features?: Record<string, boolean>;
+  primaryColor?: string;
+  whatsappNumber?: string;
+  address?: string;
+  openHours?: string;
+}
+
+export async function updateTenantFull(tenantId: string, data: UpdateTenantInput) {
+  const tenantUpdateData: any = {};
+  if (data.name !== undefined) tenantUpdateData.name = data.name.trim();
+  if (data.customDomain !== undefined) {
+    tenantUpdateData.customDomain = data.customDomain ? data.customDomain.toLowerCase().trim() : null;
+  }
+  if (data.plan !== undefined) tenantUpdateData.plan = data.plan;
+  if (data.status !== undefined) tenantUpdateData.status = data.status;
+  if (data.features !== undefined) tenantUpdateData.features = data.features;
+
+  const settingsUpdateData: any = {};
+  if (data.primaryColor !== undefined) settingsUpdateData.primaryColor = data.primaryColor;
+  if (data.whatsappNumber !== undefined) settingsUpdateData.whatsappNumber = data.whatsappNumber.trim();
+  if (data.address !== undefined) settingsUpdateData.address = data.address.trim() || null;
+  if (data.openHours !== undefined) settingsUpdateData.openHours = data.openHours.trim();
+
+  return await prisma.tenant.update({
+    where: { id: tenantId },
+    data: {
+      ...tenantUpdateData,
+      settings:
+        Object.keys(settingsUpdateData).length > 0
+          ? {
+              upsert: {
+                create: {
+                  primaryColor: data.primaryColor || "#cc252b",
+                  whatsappNumber: data.whatsappNumber || "6281234567890",
+                  address: data.address || null,
+                  openHours: data.openHours || "Senin - Sabtu: 09:00 - 20:00",
+                },
+                update: settingsUpdateData,
+              },
+            }
+          : undefined,
+    },
+    include: { settings: true },
+  });
+}
+
 export async function deleteTenant(tenantId: string) {
   // Prevent accidentally deleting Hadi Computer Tenant #1
   if (tenantId === HADI_TENANT_ID) {

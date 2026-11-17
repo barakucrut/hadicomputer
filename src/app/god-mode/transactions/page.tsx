@@ -57,7 +57,7 @@ import {
   DialogFooter,
 } from "@/components/admin/ui/dialog";
 import { ConfirmDialog } from "@/components/admin/ui/confirm-dialog";
-import { HugeIconTrash } from "@/components/admin/ui/huge-icons";
+import { HugeIconTrash, HugeIconEdit } from "@/components/admin/ui/huge-icons";
 import { useToast, ToastProvider } from "@/components/admin/ui/toast";
 import "@/app/admin.css";
 
@@ -139,6 +139,65 @@ function TransactionsContent() {
   const [newAmount, setNewAmount] = React.useState("");
   const [newPaymentMethod, setNewPaymentMethod] = React.useState("Transfer Bank");
   const [newDescription, setNewDescription] = React.useState("");
+
+  // Edit Modal State
+  const [isEditOpen, setIsEditOpen] = React.useState(false);
+  const [editingTransaction, setEditingTransaction] = React.useState<TransactionItem | null>(null);
+  const [editTitle, setEditTitle] = React.useState("");
+  const [editAmount, setEditAmount] = React.useState("");
+  const [editType, setEditType] = React.useState<"INCOME" | "EXPENSE">("INCOME");
+  const [editCategory, setEditCategory] = React.useState("SUBSCRIPTION");
+  const [editPaymentMethod, setEditPaymentMethod] = React.useState("Transfer Bank");
+  const [editTenantId, setEditTenantId] = React.useState("");
+  const [editDescription, setEditDescription] = React.useState("");
+
+  function handleOpenEdit(t: TransactionItem) {
+    setEditingTransaction(t);
+    setEditTitle(t.title);
+    setEditAmount(String(t.amount));
+    setEditType(t.type);
+    setEditCategory(t.category);
+    setEditPaymentMethod(t.paymentMethod || "Transfer Bank");
+    setEditTenantId(t.tenantId || "");
+    setEditDescription(t.description || "");
+    setIsEditOpen(true);
+  }
+
+  async function handleSaveEdit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingTransaction) return;
+
+    try {
+      setSubmitting(true);
+      const selectedTenant = tenants.find((item) => item.id === editTenantId);
+      const res = await fetch(`/api/god-mode/transactions/${editingTransaction.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: editTitle.trim(),
+          amount: Number(editAmount),
+          type: editType,
+          category: editCategory,
+          paymentMethod: editPaymentMethod,
+          tenantId: editTenantId || null,
+          tenantName: selectedTenant ? selectedTenant.name : null,
+          description: editDescription.trim() || null,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Gagal memperbarui transaksi");
+
+      toast.success("Catatan transaksi berhasil diperbarui!");
+      setIsEditOpen(false);
+      setEditingTransaction(null);
+      fetchTransactions();
+    } catch (err: any) {
+      toast.error(err.message || "Gagal menyimpan perubahan");
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   const fetchTransactions = React.useCallback(async () => {
     try {
@@ -614,7 +673,11 @@ function TransactionsContent() {
                       </TableRow>
                     ) : (
                       paginatedList.map((t) => (
-                        <TableRow key={t.id} className="hover:bg-[#fafafa] transition-colors">
+                        <TableRow
+                          key={t.id}
+                          onClick={() => handleOpenEdit(t)}
+                          className="hover:bg-[#fafafa] transition-colors cursor-pointer"
+                        >
                           <TableCell className="py-4 px-6 text-xs text-[#525854] font-medium">
                             {new Date(t.date).toLocaleDateString("id-ID", {
                               day: "numeric",
@@ -668,11 +731,25 @@ function TransactionsContent() {
                             </span>
                           </TableCell>
 
-                          <TableCell className="py-4 px-6 text-right">
+                          <TableCell className="py-4 px-6 text-right" onClick={(e) => e.stopPropagation()}>
                             <div className="flex items-center justify-end gap-1.5">
                               <button
                                 type="button"
-                                onClick={() => setDeleteTarget(t)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleOpenEdit(t);
+                                }}
+                                className="admin-action-btn"
+                                title="Edit Transaksi"
+                              >
+                                <HugeIconEdit size={16} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setDeleteTarget(t);
+                                }}
                                 className="admin-action-btn delete"
                                 title="Hapus Transaksi"
                               >
@@ -918,6 +995,152 @@ function TransactionsContent() {
               </Button>
               <Button type="submit" disabled={submitting}>
                 {submitting ? "Menyimpan..." : "Simpan Transaksi"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Transaction Modal */}
+      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Catatan Mutasi</DialogTitle>
+            <DialogDescription>
+              Perbarui detail transaksi arus kas platform.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSaveEdit} className="space-y-4 pt-2">
+            <div>
+              <Label className="text-xs font-bold text-[#111413] mb-1.5 block">Tipe Arus Kas *</Label>
+              <div className="admin-tabs-list full-width" style={{ width: "100%", display: "flex", backgroundColor: "#f1f3ed", padding: "4px", borderRadius: "10px", border: "1px solid var(--border)", gap: "4px" }}>
+                <button
+                  type="button"
+                  onClick={() => setEditType("INCOME")}
+                  className={`admin-tab-trigger ${editType === "INCOME" ? "active-income" : ""}`}
+                  style={{ flex: 1, height: "38px", fontSize: "13px", fontWeight: 700 }}
+                >
+                  <ArrowUpRight size={15} />
+                  <span>Pemasukan</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setEditType("EXPENSE")}
+                  className={`admin-tab-trigger ${editType === "EXPENSE" ? "active-expense" : ""}`}
+                  style={{ flex: 1, height: "38px", fontSize: "13px", fontWeight: 700 }}
+                >
+                  <ArrowDownLeft size={15} />
+                  <span>Pengeluaran</span>
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="edit-tx-title">Judul Transaksi *</Label>
+              <Input
+                id="edit-tx-title"
+                required
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                placeholder="Judul transaksi"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="edit-tx-category">Kategori Transaksi *</Label>
+              <Select
+                id="edit-tx-category"
+                value={editCategory}
+                onChange={(e) => setEditCategory(e.target.value)}
+              >
+                {editType === "INCOME" ? (
+                  <>
+                    <option value="SUBSCRIPTION">Subscription Paket Platform</option>
+                    <option value="JUAL_PUTUS">Jual Putus (Source Code / Lisensi Penuh)</option>
+                    <option value="SETUP_FEE">Biaya Setup Domain / Kustomisasi Toko</option>
+                    <option value="ADDON">Add-on Fitur Khusus</option>
+                    <option value="OTHER">Pemasukan Lainnya</option>
+                  </>
+                ) : (
+                  <>
+                    <option value="SERVER_INFRA">Server & Hosting Cloud VPS</option>
+                    <option value="DOMAIN_REGISTRATION">Registrasi & Perpanjangan Domain</option>
+                    <option value="WHATSAPP_GATEWAY">Biaya WhatsApp Gateway (Fonnte/Waba)</option>
+                    <option value="MARKETING">Marketing & Iklan Platform</option>
+                    <option value="OPERATIONAL">Operasional Platform</option>
+                    <option value="OTHER">Pengeluaran Lainnya</option>
+                  </>
+                )}
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="edit-tx-amount">Nominal (Rp) *</Label>
+              <CurrencyInput
+                id="edit-tx-amount"
+                name="amount"
+                value={editAmount}
+                onValueChange={(val) => setEditAmount(val)}
+                placeholder="Rp 0"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="edit-tx-tenant">Merchant Terkait (Opsional)</Label>
+              <Select
+                id="edit-tx-tenant"
+                value={editTenantId}
+                onChange={(e) => setEditTenantId(e.target.value)}
+              >
+                <option value="">-- Umum (Infrastruktur Platform) --</option>
+                {tenants.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name} ({t.slug}.tokopc.id)
+                  </option>
+                ))}
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="edit-tx-method">Metode Pembayaran</Label>
+              <Select
+                id="edit-tx-method"
+                value={editPaymentMethod}
+                onChange={(e) => setEditPaymentMethod(e.target.value)}
+              >
+                <option value="Transfer BCA">Transfer BCA</option>
+                <option value="Transfer Mandiri">Transfer Mandiri</option>
+                <option value="Transfer BNI / BRI">Transfer BNI / BRI</option>
+                <option value="Kartu Kredit / Debit">Kartu Kredit / Debit</option>
+                <option value="QRIS Platform">QRIS Platform</option>
+                <option value="Tunai">Tunai</option>
+                <option value="Lainnya">Lainnya</option>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="edit-tx-desc">Catatan / Keterangan Tambahan</Label>
+              <Input
+                id="edit-tx-desc"
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                placeholder="Catatan invoice atau nomor referensi"
+              />
+            </div>
+
+            <DialogFooter className="pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsEditOpen(false)}
+                disabled={submitting}
+              >
+                Batal
+              </Button>
+              <Button type="submit" disabled={submitting}>
+                {submitting ? "Menyimpan..." : "Simpan Perubahan"}
               </Button>
             </DialogFooter>
           </form>

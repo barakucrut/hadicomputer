@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { updateTenantFeatures, updateTenantStatus, deleteTenant, getTenantById } from "@/lib/tenant-service";
+import {
+  updateTenantFeatures,
+  updateTenantStatus,
+  updateTenantFull,
+  deleteTenant,
+  getTenantById,
+} from "@/lib/tenant-service";
 
 export async function GET(
   request: NextRequest,
@@ -25,13 +31,7 @@ export async function PATCH(
     const { id } = await params;
     const body = await request.json();
 
-    let updatedTenant;
-    if (body.features) {
-      updatedTenant = await updateTenantFeatures(id, body.features);
-    }
-    if (body.status) {
-      updatedTenant = await updateTenantStatus(id, body.status);
-    }
+    const updatedTenant = await updateTenantFull(id, body);
 
     return NextResponse.json({ success: true, tenant: updatedTenant });
   } catch (err: any) {
