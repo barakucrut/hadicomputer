@@ -400,13 +400,6 @@ function GodModeExecutiveSummary() {
               )}
             </div>
 
-            <Link href="/god-mode/tenants">
-              <Button className="flex items-center gap-1.5 h-10 px-4 text-xs font-bold">
-                <Store size={15} />
-                <span>Kelola Tenant</span>
-              </Button>
-            </Link>
-
             <Button
               variant="outline"
               onClick={handleLogout}
