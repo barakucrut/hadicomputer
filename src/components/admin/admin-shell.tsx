@@ -18,6 +18,7 @@ import {
   X,
   PanelLeftClose,
   PanelLeftOpen,
+  ChevronDown,
 } from "lucide-react";
 import { ToastProvider } from "@/components/admin/ui/toast";
 import "@/app/admin.css";
@@ -34,11 +35,77 @@ interface AdminShellProps {
   } | null;
 }
 
+interface TenantOption {
+  id: string;
+  name: string;
+  slug: string;
+  settings?: { primaryColor?: string } | null;
+}
+
 export function AdminShell({ children, user }: AdminShellProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [isCollapsed, setIsCollapsed] = React.useState(false);
+
+  // Superadmin Merchant Switcher State
+  const [isMerchantDropdownOpen, setIsMerchantDropdownOpen] = React.useState(false);
+  const [tenants, setTenants] = React.useState<TenantOption[]>([]);
+  const merchantDropdownRef = React.useRef<HTMLDivElement>(null);
+
+  // Fetch tenants if Superadmin
+  React.useEffect(() => {
+    if (user?.role === "SUPERADMIN") {
+      fetch("/api/god-mode/tenants")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.tenants) setTenants(data.tenants);
+        })
+        .catch(console.error);
+    }
+  }, [user?.role]);
+
+  // Click outside to close dropdown
+  React.useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        merchantDropdownRef.current &&
+        !merchantDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsMerchantDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  async function handleSwitchTenant(tenantId: string) {
+    try {
+      const res = await fetch("/api/god-mode/auth/impersonate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tenantId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Gagal beralih tenant");
+
+      try {
+        sessionStorage.setItem(
+          "admin_flash_message",
+          JSON.stringify({
+            message: `Beralih ke CMS ${data.tenant?.name || "Merchant"}!`,
+            type: "success",
+          })
+        );
+      } catch {}
+
+      setIsMerchantDropdownOpen(false);
+      window.location.reload();
+    } catch (err: any) {
+      console.error("Switch tenant error:", err);
+      alert(err.message || "Gagal beralih tenant");
+    }
+  }
 
   React.useEffect(() => {
     try {
@@ -422,6 +489,247 @@ export function AdminShell({ children, user }: AdminShellProps) {
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+            {/* Superadmin Tenant Switcher Dropdown (Pinned to Topbar) */}
+            {user?.role === "SUPERADMIN" && (
+              <div ref={merchantDropdownRef} style={{ position: "relative" }}>
+                <button
+                  type="button"
+                  onClick={() => setIsMerchantDropdownOpen(!isMerchantDropdownOpen)}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    height: "40px",
+                    padding: "0 14px",
+                    borderRadius: "8px",
+                    border: "1px solid var(--border)",
+                    backgroundColor: "#ffffff",
+                    fontSize: "13px",
+                    fontWeight: 700,
+                    color: "var(--ink)",
+                    cursor: "pointer",
+                    boxShadow: "var(--shadow-xs)",
+                    boxSizing: "border-box",
+                    transition: "all 0.15s ease",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--surface)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#ffffff")}
+                  title="Beralih ke merchant lain atau kembali ke God-Mode"
+                >
+                  <Store size={16} className="text-[#cc252b]" />
+                  <span style={{ maxWidth: "160px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {user.tenantName || "Pilih Merchant"}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "10px",
+                      fontWeight: 800,
+                      backgroundColor: "#fee2e2",
+                      color: "#b91c1c",
+                      padding: "1px 6px",
+                      borderRadius: "4px",
+                    }}
+                  >
+                    CMS
+                  </span>
+                  <ChevronDown size={14} className="text-[#818779]" />
+                </button>
+
+                {isMerchantDropdownOpen && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "calc(100% + 8px)",
+                      right: 0,
+                      width: "320px",
+                      backgroundColor: "#ffffff",
+                      border: "1px solid #e2e8f0",
+                      borderRadius: "12px",
+                      boxShadow: "0 10px 30px -5px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+                      zIndex: 100,
+                      overflow: "hidden",
+                      padding: "8px",
+                    }}
+                  >
+                    {/* Header */}
+                    <div
+                      style={{
+                        padding: "6px 10px 8px 10px",
+                        fontSize: "11px",
+                        fontWeight: 800,
+                        color: "#64748b",
+                        letterSpacing: "0.05em",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      SUPERADMIN CONTROL
+                    </div>
+
+                    {/* Option 1: Back to God Mode */}
+                    <Link
+                      href="/god-mode"
+                      onClick={() => setIsMerchantDropdownOpen(false)}
+                      style={{
+                        width: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        padding: "9px 10px",
+                        borderRadius: "8px",
+                        backgroundColor: "#f8fafc",
+                        border: "1px solid #e2e8f0",
+                        textDecoration: "none",
+                        marginBottom: "6px",
+                        cursor: "pointer",
+                        transition: "all 0.15s ease",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = "#fee2e2";
+                        e.currentTarget.style.borderColor = "#fca5a5";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = "#f8fafc";
+                        e.currentTarget.style.borderColor = "#e2e8f0";
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <span style={{ fontSize: "16px" }}>⚡</span>
+                        <div style={{ display: "flex", flexDirection: "column" }}>
+                          <span style={{ fontSize: "12.5px", fontWeight: 800, color: "var(--ink)" }}>
+                            Pusat Kendali God-Mode
+                          </span>
+                          <span style={{ fontSize: "10.5px", color: "var(--muted)" }}>
+                            Kembali ke dashboard utama platform
+                          </span>
+                        </div>
+                      </div>
+                      <span
+                        style={{
+                          fontSize: "10px",
+                          fontWeight: 800,
+                          backgroundColor: "#ffffff",
+                          color: "#cc252b",
+                          padding: "3px 7px",
+                          borderRadius: "4px",
+                          border: "1px solid #fca5a5",
+                        }}
+                      >
+                        Buka ↗
+                      </span>
+                    </Link>
+
+                    <div style={{ height: "1px", backgroundColor: "#f1f5f9", margin: "6px 0" }} />
+
+                    <div
+                      style={{
+                        padding: "4px 10px 6px 10px",
+                        fontSize: "10.5px",
+                        fontWeight: 800,
+                        color: "#94a3b8",
+                        letterSpacing: "0.05em",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      PILIH MERCHANT TOKO (CMS)
+                    </div>
+
+                    {/* List of Tenants */}
+                    <div style={{ maxHeight: "240px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "2px" }}>
+                      {tenants.map((t) => {
+                        const isCurrent = t.id === user?.tenantId;
+                        return (
+                          <button
+                            key={t.id}
+                            type="button"
+                            onClick={() => {
+                              if (!isCurrent) {
+                                handleSwitchTenant(t.id);
+                              } else {
+                                setIsMerchantDropdownOpen(false);
+                              }
+                            }}
+                            style={{
+                              width: "100%",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              padding: "8px 10px",
+                              borderRadius: "8px",
+                              backgroundColor: isCurrent ? "#f1f5f9" : "transparent",
+                              border: "none",
+                              cursor: isCurrent ? "default" : "pointer",
+                              textAlign: "left",
+                              transition: "background-color 0.15s ease",
+                            }}
+                            onMouseEnter={(e) => {
+                              if (!isCurrent) e.currentTarget.style.backgroundColor = "#f8fafc";
+                            }}
+                            onMouseLeave={(e) => {
+                              if (!isCurrent) e.currentTarget.style.backgroundColor = "transparent";
+                            }}
+                          >
+                            <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0 }}>
+                              <span
+                                style={{
+                                  width: "9px",
+                                  height: "9px",
+                                  borderRadius: "50%",
+                                  backgroundColor: t.settings?.primaryColor || "#cc252b",
+                                  flexShrink: 0,
+                                }}
+                              />
+                              <span
+                                style={{
+                                  fontSize: "12.5px",
+                                  fontWeight: isCurrent ? 800 : 600,
+                                  color: "var(--ink)",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {t.name}
+                              </span>
+                            </div>
+
+                            {isCurrent ? (
+                              <span
+                                style={{
+                                  fontSize: "10px",
+                                  fontWeight: 800,
+                                  backgroundColor: "#dcfce7",
+                                  color: "#15803d",
+                                  padding: "2px 7px",
+                                  borderRadius: "4px",
+                                  flexShrink: 0,
+                                }}
+                              >
+                                ✓ Aktif
+                              </span>
+                            ) : (
+                              <span
+                                style={{
+                                  fontSize: "10px",
+                                  fontWeight: 800,
+                                  backgroundColor: "#fee2e2",
+                                  color: "#b91c1c",
+                                  padding: "2px 6px",
+                                  borderRadius: "4px",
+                                  flexShrink: 0,
+                                }}
+                              >
+                                Buka CMS ↗
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             <div style={{ textAlign: "right" }} className="hidden sm:block">
               <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--ink)" }}>
                 {user?.name || "Owner Hadi Computer"}
