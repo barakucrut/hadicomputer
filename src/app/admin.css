@@ -1,8 +1,26 @@
 @import "../styles-tokens.css";
 
 /* ==========================================================
-   HADI COMPUTER — ELEGAN CMS ADMIN DESIGN SYSTEM (SHADCN UI)
+   RIGSPACE — ELEGAN CMS ADMIN DESIGN SYSTEM (SHADCN UI)
    ========================================================== */
+
+/* Fixed Admin Font: Always Plus Jakarta Sans across all CMS & God-Mode panels */
+:root {
+  --admin-font: "Plus Jakarta Sans Variable", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.admin-shell-root,
+.admin-shell-root *:not([data-preview-font]):not([data-preview-font] *),
+.admin-login-container,
+.admin-login-container *,
+.admin-drawer-panel,
+.admin-drawer-panel *,
+.admin-drawer-backdrop,
+.shadcn-dialog-content,
+.shadcn-dialog-content *,
+.admin-body {
+  font-family: "Plus Jakarta Sans Variable", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
 
 /* Universal Reset for Admin Elements (excludes styled components) */
 :where(.admin-shell-root, .admin-login-container) button:not(.admin-btn):not(.admin-login-submit-btn):not(.admin-action-btn):not(.admin-tab-trigger):not(.admin-password-toggle-btn) {

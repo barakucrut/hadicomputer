@@ -376,6 +376,7 @@ export default function AdminSettingsPage() {
                     >
                       <div className="flex items-center justify-between">
                         <span
+                          data-preview-font="true"
                           style={{ fontFamily: `'${f.id}', sans-serif` }}
                           className="font-bold text-sm text-[#111413]"
                         >
@@ -403,13 +404,14 @@ export default function AdminSettingsPage() {
                   Live Preview Tipografi ({currentFont.name}):
                 </span>
                 <div
+                  data-preview-font="true"
                   style={{ fontFamily: `'${settings.fontFamily}', sans-serif` }}
                   className="space-y-1.5"
                 >
-                  <h3 className="text-lg font-black text-[#111413]">
+                  <h3 data-preview-font="true" className="text-lg font-black text-[#111413]">
                     {settings.storeName} — Perangkat Tepat untuk Kebutuhanmu
                   </h3>
-                  <p className="text-sm text-gray-700">
+                  <p data-preview-font="true" className="text-sm text-gray-700">
                     {currentFont.sample}
                   </p>
                 </div>
