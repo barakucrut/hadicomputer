@@ -103,7 +103,6 @@ export function AdminShell({ children, user }: AdminShellProps) {
       window.location.reload();
     } catch (err: any) {
       console.error("Switch tenant error:", err);
-      alert(err.message || "Gagal beralih tenant");
     }
   }
 

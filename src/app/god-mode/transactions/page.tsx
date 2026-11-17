@@ -56,6 +56,8 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/admin/ui/dialog";
+import { ConfirmDialog } from "@/components/admin/ui/confirm-dialog";
+import { HugeIconTrash } from "@/components/admin/ui/huge-icons";
 import { useToast, ToastProvider } from "@/components/admin/ui/toast";
 import "@/app/admin.css";
 
@@ -88,17 +90,20 @@ interface TenantOption {
   customDomain: string | null;
 }
 
-const CATEGORY_LABELS: Record<string, { label: string; badgeClass: string }> = {
-  SUBSCRIPTION: { label: "Subscription", badgeClass: "bg-blue-50 text-blue-700 border-blue-200" },
-  JUAL_PUTUS: { label: "Jual Putus", badgeClass: "bg-purple-100 text-purple-800 border-purple-300 font-extrabold" },
-  SETUP_FEE: { label: "Biaya Setup", badgeClass: "bg-amber-50 text-amber-700 border-amber-200" },
-  ADDON: { label: "Add-on Fitur", badgeClass: "bg-indigo-50 text-indigo-700 border-indigo-200" },
-  SERVER_INFRA: { label: "Server & Hosting", badgeClass: "bg-gray-100 text-gray-700 border-gray-200" },
-  DOMAIN_REGISTRATION: { label: "Domain Registrar", badgeClass: "bg-gray-100 text-gray-700 border-gray-200" },
-  WHATSAPP_GATEWAY: { label: "WhatsApp Gateway", badgeClass: "bg-green-50 text-green-700 border-green-200" },
-  MARKETING: { label: "Marketing & Iklan", badgeClass: "bg-orange-50 text-orange-700 border-orange-200" },
-  OPERATIONAL: { label: "Operasional", badgeClass: "bg-gray-100 text-gray-700 border-gray-200" },
-  OTHER: { label: "Lainnya", badgeClass: "bg-gray-100 text-gray-700 border-gray-200" },
+const CATEGORY_CONFIG: Record<
+  string,
+  { label: string; variant: "default" | "secondary" | "success" | "warning" | "destructive" | "info" | "purple" }
+> = {
+  SUBSCRIPTION: { label: "Subscription", variant: "info" },
+  JUAL_PUTUS: { label: "Jual Putus", variant: "purple" },
+  SETUP_FEE: { label: "Biaya Setup", variant: "warning" },
+  ADDON: { label: "Add-on Fitur", variant: "info" },
+  SERVER_INFRA: { label: "Server & Hosting", variant: "destructive" },
+  DOMAIN_REGISTRATION: { label: "Domain Registrar", variant: "info" },
+  WHATSAPP_GATEWAY: { label: "WhatsApp Gateway", variant: "success" },
+  MARKETING: { label: "Marketing & Iklan", variant: "warning" },
+  OPERATIONAL: { label: "Operasional", variant: "secondary" },
+  OTHER: { label: "Lainnya", variant: "secondary" },
 };
 
 function TransactionsContent() {
@@ -217,16 +222,23 @@ function TransactionsContent() {
     }
   }
 
-  async function handleDeleteTransaction(id: string) {
-    if (!confirm("Hapus catatan transaksi ini?")) return;
+  const [deleteTarget, setDeleteTarget] = React.useState<TransactionItem | null>(null);
+  const [deleting, setDeleting] = React.useState(false);
+
+  async function executeDeleteTransaction() {
+    if (!deleteTarget) return;
 
     try {
-      const res = await fetch(`/api/god-mode/transactions/${id}`, { method: "DELETE" });
+      setDeleting(true);
+      const res = await fetch(`/api/god-mode/transactions/${deleteTarget.id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Gagal menghapus transaksi");
       toast.success("Catatan transaksi telah dihapus.");
       fetchTransactions();
+      setDeleteTarget(null);
     } catch (err: any) {
       toast.error(err.message || "Gagal menghapus data");
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -612,13 +624,7 @@ function TransactionsContent() {
                           </TableCell>
 
                           <TableCell className="py-4 px-6">
-                            <span
-                              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black ${
-                                t.type === "INCOME"
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-red-100 text-red-700"
-                              }`}
-                            >
+                            <Badge variant={t.type === "INCOME" ? "success" : "destructive"}>
                               {t.type === "INCOME" ? (
                                 <>
                                   <ArrowUpRight size={13} />
@@ -630,16 +636,16 @@ function TransactionsContent() {
                                   <span>PENGELUARAN</span>
                                 </>
                               )}
-                            </span>
+                            </Badge>
                           </TableCell>
 
                           <TableCell className="py-4 px-6">
                             <div>
                               <div className="font-bold text-[#111413] text-sm">{t.title}</div>
-                              <div className="text-xs text-[#818779] flex items-center gap-2 mt-0.5">
-                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${CATEGORY_LABELS[t.category]?.badgeClass || "bg-[#f0f0ee] text-[#525854] border-gray-200"}`}>
-                                  {CATEGORY_LABELS[t.category]?.label || t.category}
-                                </span>
+                              <div className="text-xs text-[#818779] flex items-center gap-2 mt-1">
+                                <Badge variant={CATEGORY_CONFIG[t.category]?.variant || "secondary"}>
+                                  {CATEGORY_CONFIG[t.category]?.label || t.category}
+                                </Badge>
                                 {t.paymentMethod && <span>• via {t.paymentMethod}</span>}
                               </div>
                             </div>
@@ -663,15 +669,16 @@ function TransactionsContent() {
                           </TableCell>
 
                           <TableCell className="py-4 px-6 text-right">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDeleteTransaction(t.id)}
-                              className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0"
-                              title="Hapus Transaksi"
-                            >
-                              <Trash2 size={14} />
-                            </Button>
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => setDeleteTarget(t)}
+                                className="admin-action-btn delete"
+                                title="Hapus Transaksi"
+                              >
+                                <HugeIconTrash size={16} />
+                              </button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))
@@ -916,6 +923,17 @@ function TransactionsContent() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Modal (Standard Shadcn ConfirmDialog) */}
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        title="Hapus Catatan Transaksi?"
+        description={`Apakah Anda yakin ingin menghapus catatan transaksi "${deleteTarget?.title}" sebesar Rp ${deleteTarget?.amount.toLocaleString("id-ID")}? Data mutasi yang dihapus tidak dapat dipulihkan.`}
+        confirmLabel="Ya, Hapus Transaksi"
+        onConfirm={executeDeleteTransaction}
+        loading={deleting}
+      />
     </div>
   );
 }

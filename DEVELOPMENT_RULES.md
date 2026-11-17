@@ -1,0 +1,108 @@
+# RIGSPACE DEVELOPMENT RULES & UI STANDARDS
+> **Single Source of Truth (SSOT) untuk Pengembangan Fitur, Komponen, dan Arsitektur Multi-Tenant Platform Rigspace (`rigspace.id`).**
+> *Wajib dijadikan acuan mutlak oleh seluruh developer dan AI coding agents sebelum membuat atau mengubah kode.*
+
+---
+
+## 1. Golden Rule: `/admin` adalah Standar Baku UI/UX
+Setiap kali membuat halaman baru di **God-Mode (`/god-mode/*`)**, **Merchant CMS (`/admin/*`)**, atau panel internal lainnya, **selalu gunakan komponen dan styling yang ada di `/admin` sebagai standar baku**. Jangan pernah mengimprovisasi komponen baru jika `/admin` sudah memiliki padanannya.
+
+---
+
+## 2. Komponen & Design System UI
+
+### A. Tombol Aksi Tabel (Action Buttons)
+- **Ukuran & Bentuk**: Selalu kotak simetris `32x32px` dengan `border-radius: 8px`.
+- **Class Standar**:
+  - Tombol aksi umum (Lihat/Edit): `className="admin-action-btn"`
+  - Tombol aksi destruktif (Hapus): `className="admin-action-btn delete"`
+- **Icon**: Gunakan icon set terpadu (misal `HugeIconTrash`, `HugeIconEdit`, `HugeIconEye` dari `@/components/admin/ui/huge-icons` atau `lucide-react` dengan `size={16}`).
+- **Pembungkus**: Selalu bungkus dalam `<div className="flex items-center justify-end gap-1.5">`.
+- **Dilarang**: Jangan pernah menggunakan tombol ghost tanpa border/bg acak, atau teks raw icon tanpa container.
+
+### B. Status & Kategori Badges
+- **Selalu gunakan komponen `<Badge>`** dari `@/components/admin/ui/badge`.
+- **Varian Resmi yang Didukung**:
+  - `default` : Aksen Utama Platform / Merah Rigspace (`var(--red)`)
+  - `secondary` : Netral / Abu-abu Elegan (`#f1f3ed`, text `#525854`)
+  - `success` : Positif / Pemasukan / Status Aktif / Tersedia (`#dcfce7`, text `#15803d`)
+  - `warning` : Peringatan / Pre-Order / Trial / Setup Fee (`#fef3c7`, text `#b45309`)
+  - `destructive` : Bahaya / Pengeluaran / Habis / Suspended (`#fee2e2`, text `#dc2626`)
+  - `info` : Informasi / Subscription / Addon / Domain (`#e0f2fe`, text `#0369a1`)
+  - `purple` : Paket Enterprise / Jual Putus / Lisensi (`#f3e8ff`, text `#7e22ce`)
+  - `outline` : Minimalis dengan border abu-abu
+- **Dilarang**: Jangan pernah membuat `<span className="px-2 py-0.5 border border-gray-200 ...">` dengan styling ad-hoc inline. Selalu gunakan `<Badge variant="...">`.
+
+### C. Konfirmasi Dialog & Modal (Zero Native Alert/Confirm)
+- **Dilarang Keras**: **JANGAN PERNAH** menggunakan native browser `confirm(...)` atau `alert(...)` di mana pun.
+- **Konfirmasi Aksi Destruktif (Hapus/Reset/Ubah Kritis)**:
+  - Wajib menggunakan `<ConfirmDialog>` dari `@/components/admin/ui/confirm-dialog`.
+  - Contoh penggunaan:
+    ```tsx
+    <ConfirmDialog
+      open={Boolean(deleteTarget)}
+      onOpenChange={(open) => !open && setDeleteTarget(null)}
+      title="Hapus Data Ini?"
+      description={`Apakah Anda yakin ingin menghapus "${deleteTarget?.name}"? Tindakan ini tidak dapat dibatalkan.`}
+      confirmLabel="Ya, Hapus"
+      onConfirm={handleExecuteDelete}
+      loading={deleting}
+    />
+    ```
+- **Modal Form & Dialog**:
+  - Selalu gunakan Shadcn UI dialog dari `@/components/admin/ui/dialog` (`Dialog`, `DialogContent`, `DialogHeader`, `DialogTitle`, `DialogDescription`, `DialogFooter`).
+
+### D. Notifikasi & Feedback (Toast)
+- Gunakan `useToast()` dari `@/components/admin/ui/toast`.
+  - `toast.success("Pesan berhasil")`
+  - `toast.error("Pesan gagal")`
+- Setiap halaman yang memanggil `useToast` harus berada di dalam `<ToastProvider>`.
+
+---
+
+## 3. Tipografi & Font Locking
+
+1. **CMS Admin & God-Mode Panel**:
+   - Seluruh teks di `/admin/*` dan `/god-mode/*` **DIKUNCI PERMANEN ke font "Plus Jakarta Sans"** (`!important`).
+   - Jangan pernah membiarkan pilihan font toko merchant mengubah tampilan dashboard admin atau god-mode.
+   - Pengecualian satu-satunya adalah elemen live preview yang ditandai dengan attribute `data-preview-font="true"`.
+2. **Storefront Frontend (Etalase Publik Pembeli)**:
+   - Menggunakan dynamic CSS variable `--font` yang dikonfigurasi per tenant (`fontFamily`: *Inter*, *Plus Jakarta Sans*, *Outfit*, *Poppins*, *Space Grotesk*).
+
+---
+
+## 4. Multi-Tenant Architecture & Data Isolation
+
+1. **Scoping `tenantId`**:
+   - Setiap query database (`findMany`, `findFirst`, `create`, `update`, `delete`) untuk produk, kategori, banner, transaksi toko, dan setting WA **WAJIB menyertakan `where: { tenantId }`**.
+   - Dilarang membocorkan data antar tenant toko.
+2. **God-Mode Scoping**:
+   - God-Mode adalah level platform engine (`/god-mode/*`).
+   - Hanya God-Mode yang boleh mengakses tabel platform-wide: `Tenant`, `TenantSetting`, dan `PlatformTransaction`.
+   - God-Mode dapat mengimpersonasi tenant melalui cookie `god_impersonated_tenant_id` dan session `platform_god_session`.
+
+---
+
+## 5. Database, Prisma & Dev Server Restart Rules
+
+1. **Koneksi Database**:
+   - MySQL/MariaDB menggunakan adapter `@prisma/adapter-mariadb` melalui `src/lib/db.ts`.
+2. **Penambahan Model/Field Baru**:
+   - Saat mengubah `prisma/schema.prisma`:
+     1. Jalankan `npx prisma db push`
+     2. Jalankan `npx prisma generate`
+     3. **PENTING**: Dev server Next.js (`npm run dev`) menyimpan singleton `PrismaClient` di memory (`global.__prisma`). Restart `npm run dev` di terminal agar Prisma Client baru terbaca dan tidak menyebabkan error `reading 'findMany'` atau `reading 'create'`.
+
+---
+
+## 6. Standar Verifikasi Kode (Pre-Commit Checklist)
+
+Sebelum melakukan commit atau menyatakan fitur selesai:
+1. Jalankan **`npm run typecheck`** (`tsc --noEmit`) — pastikan exit code `0` tanpa error type.
+2. Jalankan **`npm test`** — pastikan seluruh unit test lolos 100%.
+3. Pastikan tidak ada `console.log` liar, syntax error, kurung kurawal berlebih, atau `confirm()`/`alert()` browser.
+4. Tulis pesan commit yang rapi dan semantik:
+   - `feat(...)`: fitur baru
+   - `fix(...)`: perbaikan bug
+   - `style(...)`: perbaikan UI/CSS/styling
+   - `docs(...)`: dokumentasi

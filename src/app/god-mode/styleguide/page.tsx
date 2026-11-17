@@ -401,22 +401,14 @@ function GodModeStyleguideContent() {
 
               <Card className="shadow-sm border-[#e5e5e2] rounded-2xl overflow-hidden">
                 <CardContent className="p-8 flex flex-wrap gap-4 items-center">
-                  <Badge variant="default" className="px-3 py-1 text-xs">Primary Badge</Badge>
+                  <Badge variant="default" className="px-3 py-1 text-xs">Primary</Badge>
                   <Badge variant="secondary" className="px-3 py-1 text-xs">Secondary</Badge>
+                  <Badge variant="success" className="px-3 py-1 text-xs">Success</Badge>
+                  <Badge variant="warning" className="px-3 py-1 text-xs">Warning</Badge>
+                  <Badge variant="destructive" className="px-3 py-1 text-xs">Danger / Habis</Badge>
+                  <Badge variant="info" className="px-3 py-1 text-xs">Info</Badge>
+                  <Badge variant="purple" className="px-3 py-1 text-xs">Purple</Badge>
                   <Badge variant="outline" className="px-3 py-1 text-xs">Outline</Badge>
-                  <Badge variant="destructive" className="px-3 py-1 text-xs">Habis / Inactive</Badge>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800">
-                    <CheckCircle2 size={13} />
-                    <span>Tersedia (Ready)</span>
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
-                    <AlertCircle size={13} />
-                    <span>Preorder (PO)</span>
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-800">
-                    <Sparkles size={13} />
-                    <span>Paket PRO Active</span>
-                  </span>
                 </CardContent>
               </Card>
             </section>

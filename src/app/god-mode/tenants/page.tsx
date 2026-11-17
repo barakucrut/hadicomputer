@@ -61,6 +61,8 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/admin/ui/dialog";
+import { ConfirmDialog } from "@/components/admin/ui/confirm-dialog";
+import { HugeIconTrash } from "@/components/admin/ui/huge-icons";
 import { useToast, ToastProvider } from "@/components/admin/ui/toast";
 import "@/app/admin.css";
 
@@ -273,26 +275,32 @@ function TenantsManagementContent() {
   }
 
   // Delete Tenant
-  async function handleDeleteTenant(tenant: TenantData) {
-    if (tenant.slug === "hadicomputer") {
-      toast.error("Tenant #1 (Hadi Computer) tidak dapat dihapus.");
-      return;
-    }
+  const [deleteTarget, setDeleteTarget] = React.useState<TenantData | null>(null);
+  const [deleting, setDeleting] = React.useState(false);
 
-    if (!confirm(`Apakah Anda yakin ingin menghapus tenant "${tenant.name}"? Seluruh data produk dan pengaturan akan dihapus permanen.`)) {
+  async function executeDeleteTenant() {
+    if (!deleteTarget) return;
+
+    if (deleteTarget.slug === "hadicomputer") {
+      toast.error("Tenant #1 (Hadi Computer) tidak dapat dihapus.");
+      setDeleteTarget(null);
       return;
     }
 
     try {
-      const res = await fetch(`/api/god-mode/tenants/${tenant.id}`, {
+      setDeleting(true);
+      const res = await fetch(`/api/god-mode/tenants/${deleteTarget.id}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("Gagal menghapus tenant toko");
 
-      toast.success(`Tenant "${tenant.name}" berhasil dihapus.`);
+      toast.success(`Tenant "${deleteTarget.name}" berhasil dihapus.`);
       fetchTenants();
+      setDeleteTarget(null);
     } catch (err: any) {
       toast.error(err.message || "Gagal menghapus tenant");
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -758,13 +766,12 @@ function TenantsManagementContent() {
                           {/* Paket */}
                           <TableCell className="py-4 px-6">
                             <Badge
-                              variant="outline"
-                              className={
+                              variant={
                                 t.plan === "PRO"
-                                  ? "border-red-300 text-red-700 bg-red-50 font-black text-xs"
+                                  ? "default"
                                   : t.plan === "ENTERPRISE"
-                                  ? "border-purple-300 text-purple-700 bg-purple-50 font-black text-xs"
-                                  : "border-gray-300 text-gray-700 bg-gray-50 text-xs"
+                                  ? "purple"
+                                  : "secondary"
                               }
                             >
                               {t.plan}
@@ -802,18 +809,17 @@ function TenantsManagementContent() {
 
                           {/* Status */}
                           <TableCell className="py-4 px-6">
-                            <span
-                              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                            <Badge
+                              variant={
                                 t.status === "ACTIVE"
-                                  ? "bg-green-100 text-green-800"
+                                  ? "success"
                                   : t.status === "TRIAL"
-                                  ? "bg-amber-100 text-amber-800"
-                                  : "bg-red-100 text-red-800"
-                              }`}
+                                  ? "warning"
+                                  : "destructive"
+                              }
                             >
-                              <span className="w-1.5 h-1.5 rounded-full bg-current" />
-                              <span>{t.status}</span>
-                            </span>
+                              {t.status}
+                            </Badge>
                           </TableCell>
 
                           {/* Actions */}
@@ -832,15 +838,14 @@ function TenantsManagementContent() {
 
                               {/* Delete button (except Hadi Computer) */}
                               {t.slug !== "hadicomputer" && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleDeleteTenant(t)}
-                                  className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0"
+                                <button
+                                  type="button"
+                                  onClick={() => setDeleteTarget(t)}
+                                  className="admin-action-btn delete"
                                   title="Hapus Toko"
                                 >
-                                  <Trash2 size={14} />
-                                </Button>
+                                  <HugeIconTrash size={16} />
+                                </button>
                               )}
                             </div>
                           </TableCell>
@@ -1052,6 +1057,17 @@ function TenantsManagementContent() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Modal (Standard Shadcn ConfirmDialog) */}
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        title="Hapus Tenant Toko?"
+        description={`Apakah Anda yakin ingin menghapus tenant "${deleteTarget?.name}" (${deleteTarget?.slug})? Seluruh data produk, kategori, dan pengaturan toko akan dihapus permanen.`}
+        confirmLabel="Ya, Hapus Tenant"
+        onConfirm={executeDeleteTenant}
+        loading={deleting}
+      />
     </div>
   );
 }
