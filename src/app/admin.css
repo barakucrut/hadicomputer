@@ -1035,7 +1035,7 @@
   width: 100% !important;
   height: 1px !important;
   background-color: var(--border) !important;
-  margin: 48px 0 !important;
+  margin: 0 !important;
   border: none !important;
   display: block !important;
 }
