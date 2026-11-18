@@ -31,6 +31,18 @@ export async function POST(request: Request) {
     const buffer = Buffer.from(bytes);
 
     const safeFolder = folder.replace(/[^a-z0-9_-]/gi, "");
+
+    // Auto-trim whitespace/transparent padding for logos so they render at maximum scale
+    let finalBuffer = buffer;
+    if (safeFolder === "logos" && file.type !== "image/svg+xml") {
+      try {
+        const sharp = (await import("sharp")).default;
+        finalBuffer = await sharp(buffer).trim().toBuffer();
+      } catch (trimErr) {
+        console.warn("Auto-trim skipped or failed, using original buffer:", trimErr);
+      }
+    }
+
     const uploadDir = path.join(process.cwd(), "public", "uploads", safeFolder);
     await mkdir(uploadDir, { recursive: true, mode: 0o755 });
 
@@ -39,7 +51,7 @@ export async function POST(request: Request) {
     const uniqueName = `${baseName}-${Date.now()}${ext}`;
     const filePath = path.join(uploadDir, uniqueName);
 
-    await writeFile(filePath, buffer, { mode: 0o644 });
+    await writeFile(filePath, finalBuffer, { mode: 0o644 });
 
     const publicUrl = `/uploads/${safeFolder}/${uniqueName}`;
     return NextResponse.json({ success: true, url: publicUrl });

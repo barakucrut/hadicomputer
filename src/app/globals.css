@@ -345,9 +345,9 @@ fieldset {
   display: inline-flex;
   align-items: center;
   justify-content: flex-start;
-  height: 48px;
-  max-height: 48px;
-  max-width: 200px;
+  height: 50px;
+  max-height: 50px;
+  max-width: 240px;
   flex-shrink: 0;
   background: transparent;
   text-decoration: none;
@@ -364,12 +364,12 @@ fieldset {
   width: auto;
   max-width: 100%;
   height: auto;
-  max-height: 44px;
+  max-height: 48px;
   object-fit: contain;
   object-position: left center;
 }
 .site-header.is-sticky .logo img {
-  max-height: 38px;
+  max-height: 40px;
 }
 .header-search-wrap {
   position: relative;
