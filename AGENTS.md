@@ -39,8 +39,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
    - Form unggah file/logo wajib menggunakan dropzone `.admin-dropzone` terpadu: saat file terunggah, kotak menampilkan thumbnail di tengah, nama file, dan tombol `[ ✕ Remove file ]` untuk menghapus dan mengunggah kembali.
 
 7. **SPACING, FORM CONTROLS & MINIMALIST BORDER RULES**
+   - **Bottom Divider Line Spacing (MANDATORY)**: Setiap kali ada bottom divider line (`border-b`, garis pemisah horizontal, atau pembatas header kartu/section), **WAJIB menambahkan `margin-bottom: 16px` (`mb-4` / `mb-[16px]` / `margin-bottom: 16px`)**. Konten di atas dan di bawah garis pemisah wajib berjarak minimal 16px agar tidak dempet dan memberikan nafas visual yang seimbang.
    - **Jarak Antar Komponen**: Setiap komponen WAJIB memiliki jarak minimal 8px – 16px (dilarang dempet). Jarak vertikal antar baris input form wajib tepat 16px (`gap: 16px` / `space-y-4`).
-   - **Border Bottom / Divider Spacing**: Setiap garis pemisah (`border-t`, `border-b`, divider), konten di atas dan di bawahnya WAJIB berjarak 16px.
    - **Border State Aktif**: Garis border state aktif wajib tipis, minimalis, dan clean (maksimal `1.5px`), dilarang menggunakan ring/shadow tebal berlebih.
    - **Tipografi Form**: Seluruh teks input, select, dan label form wajib berukuran 12px (`text-xs`).
    - **Form Subtitle & Helper Hint**: Seluruh teks keterangan, subtitle, atau instruksi pembantu di bawah form input WAJIB berukuran 11px dan berwarna merah (`.admin-form-hint` / `text-red-600 text-[11px]`).
