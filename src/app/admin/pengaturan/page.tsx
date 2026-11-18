@@ -233,6 +233,47 @@ export default function AdminSettingsPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  // Helper to adjust color brightness for hover/active states
+  function adjustColorBrightness(hex: string, amount: number) {
+    if (!hex || typeof hex !== "string" || !hex.startsWith("#")) return hex;
+    let clean = hex.replace("#", "");
+    if (clean.length === 3) {
+      clean = clean.split("").map((c) => c + c).join("");
+    }
+    const num = parseInt(clean, 16);
+    if (isNaN(num)) return hex;
+    let r = (num >> 16) + amount;
+    let g = ((num >> 8) & 0x00ff) + amount;
+    let b = (num & 0x0000ff) + amount;
+    r = Math.min(255, Math.max(0, r));
+    g = Math.min(255, Math.max(0, g));
+    b = Math.min(255, Math.max(0, b));
+    return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+  }
+
+  // Live real-time color theme reactivity:
+  // Instantly updates CSS variables in CMS and broadcasts live to open storefront tabs
+  React.useEffect(() => {
+    if (settings.primaryColor && /^#[0-9A-Fa-f]{3,8}$/.test(settings.primaryColor)) {
+      const color = settings.primaryColor;
+      const darkerColor = adjustColorBrightness(color, -25);
+
+      // Instantly update current page CSS variables
+      document.documentElement.style.setProperty("--red", color);
+      document.documentElement.style.setProperty("--red-dark", darkerColor);
+      document.documentElement.style.setProperty("--border-focus", color);
+      document.documentElement.style.setProperty("--ring", `${color}33`);
+
+      // Broadcast live to open storefront tabs without requiring manual reload
+      try {
+        localStorage.setItem(
+          "rigspace_live_theme_sync",
+          JSON.stringify({ primaryColor: color, fontFamily: settings.fontFamily, timestamp: Date.now() })
+        );
+      } catch {}
+    }
+  }, [settings.primaryColor, settings.fontFamily]);
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);

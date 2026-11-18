@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "@fontsource-variable/plus-jakarta-sans";
 import "./globals.css";
 import "./mobile.css";
-import { Header, Footer } from "@/components/site-shell";
+import { Header, Footer, ThemeLiveSync } from "@/components/site-shell";
 import { StoreProvider } from "@/components/store-context";
 import { getLiveCategories } from "@/lib/live-repository";
 import { resolveStorefrontTenant } from "@/lib/tenant-resolver";
@@ -146,6 +146,7 @@ export default async function RootLayout({
         />
       </head>
       <body>
+        <ThemeLiveSync />
         <StoreProvider store={store}>
           <Header store={store} categories={liveCategories} />
           <main id="main">{children}</main>

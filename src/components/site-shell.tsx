@@ -341,3 +341,37 @@ export function Footer({ store }: { store?: StoreSettings }) {
     </footer>
   );
 }
+
+/**
+ * Real-time live theme synchronizer:
+ * Listens for color & font updates dispatched from the admin settings panel
+ * and instantly applies them to the live storefront without page reload.
+ */
+export function ThemeLiveSync() {
+  useEffect(() => {
+    function handleSync(e: StorageEvent) {
+      if (e.key === "rigspace_live_theme_sync" && e.newValue) {
+        try {
+          const payload = JSON.parse(e.newValue);
+          if (payload.primaryColor) {
+            document.documentElement.style.setProperty("--red", payload.primaryColor);
+            document.documentElement.style.setProperty("--red-dark", payload.primaryColor);
+            document.documentElement.style.setProperty("--border-focus", payload.primaryColor);
+            document.documentElement.style.setProperty("--ring", `${payload.primaryColor}33`);
+          }
+          if (payload.fontFamily) {
+            document.documentElement.style.setProperty(
+              "--font",
+              `'${payload.fontFamily}', "Plus Jakarta Sans", sans-serif`
+            );
+          }
+        } catch {}
+      }
+    }
+
+    window.addEventListener("storage", handleSync);
+    return () => window.removeEventListener("storage", handleSync);
+  }, []);
+
+  return null;
+}
