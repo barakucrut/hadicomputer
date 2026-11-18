@@ -1848,8 +1848,7 @@ textarea.admin-input {
 .block { display: block !important; }
 .inline-block { display: inline-block !important; }
 
-/* ===================================================================}
-
+/* ==========================================================================
    Interactive Selectable Option Cards (Choice Cards)
    ========================================================================== */
 .admin-choice-card {
@@ -2095,7 +2094,8 @@ textarea.admin-input {
   display: block !important;
   line-height: 1.4 !important;
   font-weight: 500 !important;
-=======
+}
+
 /* ==========================================================
    ADMIN CHECKBOX & BULK ACTIONS
    ========================================================== */
@@ -2174,9 +2174,10 @@ textarea.admin-input {
   gap: 16px !important;
   padding: 10px 16px !important;
   border-radius: 12px !important;
-  background-color: #111413 !important;
-  color: #ffffff !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+  background-color: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--ink) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03) !important;
   animation: adminSlideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
@@ -2190,8 +2191,3 @@ textarea.admin-input {
     transform: translateY(0);
   }
 }
-
-
-
-
-

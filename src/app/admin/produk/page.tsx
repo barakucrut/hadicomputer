@@ -495,17 +495,17 @@ export default function AdminProductsPage() {
             <Badge variant="destructive" className="font-bold text-xs px-2.5 py-1">
               {selectedIds.length} Produk Dipilih
             </Badge>
-            <span className="text-xs text-white/80 hidden sm:inline">
-              dari {products.length} produk di halaman ini
+            <span className="text-xs text-[#525854] font-medium hidden sm:inline">
+              dari total {products.length} produk di halaman ini
             </span>
           </div>
           <div className="flex items-center gap-2">
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={() => setSelectedIds([])}
-              className="text-white hover:text-white/80 hover:bg-white/10 text-xs"
+              className="text-xs font-semibold text-[#525854] hover:text-[#111413] bg-white border-[#d1d5db]"
             >
               Batalkan Pilihan
             </Button>
