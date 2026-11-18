@@ -283,11 +283,14 @@ model Product {
 
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
+  // Soft delete: terisi = produk sudah dihapus (data & SKU tetap tersimpan)
+  deletedAt         DateTime?
 
   @@index([tenantId])
   @@index([categoryId])
   @@index([brandId])
   @@index([publicationStatus, availability])
+  @@index([deletedAt])
   @@map("products")
 }
 

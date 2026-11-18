@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { authorizeAdmin } from "@/lib/auth";
+import { deletedSlug, isSkuTaken, isUniqueViolation, normalizeSku } from "@/lib/product-sku";
 
 export async function GET(
   request: Request,
@@ -11,8 +12,8 @@ export async function GET(
   if (!auth.ok) return auth.response;
 
   const { id } = await params;
-  const product = await prisma.product.findUnique({
-    where: { id },
+  const product = await prisma.product.findFirst({
+    where: { id, deletedAt: null },
     include: {
       category: true,
       brand: true,
@@ -75,12 +76,29 @@ export async function PUT(
       specs,
     } = data;
 
+    const current = await prisma.product.findFirst({
+      where: { id, deletedAt: null },
+      select: { code: true },
+    });
+    if (!current) {
+      return NextResponse.json({ error: "Produk tidak ditemukan" }, { status: 404 });
+    }
+
+    // SKU: kosong = tetap pakai SKU lama; diubah = wajib unik
+    const finalCode = normalizeSku(code) || current.code;
+    if (finalCode !== current.code && (await isSkuTaken(finalCode, id))) {
+      return NextResponse.json(
+        { error: `SKU ${finalCode} sudah dipakai produk lain.` },
+        { status: 409 }
+      );
+    }
+
     // Update Product Info
     await prisma.product.update({
       where: { id },
       data: {
         name,
-        code,
+        code: finalCode,
         slug,
         summary,
         description,
@@ -155,6 +173,12 @@ export async function PUT(
     return NextResponse.json({ success: true });
   } catch (err: any) {
     console.error("Update product error:", err);
+    if (isUniqueViolation(err, "code")) {
+      return NextResponse.json({ error: "SKU sudah dipakai produk lain." }, { status: 409 });
+    }
+    if (isUniqueViolation(err, "slug")) {
+      return NextResponse.json({ error: "Slug URL sudah dipakai produk lain." }, { status: 409 });
+    }
     return NextResponse.json({ error: err.message || "Gagal memperbarui produk" }, { status: 500 });
   }
 }
@@ -168,7 +192,18 @@ export async function DELETE(
 
   const { id } = await params;
   try {
-    await prisma.product.delete({ where: { id } });
+    const existing = await prisma.product.findFirst({
+      where: { id, deletedAt: null },
+      select: { id: true, slug: true },
+    });
+    if (!existing) {
+      return NextResponse.json({ error: "Produk tidak ditemukan" }, { status: 404 });
+    }
+    // Soft delete: data & SKU tetap tersimpan, slug dibebaskan agar URL bisa dipakai lagi
+    await prisma.product.update({
+      where: { id },
+      data: { deletedAt: new Date(), slug: deletedSlug(existing.slug, id) },
+    });
     revalidatePath("/", "layout");
     revalidatePath("/katalog");
     return NextResponse.json({ success: true });

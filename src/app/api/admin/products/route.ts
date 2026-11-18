@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { authorizeAdmin } from "@/lib/auth";
+import { deletedSlug, getNextSku, isSkuTaken, isUniqueViolation, normalizeSku } from "@/lib/product-sku";
 
 export async function GET(request: Request) {
   const auth = await authorizeAdmin(["products:view"]);
@@ -23,7 +24,7 @@ export async function GET(request: Request) {
   const limitParam = searchParams.get("limit");
   const limit = limitParam === "all" ? 1000 : Math.max(1, parseInt(limitParam || "10", 10));
 
-  const whereClause: any = {};
+  const whereClause: any = { deletedAt: null };
 
   if (q) {
     whereClause.OR = [
@@ -128,9 +129,9 @@ export async function POST(request: Request) {
       specs = [],
     } = data;
 
-    if (!name || !code || !categoryId || !brandId) {
+    if (!name || !categoryId || !brandId) {
       return NextResponse.json(
-        { error: "Nama, kode, kategori, dan merek wajib diisi" },
+        { error: "Nama, kategori, dan merek wajib diisi" },
         { status: 400 }
       );
     }
@@ -142,10 +143,10 @@ export async function POST(request: Request) {
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)/g, "");
 
-    const product = await prisma.product.create({
+    const createWithCode = (finalCode: string) => prisma.product.create({
       data: {
         name,
-        code,
+        code: finalCode,
         slug: finalSlug,
         summary: summary || "",
         description: description || "",
@@ -198,11 +199,48 @@ export async function POST(request: Request) {
       },
     });
 
+
+    // SKU: manual (divalidasi unik) atau otomatis HC-NNNN (retry jika bentrok
+    // karena dua admin menyimpan bersamaan).
+    const manualCode = normalizeSku(code);
+    let product;
+    if (manualCode) {
+      if (await isSkuTaken(manualCode)) {
+        return NextResponse.json(
+          { error: `SKU ${manualCode} sudah dipakai produk lain. Gunakan kode lain atau kosongkan agar dibuat otomatis.` },
+          { status: 409 }
+        );
+      }
+      try {
+        product = await createWithCode(manualCode);
+      } catch (err) {
+        if (isUniqueViolation(err, "code")) {
+          return NextResponse.json({ error: `SKU ${manualCode} sudah dipakai produk lain.` }, { status: 409 });
+        }
+        throw err;
+      }
+    } else {
+      for (let attempt = 0; attempt < 5 && !product; attempt++) {
+        const nextCode = await getNextSku();
+        try {
+          product = await createWithCode(nextCode);
+        } catch (err) {
+          if (!isUniqueViolation(err, "code")) throw err;
+        }
+      }
+      if (!product) {
+        return NextResponse.json({ error: "Gagal membuat SKU otomatis, silakan coba lagi." }, { status: 409 });
+      }
+    }
+
     revalidatePath("/", "layout");
     revalidatePath("/katalog");
-    return NextResponse.json({ success: true, id: product.id });
+    return NextResponse.json({ success: true, id: product.id, code: product.code });
   } catch (err: any) {
     console.error("Create product error:", err);
+    if (isUniqueViolation(err, "slug")) {
+      return NextResponse.json({ error: "Slug URL sudah dipakai produk lain." }, { status: 409 });
+    }
     return NextResponse.json(
       { error: err.message || "Gagal membuat produk baru" },
       { status: 500 }
@@ -225,22 +263,24 @@ export async function DELETE(request: Request) {
       );
     }
 
-    await prisma.$transaction(async (tx) => {
-      await tx.productImage.deleteMany({ where: { productId: { in: ids } } });
-      await tx.productVariant.deleteMany({ where: { productId: { in: ids } } });
-      await tx.productSpec.deleteMany({ where: { productId: { in: ids } } });
-      await tx.inquiryLog.updateMany({
-        where: { productId: { in: ids } },
-        data: { productId: null },
-      });
-      await tx.product.deleteMany({
-        where: { id: { in: ids } },
-      });
+    // Soft delete: gambar, varian, spek & riwayat inquiry tetap tersimpan
+    const targets = await prisma.product.findMany({
+      where: { id: { in: ids }, deletedAt: null },
+      select: { id: true, slug: true },
     });
+    const now = new Date();
+    await prisma.$transaction(
+      targets.map((t) =>
+        prisma.product.update({
+          where: { id: t.id },
+          data: { deletedAt: now, slug: deletedSlug(t.slug, t.id) },
+        })
+      )
+    );
 
     revalidatePath("/", "layout");
     revalidatePath("/katalog");
-    return NextResponse.json({ success: true, count: ids.length });
+    return NextResponse.json({ success: true, count: targets.length });
   } catch (err: any) {
     console.error("Bulk delete products error:", err);
     return NextResponse.json(

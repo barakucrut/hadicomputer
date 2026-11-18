@@ -25,7 +25,7 @@ async function withTimeout<T>(promise: Promise<T>, ms = 2000): Promise<T> {
 
 export async function getLiveProducts(tenantId?: string): Promise<Product[]> {
   try {
-    const whereClause: any = { publicationStatus: "PUBLISHED" };
+    const whereClause: any = { publicationStatus: "PUBLISHED", deletedAt: null };
     if (tenantId) {
       whereClause.tenantId = tenantId;
     }

@@ -38,6 +38,9 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
   // Form states
   const [name, setName] = React.useState(initialData?.name || "");
   const [code, setCode] = React.useState(initialData?.code || "");
+  // SKU otomatis (hanya saat tambah produk): pratinjau dari server
+  const [autoCode, setAutoCode] = React.useState("");
+  const [loadingCode, setLoadingCode] = React.useState(!isEdit);
   const [slug, setSlug] = React.useState(initialData?.slug || "");
   const [summary, setSummary] = React.useState(initialData?.summary || "");
   const [description, setDescription] = React.useState(initialData?.description || "");
@@ -94,6 +97,24 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
       isDefault: v.isDefault ?? idx === 0,
     })) || []
   );
+
+  // Ambil pratinjau SKU berikutnya (HC-NNNN) saat membuat produk baru
+  React.useEffect(() => {
+    if (isEdit) return;
+    let cancelled = false;
+    fetch("/api/admin/products/next-sku")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (cancelled || !data?.code) return;
+        setAutoCode(data.code);
+        setCode((prev: string) => prev || data.code);
+      })
+      .catch(() => {})
+      .finally(() => !cancelled && setLoadingCode(false));
+    return () => {
+      cancelled = true;
+    };
+  }, [isEdit]);
 
   // Fetch categories and brands
   React.useEffect(() => {
@@ -195,16 +216,19 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name || !code || !categoryId || !brandId) {
+    if (!name || !categoryId || !brandId || (isEdit && !code.trim())) {
       toast.error("Nama, kode unit, kategori, dan merek wajib diisi.");
       return;
     }
 
     setSaving(true);
 
+    // Jika SKU masih sama dengan pratinjau otomatis, biarkan server yang
+    // menerbitkan nomor final (aman bila admin lain menyimpan lebih dulu).
+    const isAutoCode = !isEdit && (!code.trim() || code.trim().toUpperCase() === autoCode);
     const payload = {
       name,
-      code,
+      code: isAutoCode ? "" : code.trim().toUpperCase(),
       slug: slug || undefined,
       summary,
       description,
@@ -241,7 +265,11 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
         throw new Error(data.error || "Gagal menyimpan produk");
       }
 
-      setFlashMessage(isEdit ? "Produk berhasil diperbarui!" : "Perangkat baru berhasil ditambahkan!");
+      setFlashMessage(
+        isEdit
+          ? "Produk berhasil diperbarui!"
+          : `Perangkat baru berhasil ditambahkan dengan SKU ${data.code || code}!`
+      );
       router.push("/admin/produk");
       router.refresh();
     } catch (err: any) {
@@ -316,12 +344,20 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                   <Input
                     id="prod-code"
                     type="text"
-                    required
+                    required={isEdit}
                     value={code}
-                    onChange={(e) => setCode(e.target.value)}
-                    placeholder="e.g. HC-0025"
+                    onChange={(e) => setCode(e.target.value.toUpperCase())}
+                    placeholder={loadingCode ? "Membuat SKU otomatis..." : "e.g. HC-0025"}
                     className="font-mono"
+                    maxLength={50}
                   />
+                  {!isEdit && (
+                    <p className="text-xs text-[#525854] mt-1">
+                      {code.trim() && code.trim().toUpperCase() !== autoCode
+                        ? "SKU manual — akan dicek agar tidak duplikat."
+                        : "Dibuat otomatis. Bisa diganti manual bila perlu."}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="prod-cond">Kondisi Perangkat</Label>
