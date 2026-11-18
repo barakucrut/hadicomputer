@@ -26,7 +26,7 @@ export async function getLiveProducts(): Promise<Product[]> {
   try {
     const dbProducts = await withTimeout(
       prisma.product.findMany({
-        where: { publicationStatus: "PUBLISHED" },
+        where: { publicationStatus: "PUBLISHED", deletedAt: null },
         include: {
           category: true,
           brand: true,

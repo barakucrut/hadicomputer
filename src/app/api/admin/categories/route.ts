@@ -5,7 +5,7 @@ import { authorizeAdmin } from "@/lib/auth";
 
 export async function GET() {
   const categories = await prisma.category.findMany({
-    include: { _count: { select: { products: true } } },
+    include: { _count: { select: { products: { where: { deletedAt: null } } } } },
     orderBy: { sortOrder: "asc" },
   });
   return NextResponse.json({ categories });
@@ -47,6 +47,23 @@ export async function DELETE(request: Request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
   if (!id) return NextResponse.json({ error: "ID missing" }, { status: 400 });
+
+  const [activeCount, deletedCount] = await Promise.all([
+    prisma.product.count({ where: { categoryId: id, deletedAt: null } }),
+    prisma.product.count({ where: { categoryId: id, NOT: { deletedAt: null } } }),
+  ]);
+  if (activeCount > 0) {
+    return NextResponse.json(
+      { error: `Kategori masih dipakai oleh ${activeCount} produk. Pindahkan atau hapus produknya terlebih dahulu.` },
+      { status: 400 }
+    );
+  }
+  if (deletedCount > 0) {
+    return NextResponse.json(
+      { error: `Kategori masih tercatat pada ${deletedCount} produk yang sudah dihapus (arsip), sehingga tidak dapat dihapus.` },
+      { status: 400 }
+    );
+  }
 
   await prisma.category.delete({ where: { id } });
   revalidatePath("/", "layout");

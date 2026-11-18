@@ -33,10 +33,10 @@ export default async function AdminDashboardPage() {
     topInquiredProducts,
     recentProducts,
   ] = await Promise.all([
-    prisma.product.count(),
-    prisma.product.count({ where: { availability: "TERSEDIA" } }),
-    prisma.product.count({ where: { availability: "PREORDER" } }),
-    prisma.product.count({ where: { availability: "HABIS" } }),
+    prisma.product.count({ where: { deletedAt: null } }),
+    prisma.product.count({ where: { availability: "TERSEDIA", deletedAt: null } }),
+    prisma.product.count({ where: { availability: "PREORDER", deletedAt: null } }),
+    prisma.product.count({ where: { availability: "HABIS", deletedAt: null } }),
     prisma.banner.count({ where: { isActive: true } }),
     prisma.service.count({ where: { isActive: true } }),
     prisma.inquiryLog.count(),
@@ -48,6 +48,7 @@ export default async function AdminDashboardPage() {
       },
     }),
     prisma.product.findMany({
+      where: { deletedAt: null },
       include: {
         category: true,
         _count: { select: { inquiryLogs: true } },
@@ -56,6 +57,7 @@ export default async function AdminDashboardPage() {
       take: 5,
     }),
     prisma.product.findMany({
+      where: { deletedAt: null },
       include: { category: true, brand: true },
       orderBy: { createdAt: "desc" },
       take: 5,
