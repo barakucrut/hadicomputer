@@ -82,6 +82,23 @@ const COLOR_PRESETS = [
   { name: "Amber Gold", hex: "#d97706", label: "Emas Mewah & Prestisius" },
 ];
 
+const TEMPLATE_OPTIONS = [
+  {
+    id: "classic-retail",
+    name: "Classic Hardware Retail",
+    badge: "Mega-Store Catalog (Default)",
+    description: "Tata letak padat dengan banner promo hero, pita 4 keunggulan toko, tab kategori populer, servis hardware, dan peta lokasi toko.",
+    tag: "Teruji & Populer",
+  },
+  {
+    id: "minimalist-boutique",
+    name: "Minimalist Tech Boutique",
+    badge: "Editorial Clean Studio",
+    description: "Desain mewah & bersih ala Apple Studio. Fokus pada fotografi produk, whitespace luas, kartu produk frameless, dan kurasi eksklusif.",
+    tag: "Modern & Premium",
+  },
+];
+
 export default function AdminSettingsPage() {
   const toast = useToast();
   const [activeTab, setActiveTab] = React.useState<"appearance" | "homepage" | "contact" | "security">("appearance");
@@ -105,6 +122,7 @@ export default function AdminSettingsPage() {
     announcementText: "",
     isAnnouncementActive: false,
     homepageConfig: {
+      templateId: "classic-retail",
       featuredTitle: "",
       featuredEyebrow: "DIPILIH UNTUKMU",
       featuredDescription: "",
@@ -198,6 +216,7 @@ export default function AdminSettingsPage() {
         if (d.settings) {
           const s = d.settings;
           const mergedConfig = {
+            templateId: s.homepageConfig?.templateId || "classic-retail",
             featuredTitle: s.homepageConfig?.featuredTitle || `Pilihan ${s.storeName || "Toko"}, untuk harimu.`,
             featuredEyebrow: s.homepageConfig?.featuredEyebrow || "DIPILIH UNTUKMU",
             featuredDescription: s.homepageConfig?.featuredDescription || "Kenali perangkat yang bisa jadi teman aktivitasmu berikutnya.",
@@ -421,6 +440,76 @@ export default function AdminSettingsPage() {
       {/* TAB 1: APPEARANCE & TYPOGRAPHY */}
       {activeTab === "appearance" && (
         <div className="space-y-6">
+          {/* 1.0 Template Layout Selector */}
+          <Card className="border-[#e5e5e2] shadow-sm rounded-2xl overflow-hidden">
+            <CardHeader className="p-6 border-b border-[#e5e5e2] bg-[#fcfcfc]">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Layout size={18} style={{ color: settings.primaryColor }} />
+                  <span>Pilihan Template Desain Etalase</span>
+                </CardTitle>
+                <Badge variant="purple" className="text-[11px] font-bold">
+                  2 Template Tersedia
+                </Badge>
+              </div>
+              <CardDescription>
+                Pilih arsitektur visual etalase publik yang paling mewakili karakter bisnis toko Anda.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {TEMPLATE_OPTIONS.map((tpl) => {
+                  const currentTpl = settings.homepageConfig?.templateId || "classic-retail";
+                  const isSelected = currentTpl === tpl.id;
+                  return (
+                    <div
+                      key={tpl.id}
+                      onClick={() =>
+                        setSettings({
+                          ...settings,
+                          homepageConfig: {
+                            ...settings.homepageConfig,
+                            templateId: tpl.id,
+                          },
+                        })
+                      }
+                      className={`admin-choice-card ${isSelected ? "is-active" : ""}`}
+                      role="button"
+                      tabIndex={0}
+                      aria-pressed={isSelected}
+                    >
+                      <div className="flex flex-col gap-1.5 pr-8">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-sm text-[#111413] leading-tight">
+                            {tpl.name}
+                          </span>
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-gray-100 text-gray-700 border border-gray-200">
+                            {tpl.tag}
+                          </span>
+                        </div>
+                        <div className="text-[11px] font-semibold text-[#818779] leading-tight">
+                          {tpl.badge}
+                        </div>
+                      </div>
+
+                      {/* Large Prominent Checkmark Indicator */}
+                      <div
+                        className="admin-choice-indicator"
+                        title={isSelected ? "Template Sedang Aktif" : "Pilih Template Ini"}
+                      >
+                        {isSelected && <Check size={14} strokeWidth={2.5} className="text-white" />}
+                      </div>
+
+                      <p className="text-xs text-[#525854] mt-3 leading-relaxed">
+                        {tpl.description}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+
           {/* 1.1 Font Family Selection (Selectable Choice Cards with Prominent Checkmark) */}
           <Card className="border-[#e5e5e2] shadow-sm rounded-2xl overflow-hidden">
             <CardHeader className="p-6 border-b border-[#e5e5e2] bg-[#fcfcfc]">

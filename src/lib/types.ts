@@ -73,6 +73,7 @@ export type HomepageSectionToggles = {
 };
 
 export type HomepageConfig = {
+  templateId?: string;
   featuredTitle?: string;
   featuredEyebrow?: string;
   featuredDescription?: string;
