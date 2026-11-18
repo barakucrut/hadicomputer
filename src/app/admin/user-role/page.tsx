@@ -890,7 +890,17 @@ export default function UserRolePage() {
                         )}
                       </div>
 
-                      <div className="pt-4 border-t border-[#f1f3ed] flex items-center gap-2">
+                      <div
+                        className="admin-role-card-footer mt-4 pt-4 border-t flex items-center gap-2"
+                        style={{
+                          marginTop: "16px",
+                          paddingTop: "16px",
+                          borderTop: "1px solid var(--border)",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                        }}
+                      >
                         <Button
                           variant="outline"
                           size="sm"

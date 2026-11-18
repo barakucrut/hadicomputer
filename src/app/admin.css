@@ -2202,3 +2202,14 @@ textarea.admin-input {
   pointer-events: none;
 }
 
+/* Card footer and role card action footer (strict 16px divider rules) */
+.admin-card-footer,
+.admin-role-card-footer {
+  margin-top: 16px !important;
+  padding-top: 16px !important;
+  border-top: 1px solid var(--border) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+

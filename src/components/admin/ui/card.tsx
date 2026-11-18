@@ -61,7 +61,7 @@ export function CardFooter({
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={`flex items-center p-6 pt-0 border-t border-[#f1f3ed] mt-4 ${className}`}
+      className={`admin-card-footer flex items-center p-6 border-t border-[#f1f3ed] mt-4 pt-4 ${className}`}
       {...props}
     />
   );
