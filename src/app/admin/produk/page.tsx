@@ -98,6 +98,60 @@ export default function AdminProductsPage() {
   const [deleteTarget, setDeleteTarget] = React.useState<{ id: string; name: string } | null>(null);
   const [deleting, setDeleting] = React.useState(false);
 
+  // Bulk Selection & Delete State
+  const [selectedIds, setSelectedIds] = React.useState<string[]>([]);
+  const [isBulkDeleteConfirmOpen, setIsBulkDeleteConfirmOpen] = React.useState(false);
+  const [bulkDeleting, setBulkDeleting] = React.useState(false);
+
+  // Clear selection on page/filter change
+  React.useEffect(() => {
+    setSelectedIds([]);
+  }, [page, search, appliedFilters]);
+
+  const isAllSelected =
+    products.length > 0 && products.every((p) => selectedIds.includes(p.id));
+  const isIndeterminate =
+    products.some((p) => selectedIds.includes(p.id)) && !isAllSelected;
+
+  function handleSelectAll() {
+    if (isAllSelected) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(products.map((p) => p.id));
+    }
+  }
+
+  function handleToggleSelect(id: string) {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  }
+
+  async function executeBulkDelete() {
+    if (selectedIds.length === 0) return;
+    setBulkDeleting(true);
+    try {
+      const res = await fetch("/api/admin/products", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: selectedIds }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success(`${selectedIds.length} produk berhasil dihapus!`);
+        setSelectedIds([]);
+        setIsBulkDeleteConfirmOpen(false);
+        fetchProducts();
+      } else {
+        toast.error(data.error || "Gagal menghapus produk terpilih.");
+      }
+    } catch (err) {
+      toast.error("Terjadi kesalahan saat menghapus produk terpilih.");
+    } finally {
+      setBulkDeleting(false);
+    }
+  }
+
   // Calculate active filter count
   const activeFilterCount = React.useMemo(() => {
     let count = 0;
@@ -433,11 +487,58 @@ export default function AdminProductsPage() {
         </div>
       </Card>
 
+      {/* Bulk Actions Floating Bar */}
+      {selectedIds.length > 0 && (
+        <div className="admin-bulk-bar">
+          <div className="flex items-center gap-3">
+            <Badge variant="destructive" className="font-bold text-xs px-2.5 py-1">
+              {selectedIds.length} Produk Dipilih
+            </Badge>
+            <span className="text-xs text-white/80 hidden sm:inline">
+              dari {products.length} produk di halaman ini
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setSelectedIds([])}
+              className="text-white hover:text-white/80 hover:bg-white/10 text-xs"
+            >
+              Batalkan Pilihan
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              onClick={() => setIsBulkDeleteConfirmOpen(true)}
+              className="flex items-center gap-1.5 text-xs font-bold"
+            >
+              <HugeIconTrash size={15} />
+              <span>Hapus {selectedIds.length} Produk</span>
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Products Data Table */}
       <Card className="overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead style={{ width: "44px", paddingRight: "0", paddingLeft: "16px" }}>
+                <input
+                  type="checkbox"
+                  aria-label="Pilih semua produk di halaman ini"
+                  checked={isAllSelected}
+                  ref={(el) => {
+                    if (el) el.indeterminate = isIndeterminate;
+                  }}
+                  onChange={handleSelectAll}
+                  className="admin-checkbox"
+                />
+              </TableHead>
               <TableHead style={{ width: "72px" }}>Foto</TableHead>
               <TableHead>Nama & Kode</TableHead>
               <TableHead>Kategori & Merek</TableHead>
@@ -451,18 +552,19 @@ export default function AdminProductsPage() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={8} className="h-32 text-center text-[#525854]">
+                <TableCell colSpan={9} className="h-32 text-center text-[#525854]">
                   Memuat data produk...
                 </TableCell>
               </TableRow>
             ) : products.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="h-32 text-center text-[#525854]">
+                <TableCell colSpan={9} className="h-32 text-center text-[#525854]">
                   Tidak ada produk yang sesuai dengan kriteria pencarian / filter.
                 </TableCell>
               </TableRow>
             ) : (
               products.map((p) => {
+                const isSelected = selectedIds.includes(p.id);
                 const primaryImage =
                   p.images?.find((img: any) => img.isPrimary)?.url ||
                   p.images?.[0]?.url ||
@@ -473,7 +575,7 @@ export default function AdminProductsPage() {
                 return (
                   <TableRow
                     key={p.id}
-                    className="admin-clickable-row"
+                    className={`admin-clickable-row ${isSelected ? "admin-row-selected" : ""}`}
                     onClick={(e) => {
                       const target = e.target as HTMLElement;
                       if (target.closest("button") || target.closest("a") || target.closest("input")) {
@@ -482,6 +584,20 @@ export default function AdminProductsPage() {
                       router.push(`/admin/produk/${p.id}`);
                     }}
                   >
+                    {/* Selection Checkbox */}
+                    <TableCell
+                      style={{ width: "44px", paddingRight: "0", paddingLeft: "16px" }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <input
+                        type="checkbox"
+                        aria-label={`Pilih ${p.name}`}
+                        checked={isSelected}
+                        onChange={() => handleToggleSelect(p.id)}
+                        className="admin-checkbox"
+                      />
+                    </TableCell>
+
                     {/* Thumbnail Image */}
                     <TableCell>
                       <div className="admin-product-thumb">
@@ -866,7 +982,7 @@ export default function AdminProductsPage() {
         </>
       )}
 
-      {/* Delete Confirmation Dialog */}
+      {/* Single Delete Confirmation Dialog */}
       <ConfirmDialog
         open={Boolean(deleteTarget)}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
@@ -875,6 +991,19 @@ export default function AdminProductsPage() {
         confirmLabel="Ya, Hapus Produk"
         onConfirm={executeDelete}
         loading={deleting}
+      />
+
+      {/* Bulk Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={isBulkDeleteConfirmOpen}
+        onOpenChange={setIsBulkDeleteConfirmOpen}
+        title={`Hapus ${selectedIds.length} Produk Terpilih?`}
+        description={`Apakah Anda yakin ingin menghapus ${selectedIds.length} produk yang dipilih secara permanen? Seluruh foto, varian, dan spesifikasi terkait produk-produk ini akan dihapus dari katalog toko dan database.`}
+        confirmLabel={`Ya, Hapus ${selectedIds.length} Produk`}
+        cancelLabel="Batal"
+        variant="destructive"
+        onConfirm={executeBulkDelete}
+        loading={bulkDeleting}
       />
     </div>
   );

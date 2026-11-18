@@ -1739,6 +1739,102 @@ textarea.admin-input {
   border: none !important;
 }
 
+/* ==========================================================
+   ADMIN CHECKBOX & BULK ACTIONS
+   ========================================================== */
+.admin-checkbox {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  min-height: 18px !important;
+  border: 1.5px solid #d1d5db !important;
+  border-radius: 5px !important;
+  background-color: #ffffff !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.15s ease-in-out !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  vertical-align: middle !important;
+  position: relative !important;
+  box-sizing: border-box !important;
+}
+
+.admin-checkbox:hover {
+  border-color: var(--red) !important;
+  background-color: #fef2f2 !important;
+}
+
+.admin-checkbox:focus-visible {
+  outline: 2px solid var(--red) !important;
+  outline-offset: 2px !important;
+}
+
+.admin-checkbox:checked {
+  background-color: var(--red) !important;
+  border-color: var(--red) !important;
+}
+
+.admin-checkbox:checked::before {
+  content: "" !important;
+  width: 5px !important;
+  height: 9px !important;
+  border-right: 2px solid #ffffff !important;
+  border-bottom: 2px solid #ffffff !important;
+  transform: rotate(45deg) translate(-0.5px, -1px) !important;
+  display: block !important;
+}
+
+.admin-checkbox:indeterminate {
+  background-color: var(--red) !important;
+  border-color: var(--red) !important;
+}
+
+.admin-checkbox:indeterminate::before {
+  content: "" !important;
+  width: 10px !important;
+  height: 2px !important;
+  background-color: #ffffff !important;
+  border-radius: 1px !important;
+  display: block !important;
+}
+
+.admin-row-selected {
+  background-color: #fff5f5 !important;
+}
+.admin-row-selected:hover {
+  background-color: #fee2e2 !important;
+}
+
+.admin-bulk-bar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  padding: 10px 16px !important;
+  border-radius: 12px !important;
+  background-color: #111413 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+  animation: adminSlideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+@keyframes adminSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
 
 
 
