@@ -141,3 +141,39 @@ Mengirim broadcast massal di WhatsApp memiliki risiko tinggi pemblokiran nomor (
 * **Add-On Kuota:** 1.000 pesan broadcast seharga Rp 150.000 / paket.
 * **Fitur Eksklusif Paket PRO & Enterprise:** Menjadi nilai jual utama (*upselling*) agar toko upgrade ke paket langganan tahunan yang lebih tinggi.
 
+
+---
+
+## 7. Roadmap Disepakati — rigspace.id (19 November 2026)
+
+### 7.1 Prinsip Go-To-Market
+* **Reverse demo sebagai senjata utama:** datang ke calon tenant dengan website yang **sudah jadi** — brand mereka, produk mereka, desain kita. Momen "WOW" di pertemuan pertama.
+* **Jual hasil, bukan website:** inquiry WhatsApp, lead tercatat, keamanan, dan nol maintenance. Desain bagus saja bukan moat.
+* **Target operasional:** 1 tenant baru siap dipresentasikan dalam **< 30 menit** (import katalog otomatis + template + branding). Development bukan lagi hambatan; fokus pada penjualan, mulai dari kota-kota besar di Indonesia.
+* **Batas custom work:** template + konfigurasi termasuk paket; permintaan custom dibayar terpisah agar model 30 menit/tenant tidak runtuh.
+* **Etika demo:** demo memakai brand & produk calon tenant hanya ditunjukkan ke mereka — `noindex`, tidak dipublikasikan, dan dihapus bila mereka menolak.
+* **Validasi pasar** = 3–5 toko berbeda membayar + minimal 1 perpanjangan. Klien pertama adalah studi kasus, belum bukti pasar.
+* Upgrade paket berikutnya ditawarkan lewat killer feature baru (PC Builder, Trade-In, Broadcast WA, laporan lanjutan) dengan konsekuensi harga paket naik.
+
+### 7.2 Klien Pertama: Bitcom Plaza (Jember)
+* Situs lama `bitcomplaza.com`: WordPress + WooCommerce, 250 produk (121 aksesori, 81 laptop, 38 printer, 8 tablet; median Rp 1,2 jt; 89 produk ≥ Rp 4 jt, rata-rata Rp 11,2 jt).
+* **Temuan keamanan (19 Nov 2026):** link judi online tersembunyi (`casinoextra.win` digeser −59.028px + `visibility:hidden`; `estelar-bet.cl` dalam kotak tinggi 1px). Tidak terlihat pengunjung, tapi dibaca Google. Cara verifikasi: Ctrl+U → cari "casino", atau Google `site:bitcomplaza.com casino`. Disampaikan sebagai bantuan, bukan serangan.
+* **Data katalog:** WooCommerce Store API publik (`/wp-json/wc/store/v1/products`) → impor seluruh 250 produk ke demo; nama dirapikan (hapus akhiran "| BITCOM PLAZA"), spek laptop diekstrak dari judul, kategori dipetakan, "Uncategorized" → Aksesori. Beranda dikurasi ke laptop/printer/tablet; aksesori murah cukup di katalog. Label demo: "Harga mengikuti website lama per [tanggal]".
+* **Pitch:** (1) bukti link judi tersembunyi, (2) demo live dengan produk asli mereka, (3) contoh laporan bulanan sederhana.
+* **Penawaran:** gratis **1 bulan** dengan syarat langsung live di domain mereka (agar data kunjungan nyata), lalu tahunan. Alternatif bila perlu: bayar tahunan + garansi uang kembali 30 hari setelah live, atau diskon "launch partner" tahun pertama ditukar testimoni & studi kasus.
+
+### 7.3 Urutan Eksekusi
+1. **Sprint Fondasi** *(mulai 19 Nov 2026)*
+   - Isolasi data tenant di seluruh `/api/admin/*` (filter `tenantId` dari sesi) — wajib sebelum data klien nyata masuk production.
+   - Port dari branch `hadicomputer` dan dibuat tenant-aware: RBAC User & Role, soft delete produk, SKU otomatis anti-duplikat, aksi massal (bulk delete).
+   - Secret production wajib dari env (`ADMIN_JWT_SECRET`, `GOD_MODE_*`), tanpa fallback hardcoded.
+   - Penegakan paket (*plan gating*) untuk fitur Pro.
+2. **Import Produk Pintar** — v1 importer WooCommerce (Bitcom & toko WordPress lain); v2 AI import (tempel teks spek / foto / link marketplace) untuk toko non-WordPress.
+3. **SEO per tenant (dashboard Pengaturan → SEO):** meta title & description beranda, template judul produk, Open Graph image, sitemap.xml & robots.txt per domain, structured data `Product`/`LocalBusiness`, verifikasi Google Search Console, toggle `noindex` (otomatis aktif untuk demo/prospek).
+4. **Google Analytics per tenant:** input Measurement ID GA4 (`G-XXXXXXX`) dan opsional Google Tag Manager di dashboard, disuntikkan hanya di storefront tenant tersebut.
+5. **Laporan ROI sederhana (v1):** jumlah chat WhatsApp/bulan & tren, produk paling ditanyakan, asal pengunjung (referrer), jam ramai + penghitung kunjungan ringan. Estimasi omzet & tombol "Tandai Terjual" = fitur upgrade.
+6. **Stok produk (opsional):** mode tampil angka / "Stok terbatas" / sembunyikan; ketersediaan otomatis HABIS saat stok 0; stok per varian menyusul; sinkron POS untuk Enterprise.
+7. Poles demo Bitcom → presentasi → closing.
+8. **Engine tim marketing:** pembuat demo otomatis (scrape Maps/IG, ekstraksi warna logo, import katalog, subdomain demo `noindex`).
+9. **Fitur upgrade:** PC Builder, Trade-In, Broadcast WA & CRM, laporan ROI lanjutan, cicilan, cek status servis, notifikasi restock, feed Google Merchant Center, bandingkan produk, inbox lead.
+10. Custom domain + SSL otomatis, pendaftaran mandiri, billing (Midtrans/Xendit).
