@@ -14,9 +14,11 @@ import {
 } from "@/components/admin/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useCan } from "@/components/admin/permissions";
 import { useToast } from "@/components/admin/ui/toast";
 
 export default function AdminServicesPage() {
+  const canManage = useCan()("services:manage");
   const toast = useToast();
   const [services, setServices] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -108,14 +110,16 @@ export default function AdminServicesPage() {
                     {s.title}
                   </span>
                 </CardTitle>
-                <button
-                  type="button"
-                  onClick={() => handleOpenEdit(s)}
-                  className="admin-action-btn"
-                  title="Edit Layanan"
-                >
-                  <Edit size={16} />
-                </button>
+                {canManage && (
+                  <button
+                    type="button"
+                    onClick={() => handleOpenEdit(s)}
+                    className="admin-action-btn"
+                    title="Edit Layanan"
+                  >
+                    <Edit size={16} />
+                  </button>
+                )}
               </div>
               <div style={{ marginTop: "10px" }}>
                 <span className="admin-service-slug-badge" style={{ padding: "4px 10px", borderRadius: "6px" }}>

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
-import { getAdminSession } from "@/lib/auth";
+import { authorizeAdmin } from "@/lib/auth";
 
 export async function GET() {
   const categories = await prisma.category.findMany({
@@ -12,8 +12,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const session = await getAdminSession();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await authorizeAdmin(["categories:manage"]);
+  if (!auth.ok) return auth.response;
 
   const { name, slug, icon, description, sortOrder = 0, isActive = true } = await request.json();
   if (!name || !slug) {
@@ -28,8 +28,8 @@ export async function POST(request: Request) {
 }
 
 export async function PUT(request: Request) {
-  const session = await getAdminSession();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await authorizeAdmin(["categories:manage"]);
+  if (!auth.ok) return auth.response;
 
   const { id, name, slug, icon, description, sortOrder, isActive } = await request.json();
   const category = await prisma.category.update({
@@ -41,8 +41,8 @@ export async function PUT(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const session = await getAdminSession();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await authorizeAdmin(["categories:manage"]);
+  if (!auth.ok) return auth.response;
 
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");

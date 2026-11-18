@@ -29,9 +29,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CategoryIcon } from "@/components/ui";
 import { IconPicker } from "@/components/admin/ui/icon-picker";
+import { useCan } from "@/components/admin/permissions";
 import { useToast } from "@/components/admin/ui/toast";
 
 export default function AdminCategoriesBrandsPage() {
+  const can = useCan();
+  const canMode = (mode: "cat" | "brand" | "need") =>
+    can(mode === "brand" ? "brands:manage" : "categories:manage");
   const toast = useToast();
   const [categories, setCategories] = React.useState<any[]>([]);
   const [brands, setBrands] = React.useState<any[]>([]);
@@ -92,6 +96,7 @@ export default function AdminCategoriesBrandsPage() {
   }
 
   function openEditDialog(item: any, mode: "cat" | "brand" | "need") {
+    if (!canMode(mode)) return;
     setDialogMode(mode);
     setEditingItem(item);
     setName(item.name);
@@ -213,10 +218,12 @@ export default function AdminCategoriesBrandsPage() {
         {/* Tab 1: Kategori */}
         <TabsContent value="kategori" className="space-y-4">
           <div className="flex justify-end">
+            {canMode("cat") && (
             <Button onClick={() => openCreateDialog("cat")} className="flex items-center gap-1.5">
               <Plus size={16} />
               <span>Tambah Kategori</span>
             </Button>
+            )}
           </div>
 
           <Card>
@@ -282,6 +289,7 @@ export default function AdminCategoriesBrandsPage() {
                         <Badge variant="secondary">{c._count?.products || 0} Produk</Badge>
                       </TableCell>
                       <TableCell className="text-right">
+                        {canMode("cat") && (
                         <div className="flex items-center justify-end gap-1.5">
                           <button
                             type="button"
@@ -300,6 +308,7 @@ export default function AdminCategoriesBrandsPage() {
                             <HugeIconTrash size={16} />
                           </button>
                         </div>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))
@@ -325,10 +334,12 @@ export default function AdminCategoriesBrandsPage() {
         {/* Tab 2: Merek */}
         <TabsContent value="merek" className="space-y-4">
           <div className="flex justify-end">
+            {canMode("brand") && (
             <Button onClick={() => openCreateDialog("brand")} className="flex items-center gap-1.5">
               <Plus size={16} />
               <span>Tambah Merek</span>
             </Button>
+            )}
           </div>
 
           <Card>
@@ -367,6 +378,7 @@ export default function AdminCategoriesBrandsPage() {
                         <Badge variant="secondary">{b._count?.products || 0} Produk</Badge>
                       </TableCell>
                       <TableCell className="text-right">
+                        {canMode("brand") && (
                         <div className="flex items-center justify-end gap-1.5">
                           <button
                             type="button"
@@ -385,6 +397,7 @@ export default function AdminCategoriesBrandsPage() {
                             <HugeIconTrash size={16} />
                           </button>
                         </div>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))
@@ -410,10 +423,12 @@ export default function AdminCategoriesBrandsPage() {
         {/* Tab 3: Kebutuhan */}
         <TabsContent value="kebutuhan" className="space-y-4">
           <div className="flex justify-end">
+            {canMode("need") && (
             <Button onClick={() => openCreateDialog("need")} className="flex items-center gap-1.5">
               <Plus size={16} />
               <span>Tambah Kebutuhan Baru</span>
             </Button>
+            )}
           </div>
 
           <Card>
@@ -453,6 +468,7 @@ export default function AdminCategoriesBrandsPage() {
                           {n.description || "-"}
                         </TableCell>
                         <TableCell className="text-right">
+                          {canMode("need") && (
                           <div className="flex items-center justify-end gap-1.5">
                             <button
                               type="button"
@@ -471,6 +487,7 @@ export default function AdminCategoriesBrandsPage() {
                               <HugeIconTrash size={16} />
                             </button>
                           </div>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))

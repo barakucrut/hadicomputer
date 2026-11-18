@@ -33,9 +33,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { useCan } from "@/components/admin/permissions";
 import { useToast } from "@/components/admin/ui/toast";
 
 export default function AdminBannersPage() {
+  const canManage = useCan()("banners:manage");
   const toast = useToast();
   const [banners, setBanners] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -271,10 +273,12 @@ export default function AdminBannersPage() {
                 Kelola daftar banner promosi utama beranda toko dan titik hotspot bonus interaktif.
               </p>
             </div>
-            <Button onClick={handleCreateNewBanner} className="flex items-center gap-2">
-              <Plus size={16} />
-              <span>Tambah Banner Baru</span>
-            </Button>
+            {canManage && (
+              <Button onClick={handleCreateNewBanner} className="flex items-center gap-2">
+                <Plus size={16} />
+                <span>Tambah Banner Baru</span>
+              </Button>
+            )}
           </div>
 
           {/* Table Card */}
@@ -310,8 +314,9 @@ export default function AdminBannersPage() {
                     .map((b) => (
                     <TableRow
                       key={b.id}
-                      className="admin-clickable-row"
+                      className={canManage ? "admin-clickable-row" : ""}
                       onClick={(e) => {
+                        if (!canManage) return;
                         const target = e.target as HTMLElement;
                         if (target.closest("button") || target.closest("a")) return;
                         handleEditBanner(b);
@@ -378,7 +383,8 @@ export default function AdminBannersPage() {
                       <TableCell>
                         <button
                           type="button"
-                          onClick={() => handleToggleStatus(b)}
+                          onClick={() => canManage && handleToggleStatus(b)}
+                          disabled={!canManage}
                           className="admin-badge-btn"
                           title="Klik untuk mengubah status aktif/nonaktif"
                         >
@@ -390,6 +396,7 @@ export default function AdminBannersPage() {
 
                       {/* Actions (Hugeicons style) */}
                       <TableCell className="text-right">
+                        {canManage && (
                         <div className="flex items-center justify-end gap-1.5">
                           <button
                             type="button"
@@ -408,6 +415,7 @@ export default function AdminBannersPage() {
                             <HugeIconTrash size={16} />
                           </button>
                         </div>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))

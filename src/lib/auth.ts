@@ -1,5 +1,6 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
 import { prisma } from "./db";
 
 const JWT_SECRET = new TextEncoder().encode(
@@ -102,4 +103,37 @@ export async function requireAdminSession() {
       permissions: session.permissions || (session.role?.toUpperCase() === "OWNER" || session.role === "owner" ? ["*"] : []),
     };
   }
+}
+
+type AuthorizeResult =
+  | { ok: true; session: NonNullable<Awaited<ReturnType<typeof requireAdminSession>>> }
+  | { ok: false; response: NextResponse };
+
+/**
+ * Guard for admin API routes. Reads the user's permissions live from the
+ * database (not from the JWT), so role changes apply without re-login.
+ * Passes when the user has ANY of the listed permissions; with no list,
+ * only a valid, active session is required.
+ */
+export async function authorizeAdmin(required?: string | string[]): Promise<AuthorizeResult> {
+  const session = await requireAdminSession();
+  if (!session) {
+    return {
+      ok: false,
+      response: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
+    };
+  }
+
+  const list = required ? (Array.isArray(required) ? required : [required]) : [];
+  if (list.length > 0 && !list.some((perm) => hasPermission(session, perm))) {
+    return {
+      ok: false,
+      response: NextResponse.json(
+        { error: "Anda tidak memiliki izin untuk melakukan aksi ini." },
+        { status: 403 }
+      ),
+    };
+  }
+
+  return { ok: true, session };
 }

@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
-import { getAdminSession, hasPermission } from "@/lib/auth";
+import { requireAdminSession, hasPermission } from "@/lib/auth";
 
 export async function GET() {
-  const session = await getAdminSession();
+  const session = await requireAdminSession();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -45,7 +45,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const session = await getAdminSession();
+  const session = await requireAdminSession();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

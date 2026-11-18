@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
-import { getAdminSession } from "@/lib/auth";
+import { authorizeAdmin } from "@/lib/auth";
 
 export async function GET() {
   const services = await prisma.service.findMany({
@@ -12,8 +12,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const session = await getAdminSession();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await authorizeAdmin(["services:manage"]);
+  if (!auth.ok) return auth.response;
 
   const data = await request.json();
   const { title, slug, summary, description, estimatedTime, priceInfo, ctaWhatsappText, iconName, imageUrl, isActive = true, sortOrder = 0 } = data;
@@ -27,8 +27,8 @@ export async function POST(request: Request) {
 }
 
 export async function PUT(request: Request) {
-  const session = await getAdminSession();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await authorizeAdmin(["services:manage"]);
+  if (!auth.ok) return auth.response;
 
   const data = await request.json();
   const { id, title, slug, summary, description, estimatedTime, priceInfo, ctaWhatsappText, iconName, imageUrl, isActive, sortOrder } = data;

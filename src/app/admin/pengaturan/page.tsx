@@ -21,9 +21,11 @@ import {
 } from "@/components/admin/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useCan } from "@/components/admin/permissions";
 import { useToast } from "@/components/admin/ui/toast";
 
 export default function AdminSettingsPage() {
+  const canEditStore = useCan()("settings:store_info");
   const toast = useToast();
   const [settings, setSettings] = React.useState<any>({
     storeName: "Hadi Computer",
@@ -136,7 +138,8 @@ export default function AdminSettingsPage() {
 
   return (
     <div className="space-y-10 w-full pb-16">
-      {/* 1. Pengaturan Toko Form */}
+      {/* 1. Pengaturan Toko Form (hanya untuk role dengan settings:store_info) */}
+      {canEditStore && (
       <form onSubmit={handleSave} className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
@@ -304,6 +307,7 @@ export default function AdminSettingsPage() {
           </Button>
         </div>
       </form>
+      )}
 
       {/* 2. Keamanan Akun & Ganti Password (Diberi Jarak Bernapas yang Lapang) */}
       <div

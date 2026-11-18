@@ -1,16 +1,14 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
-import { getAdminSession } from "@/lib/auth";
+import { authorizeAdmin } from "@/lib/auth";
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getAdminSession();
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await authorizeAdmin(["products:view", "products:edit"]);
+  if (!auth.ok) return auth.response;
 
   const { id } = await params;
   const product = await prisma.product.findUnique({
@@ -46,10 +44,8 @@ export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getAdminSession();
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await authorizeAdmin(["products:edit"]);
+  if (!auth.ok) return auth.response;
 
   const { id } = await params;
   try {
@@ -167,10 +163,8 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getAdminSession();
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await authorizeAdmin(["products:delete"]);
+  if (!auth.ok) return auth.response;
 
   const { id } = await params;
   try {

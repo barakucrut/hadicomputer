@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { getAdminSession } from "@/lib/auth";
+import { authorizeAdmin } from "@/lib/auth";
 
 export async function GET(request: Request) {
-  const session = await getAdminSession();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await authorizeAdmin(["inquiries:view", "dashboard:view"]);
+  if (!auth.ok) return auth.response;
 
   const { searchParams } = new URL(request.url);
   const type = searchParams.get("type");
