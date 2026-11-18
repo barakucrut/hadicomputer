@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
-import { getAdminSession } from "@/lib/auth";
+import { authorizeAdmin } from "@/lib/auth";
 
 export async function POST(request: Request) {
-  const session = await getAdminSession();
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await authorizeAdmin(["products:create", "products:edit", "banners:manage", "brands:manage", "categories:manage", "settings:appearance"]);
+  if (!auth.ok) return auth.response;
 
   try {
     const formData = await request.formData();

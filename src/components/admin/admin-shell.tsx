@@ -22,6 +22,11 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { ToastProvider } from "@/components/admin/ui/toast";
+import {
+  PermissionsProvider,
+  AccessDenied,
+  requiredPermissionsFor,
+} from "@/components/admin/permissions";
 import "@/app/admin.css";
 
 interface AdminShellProps {
@@ -141,7 +146,7 @@ export function AdminShell({ children, user }: AdminShellProps) {
     { label: "Layanan & Servis", href: "/admin/layanan", icon: Wrench, permission: "services:view" },
     { label: "Inquiry WhatsApp", href: "/admin/inquiry-analytics", icon: MessageSquare, permission: "inquiries:view" },
     { label: "User & Role", href: "/admin/user-role", icon: Users, permission: "users:view" },
-    { label: "Pengaturan Toko", href: "/admin/pengaturan", icon: Settings, permission: "settings:appearance" },
+    { label: "Pengaturan Toko", href: "/admin/pengaturan", icon: Settings },
   ];
 
   const isOwner =
@@ -149,10 +154,15 @@ export function AdminShell({ children, user }: AdminShellProps) {
     user?.role === "owner" ||
     user?.permissions?.includes("*");
 
+  const routeRequired = requiredPermissionsFor(pathname);
+  const canViewRoute =
+    isOwner || !routeRequired || routeRequired.some((perm) => user?.permissions?.includes(perm));
+
   const visibleNavItems = allNavItems.filter((item) => {
     if (isOwner) return true;
-    if (!item.permission) return true;
-    return user?.permissions?.includes(item.permission);
+    const required = requiredPermissionsFor(item.href) || (item.permission ? [item.permission] : null);
+    if (!required) return true;
+    return required.some((perm) => user?.permissions?.includes(perm));
   });
 
   async function handleLogout() {
@@ -721,7 +731,11 @@ export function AdminShell({ children, user }: AdminShellProps) {
         </header>
 
         {/* Content Body with Generous, Elegant Margin */}
-        <main className="admin-main-content">{children}</main>
+        <main className="admin-main-content">
+          <PermissionsProvider permissions={user?.permissions} role={user?.role}>
+            {canViewRoute ? children : <AccessDenied />}
+          </PermissionsProvider>
+        </main>
       </div>
     </div>
     </ToastProvider>

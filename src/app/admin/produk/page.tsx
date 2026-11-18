@@ -27,6 +27,7 @@ import { DualRangeSlider } from "@/components/ui";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { AdminPagination } from "@/components/admin/ui/pagination";
 import { ConfirmDialog } from "@/components/admin/ui/confirm-dialog";
+import { useCan } from "@/components/admin/permissions";
 import { useToast } from "@/components/admin/ui/toast";
 import {
   Table,
@@ -43,6 +44,10 @@ const SLIDER_MAX = 50000000;
 const SLIDER_STEP = 500000;
 
 export default function AdminProductsPage() {
+  const can = useCan();
+  const canCreate = can("products:create");
+  const canEdit = can("products:edit");
+  const canDelete = can("products:delete");
   const router = useRouter();
   const toast = useToast();
   const [products, setProducts] = React.useState<any[]>([]);
@@ -363,12 +368,14 @@ export default function AdminProductsPage() {
             )}
           </Button>
 
-          <Link href="/admin/produk/baru">
-            <Button className="flex items-center gap-2">
-              <Plus size={16} />
-              <span>Tambah Produk Baru</span>
-            </Button>
-          </Link>
+          {canCreate && (
+            <Link href="/admin/produk/baru">
+              <Button className="flex items-center gap-2">
+                <Plus size={16} />
+                <span>Tambah Produk Baru</span>
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 
@@ -489,7 +496,7 @@ export default function AdminProductsPage() {
       </Card>
 
       {/* Bulk Actions Floating Bar */}
-      {selectedIds.length > 0 && (
+      {canDelete && selectedIds.length > 0 && (
         <div className="admin-bulk-bar">
           <div className="flex items-center gap-3">
             <Badge variant="destructive" className="font-bold text-xs px-2.5 py-1">
@@ -528,6 +535,7 @@ export default function AdminProductsPage() {
         <Table>
           <TableHeader>
             <TableRow>
+              {canDelete && (
               <TableHead style={{ width: "44px", paddingRight: "0", paddingLeft: "16px" }}>
                 <input
                   type="checkbox"
@@ -540,6 +548,7 @@ export default function AdminProductsPage() {
                   className="admin-checkbox"
                 />
               </TableHead>
+              )}
               <TableHead style={{ width: "72px" }}>Foto</TableHead>
               <TableHead>Nama & Kode</TableHead>
               <TableHead>Kategori & Merek</TableHead>
@@ -553,13 +562,13 @@ export default function AdminProductsPage() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={9} className="h-32 text-center text-[#525854]">
+                <TableCell colSpan={canDelete ? 9 : 8} className="h-32 text-center text-[#525854]">
                   Memuat data produk...
                 </TableCell>
               </TableRow>
             ) : products.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="h-32 text-center text-[#525854]">
+                <TableCell colSpan={canDelete ? 9 : 8} className="h-32 text-center text-[#525854]">
                   Tidak ada produk yang sesuai dengan kriteria pencarian / filter.
                 </TableCell>
               </TableRow>
@@ -576,8 +585,9 @@ export default function AdminProductsPage() {
                 return (
                   <TableRow
                     key={p.id}
-                    className={`admin-clickable-row ${isSelected ? "admin-row-selected" : ""}`}
+                    className={`${canEdit ? "admin-clickable-row" : ""} ${isSelected ? "admin-row-selected" : ""}`.trim()}
                     onClick={(e) => {
+                      if (!canEdit) return;
                       const target = e.target as HTMLElement;
                       if (target.closest("button") || target.closest("a") || target.closest("input")) {
                         return;
@@ -586,6 +596,7 @@ export default function AdminProductsPage() {
                     }}
                   >
                     {/* Selection Checkbox */}
+                    {canDelete && (
                     <TableCell
                       style={{ width: "44px", paddingRight: "0", paddingLeft: "16px" }}
                       onClick={(e) => e.stopPropagation()}
@@ -598,6 +609,7 @@ export default function AdminProductsPage() {
                         className="admin-checkbox"
                       />
                     </TableCell>
+                    )}
 
                     {/* Thumbnail Image */}
                     <TableCell>
@@ -693,21 +705,25 @@ export default function AdminProductsPage() {
                         >
                           <HugeIconEye size={16} />
                         </a>
-                        <Link
-                          href={`/admin/produk/${p.id}`}
-                          title="Edit produk"
-                          className="admin-action-btn"
-                        >
-                          <HugeIconEdit size={16} />
-                        </Link>
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(p.id, p.name)}
-                          title="Hapus produk"
-                          className="admin-action-btn delete"
-                        >
-                          <HugeIconTrash size={16} />
-                        </button>
+                        {canEdit && (
+                          <Link
+                            href={`/admin/produk/${p.id}`}
+                            title="Edit produk"
+                            className="admin-action-btn"
+                          >
+                            <HugeIconEdit size={16} />
+                          </Link>
+                        )}
+                        {canDelete && (
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(p.id, p.name)}
+                            title="Hapus produk"
+                            className="admin-action-btn delete"
+                          >
+                            <HugeIconTrash size={16} />
+                          </button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>

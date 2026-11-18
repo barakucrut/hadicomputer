@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
-import { getAdminSession } from "@/lib/auth";
+import { authorizeAdmin } from "@/lib/auth";
 
 export async function GET(request: Request) {
-  const session = await getAdminSession();
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await authorizeAdmin(["products:view"]);
+  if (!auth.ok) return auth.response;
 
   const { searchParams } = new URL(request.url);
   const q = searchParams.get("q") || "";
@@ -100,10 +98,8 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const session = await getAdminSession();
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await authorizeAdmin(["products:create"]);
+  if (!auth.ok) return auth.response;
 
   try {
     const data = await request.json();
@@ -215,10 +211,8 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const session = await getAdminSession();
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await authorizeAdmin(["products:delete"]);
+  if (!auth.ok) return auth.response;
 
   try {
     const data = await request.json();
