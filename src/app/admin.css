@@ -2213,3 +2213,73 @@ textarea.admin-input {
   gap: 8px !important;
 }
 
+/* Permission Group Box (Modal & Cards) */
+.admin-perm-group-card {
+  border-radius: 12px !important;
+  border: 1px solid var(--border) !important;
+  background-color: #ffffff !important;
+  overflow: hidden !important;
+  box-shadow: none !important;
+  margin-bottom: 16px !important;
+  transition: border-color 0.15s ease !important;
+}
+.admin-perm-group-card:hover {
+  border-color: #d1d5db !important;
+}
+.admin-perm-group-header {
+  background-color: var(--surface) !important; /* Signature table header gray #f7f8f4 */
+  border-bottom: 1px solid var(--border) !important;
+  padding: 14px 18px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+}
+.admin-perm-group-icon {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  border-radius: 8px !important;
+  background-color: #ffffff !important;
+  border: 1px solid var(--border) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: var(--ink) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+}
+.admin-perm-group-body {
+  padding: 16px 18px !important;
+}
+
+/* Choice card standard */
+.admin-choice-card {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 10px !important;
+  padding: 12px 14px !important;
+  border-radius: 8px !important;
+  border: 1px solid var(--border) !important;
+  background-color: #ffffff !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  user-select: none !important;
+}
+.admin-choice-card:hover {
+  border-color: #c9c6bd !important;
+  background-color: var(--surface) !important;
+}
+.admin-choice-card.active {
+  border-color: rgba(204, 37, 43, 0.45) !important;
+  background-color: #fff8f8 !important;
+}
+
+/* Card header with signature table gray */
+.admin-card-header-surface {
+  background-color: var(--surface) !important;
+  border-bottom: 1px solid var(--border) !important;
+  padding: 16px 20px !important;
+  margin-bottom: 16px !important;
+}
+
+

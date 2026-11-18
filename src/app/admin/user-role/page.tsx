@@ -11,6 +11,13 @@ import {
   Sparkles,
   SlidersHorizontal,
   UserCheck,
+  LayoutDashboard,
+  Package,
+  FolderTree,
+  Image as ImageIcon,
+  Wrench,
+  MessageSquare,
+  Settings,
 } from "lucide-react";
 import { Button } from "@/components/admin/ui/button";
 import { Badge } from "@/components/admin/ui/badge";
@@ -136,6 +143,17 @@ interface PermissionGroup {
   desc: string;
   items: PermissionDef[];
 }
+
+const GROUP_ICONS: Record<string, React.ReactNode> = {
+  dashboard: <LayoutDashboard size={16} />,
+  products: <Package size={16} />,
+  categories_brands: <FolderTree size={16} />,
+  banners: <ImageIcon size={16} />,
+  services: <Wrench size={16} />,
+  inquiries: <MessageSquare size={16} />,
+  settings: <Settings size={16} />,
+  users_roles: <Users size={16} />,
+};
 
 const PERMISSION_GROUPS: PermissionGroup[] = [
   {
@@ -846,16 +864,43 @@ export default function UserRolePage() {
 
                 return (
                   <Card key={r.id} className="flex flex-col">
-                    <CardHeader className="p-5 border-b border-[#f1f3ed] mb-4">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className="font-bold text-base text-[#111413]">{r.name}</span>
-                            <Badge variant={r.isSystem ? "default" : "outline"}>
-                              {r.isSystem ? "Sistem" : "Custom"}
-                            </Badge>
+                    <CardHeader
+                      className="admin-card-header-surface p-5 border-b border-[#e5e3dd] mb-4"
+                      style={{
+                        backgroundColor: "var(--surface)",
+                        borderBottom: "1px solid var(--border)",
+                        padding: "16px 20px",
+                        marginBottom: "16px",
+                      }}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-start gap-3 min-w-0">
+                          <div
+                            style={{
+                              width: 36,
+                              height: 36,
+                              minWidth: 36,
+                              borderRadius: 8,
+                              backgroundColor: "#ffffff",
+                              border: "1px solid var(--border)",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              color: r.isSystem ? "var(--red)" : "var(--ink)",
+                              flexShrink: 0,
+                            }}
+                          >
+                            {r.isSystem ? <ShieldCheck size={18} /> : <SlidersHorizontal size={18} />}
                           </div>
-                          <div className="font-mono text-xs text-[#525854] mt-1">{r.slug}</div>
+                          <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="font-bold text-base text-[#111413]">{r.name}</span>
+                              <Badge variant={r.isSystem ? "default" : "outline"}>
+                                {r.isSystem ? "Sistem" : "Custom"}
+                              </Badge>
+                            </div>
+                            <div className="font-mono text-xs text-[#525854] mt-0.5">{r.slug}</div>
+                          </div>
                         </div>
                         <Badge variant="secondary">{userCount} Pengguna</Badge>
                       </div>
@@ -1159,24 +1204,49 @@ export default function UserRolePage() {
                 const selectedCount = groupKeys.filter((k) => roleForm.permissions.includes(k)).length;
 
                 return (
-                  <Card key={group.id} className="overflow-hidden shadow-none">
-                    <div className="px-4 py-3 bg-[#fdfdfc] border-b border-[#f1f3ed] mb-4 flex items-center justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-sm text-[#111413]">{group.title}</span>
-                          <Badge variant={selectedCount > 0 ? "success" : "outline"}>
-                            {selectedCount}/{groupKeys.length}
-                          </Badge>
+                  <div key={group.id} className="admin-perm-group-card">
+                    {/* Header Box with Table-Style Gray Background */}
+                    <div className="admin-perm-group-header">
+                      <div className="min-w-0 flex items-center gap-3">
+                        <div className="admin-perm-group-icon">
+                          {GROUP_ICONS[group.id] || <ShieldCheck size={16} />}
                         </div>
-                        <p className="text-xs text-[#525854] mt-0.5">{group.desc}</p>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-sm text-[#111413]">{group.title}</span>
+                            <Badge
+                              variant={
+                                isGroupAllSelected
+                                  ? "success"
+                                  : selectedCount > 0
+                                  ? "default"
+                                  : "outline"
+                              }
+                            >
+                              {selectedCount}/{groupKeys.length}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-[#525854] mt-0.5">{group.desc}</p>
+                        </div>
                       </div>
-                      <Switch
-                        checked={isGroupAllSelected}
-                        onCheckedChange={() => handleToggleGroupPermissions(group)}
-                      />
+
+                      <div className="flex items-center gap-2.5 shrink-0">
+                        <span className="text-xs text-[#525854] hidden sm:inline font-medium">
+                          {isGroupAllSelected
+                            ? "Semua Aktif"
+                            : selectedCount > 0
+                            ? "Sebagian Aktif"
+                            : "Nonaktif"}
+                        </span>
+                        <Switch
+                          checked={isGroupAllSelected}
+                          onCheckedChange={() => handleToggleGroupPermissions(group)}
+                        />
+                      </div>
                     </div>
 
-                    <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {/* Content Body with Proper 16px Padding & Choice Cards */}
+                    <div className="admin-perm-group-body grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {group.items.map((item) => {
                         const isChecked = roleForm.permissions.includes(item.key);
                         const inputId = `perm-${item.key.replace(/[^a-z0-9]/gi, "-")}`;
@@ -1184,11 +1254,7 @@ export default function UserRolePage() {
                           <label
                             key={item.key}
                             htmlFor={inputId}
-                            className={`flex items-start gap-2.5 p-3 rounded-lg border transition-colors cursor-pointer ${
-                              isChecked
-                                ? "border-[#cc252b]/30 bg-[#fef2f2]"
-                                : "border-[#e5e3dd] hover:border-[#c9c6bd]"
-                            }`}
+                            className={`admin-choice-card ${isChecked ? "active" : ""}`}
                           >
                             <input
                               id={inputId}
@@ -1199,13 +1265,13 @@ export default function UserRolePage() {
                             />
                             <span style={{ display: "block" }}>
                               <span
-                                className="text-sm font-bold text-[#111413] leading-tight"
+                                className="text-xs font-bold text-[#111413] leading-tight"
                                 style={{ display: "block" }}
                               >
                                 {item.label}
                               </span>
                               <span
-                                className="text-xs text-[#525854]"
+                                className="text-[11px] text-[#525854]"
                                 style={{ display: "block", marginTop: "2px", lineHeight: 1.45 }}
                               >
                                 {item.desc}
@@ -1215,7 +1281,7 @@ export default function UserRolePage() {
                         );
                       })}
                     </div>
-                  </Card>
+                  </div>
                 );
               })}
             </div>
