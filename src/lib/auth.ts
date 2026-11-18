@@ -54,39 +54,52 @@ export async function requireAdminSession() {
   if (!session) {
     return null;
   }
-  const user = await prisma.adminUser.findUnique({
-    where: { id: session.id },
-    select: {
-      id: true,
-      email: true,
-      name: true,
-      role: true,
-      isActive: true,
-      roleRef: {
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-          permissions: true,
+
+  try {
+    const user = await prisma.adminUser.findUnique({
+      where: { id: session.id },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        isActive: true,
+        roleRef: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            permissions: true,
+          },
         },
       },
-    },
-  });
+    });
 
-  if (!user || !user.isActive) return null;
+    if (!user || user.isActive === false) return null;
 
-  const permissions = Array.isArray(user.roleRef?.permissions)
-    ? (user.roleRef.permissions as string[])
-    : user.role?.toUpperCase() === "OWNER" || user.role === "owner"
-    ? ["*"]
-    : [];
+    const permissions = Array.isArray(user.roleRef?.permissions)
+      ? (user.roleRef.permissions as string[])
+      : user.role?.toUpperCase() === "OWNER" || user.role === "owner"
+      ? ["*"]
+      : [];
 
-  return {
-    id: user.id,
-    email: user.email,
-    name: user.name,
-    role: user.roleRef?.slug || user.role,
-    roleName: user.roleRef?.name || user.role,
-    permissions,
-  };
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.roleRef?.slug || user.role,
+      roleName: user.roleRef?.name || user.role,
+      permissions,
+    };
+  } catch (err) {
+    console.error("requireAdminSession DB error, fallback to session:", err);
+    return {
+      id: session.id,
+      email: session.email,
+      name: session.name,
+      role: session.role,
+      roleName: session.roleName || session.role,
+      permissions: session.permissions || (session.role?.toUpperCase() === "OWNER" || session.role === "owner" ? ["*"] : []),
+    };
+  }
 }
