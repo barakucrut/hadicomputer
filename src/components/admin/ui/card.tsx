@@ -18,7 +18,7 @@ export function CardHeader({
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={`admin-card-header flex flex-col space-y-1.5 p-6 border-b border-[#f1f3ed] ${className}`}
+      className={`admin-card-header flex flex-col space-y-1.5 p-6 border-b border-[#f1f3ed] mb-4 ${className}`}
       {...props}
     />
   );

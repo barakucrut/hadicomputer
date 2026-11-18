@@ -5,7 +5,7 @@
    ========================================================== */
 
 /* Universal Reset for Admin Elements (excludes styled components) */
-:where(.admin-shell-root, .admin-login-container) button:not(.admin-btn):not(.admin-login-submit-btn):not(.admin-action-btn):not(.admin-tab-trigger):not(.admin-password-toggle-btn) {
+:where(.admin-shell-root, .admin-login-container) button:not(.admin-btn):not(.admin-login-submit-btn):not(.admin-action-btn):not(.admin-tab-trigger):not(.admin-password-toggle-btn):not(.admin-switch) {
   border: none;
   background: transparent;
   padding: 0;
@@ -256,6 +256,10 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  margin-bottom: 16px;
+}
+.admin-card-header + .admin-card-content {
+  padding-top: 0;
 }
 .admin-card-title {
   font-size: 16px;
@@ -1839,3 +1843,65 @@ textarea.admin-input {
 
 
 
+
+/* ==========================================================
+   SWITCH (TOGGLE)
+   ========================================================== */
+.admin-switch {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 22px;
+  padding: 2px;
+  margin: 0;
+  border: none;
+  border-radius: 999px;
+  background-color: #e5e3dd;
+  cursor: pointer;
+  transition: background-color 0.18s ease;
+  outline: none;
+}
+.admin-switch.checked {
+  background-color: var(--red);
+}
+.admin-switch:focus-visible {
+  box-shadow: 0 0 0 3px rgba(204, 37, 43, 0.25);
+}
+.admin-switch:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.admin-switch-thumb {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.admin-switch.checked .admin-switch-thumb {
+  transform: translateX(18px);
+}
+
+/* Disabled icon action (e.g. protected owner account) */
+.admin-action-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Extra layout utilities used by admin pages (no Tailwind on this branch) */
+.w-8 { width: 32px; }
+.h-8 { height: 32px; }
+.w-9 { width: 36px; }
+.h-9 { height: 36px; }
+.min-w-0 { min-width: 0; }
+.mt-0\.5 { margin-top: 2px; }
+.uppercase { text-transform: uppercase; }
+.tracking-wider { letter-spacing: 0.05em; }
+.tracking-tight { letter-spacing: -0.025em; }
+.leading-tight { line-height: 1.25; }
+.flex-wrap { flex-wrap: wrap; }
