@@ -16,12 +16,20 @@ export async function POST(request: Request) {
 
     const admin = await prisma.adminUser.findUnique({
       where: { email: email.toLowerCase().trim() },
+      include: { roleRef: true },
     });
 
     if (!admin) {
       return NextResponse.json(
         { error: "Email atau password tidak valid" },
         { status: 401 }
+      );
+    }
+
+    if (admin.isActive === false) {
+      return NextResponse.json(
+        { error: "Akun Anda dinonaktifkan oleh Administrator. Hubungi Owner toko." },
+        { status: 403 }
       );
     }
 
@@ -39,11 +47,19 @@ export async function POST(request: Request) {
       data: { lastLoginAt: new Date() },
     });
 
+    const permissions = Array.isArray(admin.roleRef?.permissions)
+      ? (admin.roleRef.permissions as string[])
+      : admin.role?.toUpperCase() === "OWNER" || admin.role === "owner"
+      ? ["*"]
+      : [];
+
     const token = await signAdminToken({
       id: admin.id,
       email: admin.email,
       name: admin.name,
-      role: admin.role,
+      role: admin.roleRef?.slug || admin.role,
+      roleName: admin.roleRef?.name || admin.role,
+      permissions,
     });
 
     const response = NextResponse.json({

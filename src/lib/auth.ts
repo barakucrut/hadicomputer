@@ -13,6 +13,16 @@ export interface AdminSessionPayload {
   email: string;
   name: string;
   role: string;
+  roleName?: string;
+  permissions?: string[];
+}
+
+export function hasPermission(session: AdminSessionPayload | null, permission: string): boolean {
+  if (!session) return false;
+  if (session.role?.toUpperCase() === "OWNER" || session.role === "owner") return true;
+  if (!session.permissions || !Array.isArray(session.permissions)) return false;
+  if (session.permissions.includes("*")) return true;
+  return session.permissions.includes(permission);
 }
 
 export async function signAdminToken(payload: AdminSessionPayload): Promise<string> {
@@ -46,7 +56,37 @@ export async function requireAdminSession() {
   }
   const user = await prisma.adminUser.findUnique({
     where: { id: session.id },
-    select: { id: true, email: true, name: true, role: true },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      role: true,
+      isActive: true,
+      roleRef: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          permissions: true,
+        },
+      },
+    },
   });
-  return user;
+
+  if (!user || !user.isActive) return null;
+
+  const permissions = Array.isArray(user.roleRef?.permissions)
+    ? (user.roleRef.permissions as string[])
+    : user.role?.toUpperCase() === "OWNER" || user.role === "owner"
+    ? ["*"]
+    : [];
+
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.roleRef?.slug || user.role,
+    roleName: user.roleRef?.name || user.role,
+    permissions,
+  };
 }
