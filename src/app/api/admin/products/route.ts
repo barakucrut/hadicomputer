@@ -213,3 +213,45 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export async function DELETE(request: Request) {
+  const session = await getAdminSession();
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const data = await request.json();
+    const { ids } = data;
+
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return NextResponse.json(
+        { error: "Daftar ID produk wajib diisi" },
+        { status: 400 }
+      );
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.productImage.deleteMany({ where: { productId: { in: ids } } });
+      await tx.productVariant.deleteMany({ where: { productId: { in: ids } } });
+      await tx.productSpec.deleteMany({ where: { productId: { in: ids } } });
+      await tx.inquiryLog.updateMany({
+        where: { productId: { in: ids } },
+        data: { productId: null },
+      });
+      await tx.product.deleteMany({
+        where: { id: { in: ids } },
+      });
+    });
+
+    revalidatePath("/", "layout");
+    revalidatePath("/katalog");
+    return NextResponse.json({ success: true, count: ids.length });
+  } catch (err: any) {
+    console.error("Bulk delete products error:", err);
+    return NextResponse.json(
+      { error: err.message || "Gagal menghapus produk terpilih" },
+      { status: 500 }
+    );
+  }
+}
