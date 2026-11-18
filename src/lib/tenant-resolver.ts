@@ -155,6 +155,7 @@ export async function resolveStorefrontTenant(explicitSlugOrId?: string): Promis
 
   const storeName = tenant.name;
   const mergedHomepageConfig: HomepageConfig = {
+    templateId: rawConfig?.templateId || "classic-retail",
     featuredTitle: rawConfig?.featuredTitle || `Pilihan ${storeName}, untuk harimu.`,
     featuredEyebrow: rawConfig?.featuredEyebrow || "DIPILIH UNTUKMU",
     featuredDescription: rawConfig?.featuredDescription || "Kenali perangkat yang bisa jadi teman aktivitasmu berikutnya.",

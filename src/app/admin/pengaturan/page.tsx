@@ -93,9 +93,16 @@ const TEMPLATE_OPTIONS = [
   {
     id: "minimalist-boutique",
     name: "Minimalist Tech Boutique",
-    badge: "Editorial Clean Studio",
-    description: "Desain mewah & bersih ala Apple Studio. Fokus pada fotografi produk, whitespace luas, kartu produk frameless, dan kurasi eksklusif.",
+    badge: "Editorial Gallery",
+    description: "Etalase terang dan tenang ala galeri. Satu produk sorotan berukuran besar, indeks kategori tipografis, kartu tanpa bingkai, dan cerita produk.",
     tag: "Modern & Premium",
+  },
+  {
+    id: "gaming-arena",
+    name: "Gaming Rig Arena",
+    badge: "Dark Performance Showroom",
+    description: "Etalase gelap bernuansa gaming dengan aksen glow warna toko, kartu produk berbasis spesifikasi, dan sorotan rakitan PC siap main.",
+    tag: "Bold & Immersive",
   },
 ];
 
@@ -449,7 +456,7 @@ export default function AdminSettingsPage() {
                   <span>Pilihan Template Desain Etalase</span>
                 </CardTitle>
                 <Badge variant="purple" className="text-[11px] font-bold">
-                  2 Template Tersedia
+                  {TEMPLATE_OPTIONS.length} Template Tersedia
                 </Badge>
               </div>
               <CardDescription>
@@ -457,7 +464,7 @@ export default function AdminSettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {TEMPLATE_OPTIONS.map((tpl) => {
                   const currentTpl = settings.homepageConfig?.templateId || "classic-retail";
                   const isSelected = currentTpl === tpl.id;
@@ -479,13 +486,13 @@ export default function AdminSettingsPage() {
                       aria-pressed={isSelected}
                     >
                       <div className="flex flex-col gap-1.5 pr-8">
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                           <span className="font-bold text-sm text-[#111413] leading-tight">
                             {tpl.name}
                           </span>
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-gray-100 text-gray-700 border border-gray-200">
+                          <Badge variant="secondary" className="text-[10px]">
                             {tpl.tag}
-                          </span>
+                          </Badge>
                         </div>
                         <div className="text-[11px] font-semibold text-[#818779] leading-tight">
                           {tpl.badge}

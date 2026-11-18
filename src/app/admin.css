@@ -1004,6 +1004,7 @@
    4. UTILITY HELPERS (RELIABLE WITHOUT TAILWIND)
    ========================================================== */
 .flex { display: flex; }
+.flex-wrap { flex-wrap: wrap; }
 .inline-flex { display: inline-flex; }
 .grid { display: grid; }
 .hidden { display: none; }
@@ -1182,6 +1183,9 @@
   .md\:translate-x-0 { transform: none; }
   .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .md\:p-8 { padding: 32px; }
+}
+@media (min-width: 1024px) {
+  .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 /* ==========================================================
    PAGINATION, THUMBNAIL & SLIDE-OVER DRAWER STYLES

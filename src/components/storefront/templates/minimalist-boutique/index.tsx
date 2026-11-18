@@ -1,20 +1,97 @@
 import Link from "next/link";
-import {
-  ArrowRight,
-  ArrowUpRight,
-  Sparkles,
-  MessageCircle,
-  ShieldCheck,
-  Zap,
-  MapPin,
-  ChevronRight,
-  SlidersHorizontal,
-} from "lucide-react";
+import { ArrowRight, ArrowUpRight, Clock, MapPin } from "lucide-react";
 import { Container } from "@/components/ui";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 import { parseGoogleMaps } from "@/components/location-panel";
-import type { StorefrontTemplateProps } from "../../types";
 import { rupiah, priceLabel } from "@/lib/catalog";
+import type { Product } from "@/lib/types";
+import type { StorefrontTemplateProps } from "../../types";
+
+/**
+ * MINIMALIST TECH BOUTIQUE — "Editorial Gallery"
+ * Light, calm, one product at a time. Merchant color is used sparingly
+ * (dots, underlines, prices) via the `brand` Tailwind token.
+ */
+
+const FALLBACK_IMG = "/images/banners/promo-bundle.png";
+
+function hasDiscount(p: Product) {
+  return !!(p.originalPrice && p.price && p.originalPrice > p.price);
+}
+
+function SectionHead({
+  eyebrow,
+  title,
+  description,
+  href,
+  linkLabel,
+}: {
+  eyebrow: string;
+  title: string;
+  description?: string;
+  href?: string;
+  linkLabel?: string;
+}) {
+  return (
+    <div className="mb-10 flex flex-col gap-4 md:mb-14 md:flex-row md:items-end md:justify-between">
+      <div className="max-w-2xl">
+        <span className="mb-3 inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#8a8a83]">
+          <span className="h-1.5 w-1.5 rounded-full bg-brand" />
+          {eyebrow}
+        </span>
+        <h2 className="m-0 text-3xl font-semibold leading-[1.08] tracking-[-0.03em] text-[#141412] md:text-[44px]">
+          {title}
+        </h2>
+        {description && (
+          <p className="mt-4 mb-0 max-w-xl text-[15px] font-light leading-relaxed text-[#6b6b65]">{description}</p>
+        )}
+      </div>
+      {href && (
+        <Link
+          href={href}
+          className="group inline-flex shrink-0 items-center gap-2 text-sm font-medium text-[#141412] underline decoration-brand decoration-1 underline-offset-[6px] transition-colors hover:text-brand"
+        >
+          {linkLabel || "Lihat semua"}
+          <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
+        </Link>
+      )}
+    </div>
+  );
+}
+
+function GalleryCard({ product, size = "md" }: { product: Product; size?: "md" | "sm" }) {
+  const discount = hasDiscount(product);
+  return (
+    <Link href={`/produk/${product.slug}`} className="group flex flex-col gap-4 text-[#141412]">
+      <div className="relative flex aspect-[4/5] items-center justify-center overflow-hidden bg-[#ecebe6]">
+        <img
+          src={product.images?.[0] || FALLBACK_IMG}
+          alt={product.name}
+          className={`${size === "sm" ? "max-h-[62%]" : "max-h-[70%]"} max-w-[78%] object-contain mix-blend-multiply transition-transform duration-700 ease-out group-hover:scale-[1.04]`}
+        />
+        {product.condition === "bekas" && (
+          <span className="absolute top-3 left-3 bg-white px-2 py-1 text-[10px] font-medium uppercase tracking-[0.14em] text-[#6b6b65]">
+            Second
+          </span>
+        )}
+      </div>
+      <div className="flex flex-col gap-1">
+        <span className="text-[11px] uppercase tracking-[0.16em] text-[#8a8a83]">{product.brand}</span>
+        <h3 className="m-0 line-clamp-2 text-[15px] font-medium leading-snug tracking-[-0.01em] group-hover:underline group-hover:decoration-brand group-hover:underline-offset-4">
+          {product.name}
+        </h3>
+        <div className="mt-1 flex items-baseline gap-2">
+          <span className={`text-sm ${product.price === null ? "text-[#8a8a83]" : "font-medium text-brand"}`}>
+            {priceLabel(product.price)}
+          </span>
+          {discount && (
+            <span className="text-xs text-[#a3a39c] line-through">{rupiah(product.originalPrice!)}</span>
+          )}
+        </div>
+      </div>
+    </Link>
+  );
+}
 
 export function MinimalistBoutiqueHome({
   tenant,
@@ -28,300 +105,348 @@ export function MinimalistBoutiqueHome({
   const config = storeSettings.homepageConfig || {};
   const sections = config.sections || {};
   const storeName = storeSettings.name || tenant.name || "Toko Pilihan";
-
   const mapData = parseGoogleMaps(storeSettings.mapsUrl, storeSettings.address);
 
-  // Filter curated collections
   const featured = products.filter(
-    (p) => p.labels.includes("Pilihan Toko") || p.labels.includes("Pilihan Hadi") || p.labels.includes("Featured")
+    (p) => p.labels.includes("Pilihan Toko") || p.labels.includes("Pilihan Hadi") || p.labels.includes("Featured"),
   );
-  const heroProduct = featured[0] || products[0];
+  const bestsellers = products.filter((p) => p.labels.includes("Terlaris") || p.labels.includes("Bestseller"));
+  const promoProducts = products.filter((p) => p.labels.includes("Promo") || hasDiscount(p)).slice(0, 8);
+  const latest = products.filter((p) => p.labels.includes("Terbaru")).slice(0, 4);
 
-  const promoProducts = products.filter(
-    (p) => p.labels.includes("Promo") || (p.originalPrice && p.price && p.originalPrice > p.price)
-  ).slice(0, 6);
+  const spotlight = featured[0] || products[0];
+  const curated = featured.filter((p) => p.id !== spotlight?.id).slice(0, 6);
+  const story = bestsellers.find((p) => p.id !== spotlight?.id) || featured[1] || products[1];
+  const storySpecs = story?.specs.slice(0, 3) || [];
+  const primaryBanner = banners[0];
 
-  const bestsellers = products.filter(
-    (p) => p.labels.includes("Terlaris") || p.labels.includes("Bestseller")
-  ).slice(0, 6);
-
-  const activeBanners = banners && banners.length > 0 ? banners : [];
-  const primaryBanner = activeBanners[0];
+  const countByCategory = (value: string) => products.filter((p) => p.category === value).length;
 
   return (
-    <div className="boutique-theme pb-24" style={{ backgroundColor: "#fafaf8", minHeight: "100vh" }}>
-      {/* 1. CINEMATIC BOUTIQUE HERO */}
+    <div className="min-h-screen bg-[#f7f6f2] pb-24 text-[#141412]">
+      {/* 1. HERO SPOTLIGHT */}
       {sections.heroSlider !== false && (
-        <section className="relative overflow-hidden pt-8 pb-16 md:pt-14 md:pb-20 border-b border-[#ecece8] bg-white">
+        <section className="pt-14 pb-20 md:pt-24 md:pb-28">
           <Container>
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 md:gap-14 items-center">
-              {/* Left Column: Editorial Headline & Actions */}
-              <div className="lg:col-span-7 space-y-6">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#f1f3ed] border border-[#e2e5dc] text-[11px] font-bold text-[#525854] tracking-wide uppercase">
-                  <Sparkles size={13} style={{ color: "var(--red)" }} />
-                  <span>Koleksi Eksklusif &bull; {storeName}</span>
+            <div className="mx-auto max-w-4xl text-center">
+              <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#8a8a83]">
+                <span className="h-1.5 w-1.5 rounded-full bg-brand" />
+                {storeName}
+              </span>
+              <h1 className="mt-6 mb-0 text-[42px] font-semibold leading-[1.02] tracking-[-0.045em] sm:text-6xl md:text-[84px]">
+                Dipilih dengan teliti.
+                <br />
+                <span className="font-light text-[#8a8a83]">Dirawat sepenuh hati.</span>
+              </h1>
+              <p className="mx-auto mt-6 mb-0 max-w-xl text-[15px] font-light leading-relaxed text-[#6b6b65] md:text-base">
+                {storeSettings.tagline ||
+                  primaryBanner?.description ||
+                  "Kurasi perangkat komputasi terbaik untuk kerja, kreasi, dan keseharianmu."}
+              </p>
+            </div>
+
+            {spotlight && (
+              <Link href={`/produk/${spotlight.slug}`} className="group mt-14 block md:mt-20">
+                <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-[#ecebe6] md:aspect-[21/9]">
+                  <img
+                    src={spotlight.images?.[0] || FALLBACK_IMG}
+                    alt={spotlight.name}
+                    className="max-h-[78%] max-w-[70%] object-contain mix-blend-multiply transition-transform duration-1000 ease-out group-hover:scale-[1.03]"
+                  />
+                  <span className="absolute top-5 left-5 text-[11px] uppercase tracking-[0.2em] text-[#8a8a83]">
+                    Sorotan
+                  </span>
                 </div>
+                <div className="flex flex-col gap-3 border-b border-[#dedcd5] py-5 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex flex-col">
+                    <span className="text-[11px] uppercase tracking-[0.16em] text-[#8a8a83]">{spotlight.brand}</span>
+                    <span className="text-lg font-medium tracking-[-0.01em] md:text-xl">{spotlight.name}</span>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    <span className={spotlight.price === null ? "text-sm text-[#8a8a83]" : "text-lg font-medium text-brand"}>
+                      {priceLabel(spotlight.price)}
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 text-sm font-medium underline decoration-brand underline-offset-[6px]">
+                      Lihat detail <ArrowUpRight size={15} />
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            )}
+          </Container>
+        </section>
+      )}
 
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-[#111413] tracking-tight leading-[1.12]">
-                  Performa Tinggi.
-                  <br />
-                  <span style={{ color: "var(--red)" }}>Desain Minimalis.</span>
-                </h1>
-
-                <p className="text-sm md:text-base text-[#525854] max-w-xl leading-relaxed">
-                  {primaryBanner?.description ||
-                    `Kurasi perangkat komputasi pilihan, laptop premium, dan rakitan desktop presisi yang disesuaikan untuk kebutuhan kerja dan kreasi Anda.`}
+      {/* 2. CATEGORY INDEX */}
+      {sections.categories !== false && categories.length > 0 && (
+        <section className="border-t border-[#dedcd5] py-20 md:py-28">
+          <Container>
+            <div className="grid grid-cols-1 gap-10 md:grid-cols-12">
+              <div className="md:col-span-4">
+                <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#8a8a83]">
+                  <span className="h-1.5 w-1.5 rounded-full bg-brand" />
+                  Indeks
+                </span>
+                <p className="mt-4 mb-0 max-w-xs text-[15px] font-light leading-relaxed text-[#6b6b65]">
+                  Jelajahi koleksi {storeName} berdasarkan jenis perangkat.
                 </p>
+              </div>
+              <ol className="m-0 list-none p-0 md:col-span-8">
+                {categories.map((cat, i) => (
+                  <li key={cat.value} className="border-t border-[#dedcd5] last:border-b">
+                    <Link
+                      href={`/katalog?kategori=${cat.value}`}
+                      className="group flex items-center justify-between gap-4 py-5 md:py-6"
+                    >
+                      <span className="flex items-baseline gap-5">
+                        <span className="w-6 text-xs tabular-nums text-[#a3a39c]">{String(i + 1).padStart(2, "0")}</span>
+                        <span className="text-2xl font-medium tracking-[-0.03em] transition-colors group-hover:text-brand md:text-4xl">
+                          {cat.name}
+                        </span>
+                      </span>
+                      <span className="flex items-center gap-4 text-sm text-[#8a8a83]">
+                        <span className="hidden opacity-0 transition-opacity group-hover:opacity-100 sm:inline">
+                          {countByCategory(cat.value)} produk
+                        </span>
+                        <ArrowUpRight
+                          size={22}
+                          className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-brand"
+                        />
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </Container>
+        </section>
+      )}
 
-                <div className="flex flex-wrap items-center gap-4 pt-2">
-                  <Link
-                    href="/katalog"
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-xs font-bold text-white shadow-sm transition-all hover:opacity-90"
-                    style={{ backgroundColor: "var(--red)" }}
-                  >
-                    <span>Eksplorasi Katalog</span>
-                    <ArrowRight size={15} />
-                  </Link>
+      {/* 3. CURATED GRID */}
+      {sections.featured !== false && curated.length > 0 && (
+        <section className="border-t border-[#dedcd5] py-20 md:py-28">
+          <Container>
+            <SectionHead
+              eyebrow={config.featuredEyebrow || "Kurasi"}
+              title={config.featuredTitle || `Pilihan ${storeName}`}
+              description={config.featuredDescription}
+              href="/katalog?koleksi=Pilihan%20Toko"
+              linkLabel="Lihat semua kurasi"
+            />
+            <div className="grid grid-cols-2 gap-x-4 gap-y-12 md:grid-cols-3 md:gap-x-8 md:gap-y-16">
+              {curated.map((p) => (
+                <GalleryCard key={p.id} product={p} />
+              ))}
+            </div>
+          </Container>
+        </section>
+      )}
 
+      {/* 4. FEATURE STORY */}
+      {sections.featured !== false && story && (
+        <section className="border-t border-[#dedcd5] bg-white py-20 md:py-28">
+          <Container>
+            <div className="grid grid-cols-1 items-center gap-10 md:grid-cols-2 md:gap-16">
+              <Link
+                href={`/produk/${story.slug}`}
+                className="group flex aspect-[4/5] items-center justify-center overflow-hidden bg-[#ecebe6]"
+              >
+                <img
+                  src={story.images?.[0] || FALLBACK_IMG}
+                  alt={story.name}
+                  className="max-h-[72%] max-w-[76%] object-contain mix-blend-multiply transition-transform duration-1000 ease-out group-hover:scale-[1.03]"
+                />
+              </Link>
+              <div className="flex flex-col gap-6">
+                <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#8a8a83]">
+                  <span className="h-1.5 w-1.5 rounded-full bg-brand" />
+                  {config.bestSellerEyebrow || "Cerita Produk"}
+                </span>
+                <h2 className="m-0 text-3xl font-semibold leading-[1.08] tracking-[-0.03em] md:text-5xl">{story.name}</h2>
+                <p className="m-0 text-[15px] font-light leading-relaxed text-[#6b6b65]">
+                  {story.summary || config.bestSellerDescription}
+                </p>
+                {storySpecs.length > 0 && (
+                  <dl className="m-0 grid grid-cols-1 border-t border-[#dedcd5]">
+                    {storySpecs.map((spec) => (
+                      <div key={spec.name} className="flex justify-between gap-6 border-b border-[#dedcd5] py-3 text-sm">
+                        <dt className="text-[#8a8a83]">{spec.name}</dt>
+                        <dd className="m-0 text-right font-medium">{spec.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                )}
+                <div className="flex flex-wrap items-center gap-6 pt-2">
+                  <span className={story.price === null ? "text-sm text-[#8a8a83]" : "text-2xl font-medium text-brand"}>
+                    {priceLabel(story.price)}
+                  </span>
                   <WhatsAppButton
-                    label={`Konsultasi Spesifikasi`}
+                    label="Tanyakan unit ini"
                     phone={storeSettings.whatsapp}
-                    className="px-5 py-3 rounded-full text-xs font-bold border border-[#d8d8d4] bg-white text-[#111413] hover:bg-gray-50 shadow-xs"
+                    message={`Halo ${storeName}, saya tertarik dengan ${story.name}. Apakah masih tersedia? {origin}/produk/${story.slug}`}
+                    trackingData={{ inquiryType: "PRODUCT", productId: story.id, priceAtInquiry: story.price ?? undefined }}
+                    className="rounded-full!"
                   />
                 </div>
+              </div>
+            </div>
+          </Container>
+        </section>
+      )}
 
-                {/* Micro Guarantee Strip */}
-                <div className="pt-6 border-t border-[#ecece8] grid grid-cols-3 gap-4 text-left">
-                  <div>
-                    <span className="block text-xs font-black text-[#111413]">100% Original</span>
-                    <span className="text-[11px] text-[#818779]">Garansi & unit teruji</span>
+      {/* 5. PROMO RAIL */}
+      {sections.promoWeek !== false && promoProducts.length > 0 && (
+        <section className="border-t border-[#dedcd5] py-20 md:py-28">
+          <Container>
+            <SectionHead
+              eyebrow="Penawaran"
+              title="Harga terbaik pekan ini."
+              href="/katalog?koleksi=Promo"
+              linkLabel="Semua promo"
+            />
+            <div className="-mx-1 flex snap-x snap-mandatory gap-6 overflow-x-auto px-1 pb-4 [scrollbar-width:thin]">
+              {promoProducts.map((p) => (
+                <div key={p.id} className="w-[68%] shrink-0 snap-start sm:w-[42%] md:w-[calc((100%-72px)/4)]">
+                  <GalleryCard product={p} size="sm" />
+                </div>
+              ))}
+            </div>
+          </Container>
+        </section>
+      )}
+
+      {/* 6. NEEDS */}
+      {sections.needs !== false && needs.length > 0 && (
+        <section className="border-t border-[#dedcd5] py-20 md:py-28">
+          <Container>
+            <SectionHead eyebrow="Kebutuhan" title="Mulai dari apa yang kamu kerjakan." />
+            <div className="grid grid-cols-1 border-t border-[#dedcd5] sm:grid-cols-2 lg:grid-cols-3">
+              {needs.map((need) => (
+                <Link
+                  key={need.id}
+                  href={`/katalog?kebutuhan=${need.slug}`}
+                  className="group flex flex-col gap-2 border-b border-[#dedcd5] py-6 sm:pr-8"
+                >
+                  <span className="flex items-center justify-between text-xl font-medium tracking-[-0.02em] group-hover:text-brand">
+                    {need.name}
+                    <ArrowRight size={18} className="text-[#a3a39c] transition-transform group-hover:translate-x-1 group-hover:text-brand" />
+                  </span>
+                  {need.description && (
+                    <span className="text-sm font-light leading-relaxed text-[#6b6b65]">{need.description}</span>
+                  )}
+                </Link>
+              ))}
+            </div>
+          </Container>
+        </section>
+      )}
+
+      {/* 7. LATEST */}
+      {sections.latest !== false && latest.length > 0 && (
+        <section className="border-t border-[#dedcd5] py-20 md:py-28">
+          <Container>
+            <SectionHead eyebrow="Baru Tiba" title="Koleksi terbaru." href="/katalog?koleksi=Terbaru" />
+            <div className="grid grid-cols-2 gap-x-4 gap-y-12 md:grid-cols-4 md:gap-x-8">
+              {latest.map((p) => (
+                <GalleryCard key={p.id} product={p} size="sm" />
+              ))}
+            </div>
+          </Container>
+        </section>
+      )}
+
+      {/* 8. SERVICES */}
+      {sections.services !== false && services.length > 0 && (
+        <section className="border-t border-[#dedcd5] bg-white py-20 md:py-28">
+          <Container>
+            <SectionHead eyebrow="Layanan" title="Lebih dari sekadar menjual." href="/layanan" linkLabel="Semua layanan" />
+            <div className="grid grid-cols-1 gap-12 md:grid-cols-3 md:gap-10">
+              {services.slice(0, 3).map((svc, i) => (
+                <Link key={svc.slug} href={`/layanan/${svc.slug}`} className="group flex flex-col gap-5">
+                  <div className="aspect-[3/2] overflow-hidden bg-[#ecebe6]">
+                    <img
+                      src={svc.image || FALLBACK_IMG}
+                      alt={svc.name}
+                      className="h-full w-full object-cover grayscale transition duration-700 group-hover:scale-[1.03] group-hover:grayscale-0"
+                    />
                   </div>
-                  <div>
-                    <span className="block text-xs font-black text-[#111413]">Personal Setup</span>
-                    <span className="text-[11px] text-[#818779]">Konsultasi ramah</span>
+                  <div className="flex flex-col gap-2 border-t border-[#dedcd5] pt-5">
+                    <span className="text-xs tabular-nums text-brand">{String(i + 1).padStart(2, "0")}</span>
+                    <h3 className="m-0 text-xl font-medium tracking-[-0.02em] group-hover:underline group-hover:decoration-brand group-hover:underline-offset-4">
+                      {svc.name}
+                    </h3>
+                    <p className="m-0 line-clamp-3 text-sm font-light leading-relaxed text-[#6b6b65]">{svc.summary}</p>
+                    <span className="mt-1 text-sm text-[#8a8a83]">
+                      {svc.price !== null ? `Mulai ${rupiah(svc.price)}` : "Konsultasi gratis"}
+                    </span>
                   </div>
-                  <div>
-                    <span className="block text-xs font-black text-[#111413]">Siap Kirim</span>
-                    <span className="text-[11px] text-[#818779]">Packing aman & rapi</span>
+                </Link>
+              ))}
+            </div>
+          </Container>
+        </section>
+      )}
+
+      {/* 9. VISIT */}
+      {sections.storeLocation !== false && (
+        <section className="border-t border-[#dedcd5] py-20 md:py-28">
+          <Container>
+            <div className="grid grid-cols-1 gap-12 md:grid-cols-2 md:gap-16">
+              <div className="flex flex-col gap-8">
+                <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#8a8a83]">
+                  <span className="h-1.5 w-1.5 rounded-full bg-brand" />
+                  {config.storeSectionEyebrow || "Kunjungi"}
+                </span>
+                <h2 className="m-0 text-4xl font-semibold leading-[1.05] tracking-[-0.04em] md:text-6xl">
+                  {config.storeSectionTitle || "Lihat langsung. Ngobrol lebih nyaman."}
+                </h2>
+                {config.storeSectionDescription && (
+                  <p className="m-0 max-w-md text-[15px] font-light leading-relaxed text-[#6b6b65]">
+                    {config.storeSectionDescription}
+                  </p>
+                )}
+                <div className="flex flex-col border-t border-[#dedcd5]">
+                  {storeSettings.address && (
+                    <div className="flex items-start gap-3 border-b border-[#dedcd5] py-4 text-[15px]">
+                      <MapPin size={17} className="mt-0.5 shrink-0 text-brand" />
+                      <span>{storeSettings.address}</span>
+                    </div>
+                  )}
+                  <div className="flex items-start gap-3 border-b border-[#dedcd5] py-4 text-[15px]">
+                    <Clock size={17} className="mt-0.5 shrink-0 text-brand" />
+                    <span>{storeSettings.hours || "Buka setiap hari: 08.00 – 22.00 WIB"}</span>
                   </div>
                 </div>
+                <div className="flex flex-wrap items-center gap-6">
+                  <WhatsAppButton
+                    label={config.waConsultLabel || `Hubungi ${storeName}`}
+                    phone={storeSettings.whatsapp}
+                    trackingData={{ inquiryType: "GENERAL" }}
+                    className="rounded-full!"
+                  />
+                  <Link
+                    href="/lokasi"
+                    className="inline-flex items-center gap-1.5 text-sm font-medium underline decoration-brand underline-offset-[6px]"
+                  >
+                    Petunjuk arah <ArrowUpRight size={15} />
+                  </Link>
+                </div>
               </div>
-
-              {/* Right Column: Featured Hero Visual */}
-              <div className="lg:col-span-5 relative">
-                {heroProduct ? (
-                  <div className="relative rounded-3xl p-6 md:p-8 bg-[#f6f6f4] border border-[#e5e5e2] shadow-xs flex flex-col items-center text-center">
-                    <span className="absolute top-4 left-4 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-white border border-[#e2e5dc] text-[#111413]">
-                      Flagship Curated
-                    </span>
-
-                    <div className="w-full h-56 sm:h-64 flex items-center justify-center my-4 overflow-hidden">
-                      <img
-                        src={heroProduct.images?.[0] || "/images/banners/promo-bundle.png"}
-                        alt={heroProduct.name}
-                        className="max-h-full max-w-full object-contain transition-transform duration-500 hover:scale-105"
-                      />
-                    </div>
-
-                    <div className="w-full text-left pt-4 border-t border-[#e8e8e4]">
-                      <span className="text-[11px] font-mono text-[#818779] uppercase">
-                        {heroProduct.brand || "Hardware Pilihan"}
-                      </span>
-                      <h3 className="text-sm font-bold text-[#111413] truncate mt-0.5">
-                        {heroProduct.name}
-                      </h3>
-                      <div className="flex items-center justify-between mt-2">
-                        <span className="text-base font-black text-[#111413]">
-                          {priceLabel(heroProduct.price)}
-                        </span>
-                        <Link
-                          href={`/produk/${heroProduct.slug}`}
-                          className="inline-flex items-center gap-1 text-xs font-bold hover:underline"
-                          style={{ color: "var(--red)" }}
-                        >
-                          <span>Detail</span>
-                          <ArrowUpRight size={13} />
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
+              <div className="relative min-h-[320px] overflow-hidden bg-[#ecebe6] md:min-h-full">
+                {mapData ? (
+                  <iframe
+                    src={mapData.embedUrl}
+                    title={`Lokasi ${storeName}`}
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    className="absolute inset-0 h-full w-full border-0 grayscale-[0.9] contrast-[0.95]"
+                  />
                 ) : (
-                  <div className="rounded-3xl p-8 bg-[#f6f6f4] border border-[#e5e5e2] text-center">
-                    <p className="text-sm text-[#818779]">Koleksi siap dieksplorasi</p>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-sm text-[#8a8a83]">
+                    <MapPin size={24} className="text-brand" />
+                    Peta lokasi belum diatur
                   </div>
                 )}
-              </div>
-            </div>
-          </Container>
-        </section>
-      )}
-
-      {/* 2. CURATED CATEGORY CHIPS STRIP */}
-      {sections.categories !== false && categories && categories.length > 0 && (
-        <section className="py-8 border-b border-[#ecece8] bg-white sticky top-0 z-10 shadow-xs">
-          <Container>
-            <div className="flex items-center justify-between gap-4 overflow-x-auto pb-1 scrollbar-none">
-              <span className="text-xs font-bold text-[#111413] shrink-0 tracking-wide uppercase hidden sm:inline-block">
-                Kategori Pilihan:
-              </span>
-              <div className="flex items-center gap-2 overflow-x-auto">
-                <Link
-                  href="/katalog"
-                  className="px-4 py-1.5 rounded-full text-xs font-bold border border-[#111413] bg-[#111413] text-white shrink-0 transition-colors"
-                >
-                  Semua Produk
-                </Link>
-                {categories.map((cat) => (
-                  <Link
-                    key={cat.value}
-                    href={`/katalog?kategori=${cat.value}`}
-                    className="px-4 py-1.5 rounded-full text-xs font-medium border border-[#e5e5e2] bg-white text-[#525854] hover:text-[#111413] hover:border-[#111413] shrink-0 transition-colors"
-                  >
-                    {cat.name}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </Container>
-        </section>
-      )}
-
-      {/* 3. CURATED SELECTIONS (BOUTIQUE PRODUCT GRID) */}
-      {sections.featured !== false && featured.length > 0 && (
-        <section className="py-16 md:py-20">
-          <Container>
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
-              <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[#818779] block mb-1">
-                  {config.featuredEyebrow || "KURASI UTAMA"}
-                </span>
-                <h2 className="text-2xl md:text-3xl font-black text-[#111413] tracking-tight">
-                  {config.featuredTitle || `Koleksi Terpilih di ${storeName}`}
-                </h2>
-              </div>
-              <Link
-                href="/katalog?koleksi=Pilihan%20Toko"
-                className="inline-flex items-center gap-1.5 text-xs font-bold hover:underline shrink-0"
-                style={{ color: "var(--red)" }}
-              >
-                <span>Lihat Semua Kurasi</span>
-                <ArrowRight size={14} />
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featured.slice(0, 8).map((product) => (
-                <BoutiqueProductCard key={product.id} product={product} storeSettings={storeSettings} />
-              ))}
-            </div>
-          </Container>
-        </section>
-      )}
-
-      {/* 4. PROMO & SPECIAL DEALS (MINIMALIST CARDS) */}
-      {sections.promoWeek !== false && promoProducts.length > 0 && (
-        <section className="py-16 md:py-20 border-t border-[#ecece8] bg-white">
-          <Container>
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
-              <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-red-600 block mb-1">
-                  PENAWARAN TERBATAS
-                </span>
-                <h2 className="text-2xl md:text-3xl font-black text-[#111413] tracking-tight">
-                  Promo Pekan Ini
-                </h2>
-              </div>
-              <Link
-                href="/katalog?koleksi=Promo"
-                className="inline-flex items-center gap-1.5 text-xs font-bold hover:underline shrink-0"
-                style={{ color: "var(--red)" }}
-              >
-                <span>Semua Promo</span>
-                <ArrowRight size={14} />
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {promoProducts.map((product) => (
-                <BoutiqueProductCard key={product.id} product={product} storeSettings={storeSettings} />
-              ))}
-            </div>
-          </Container>
-        </section>
-      )}
-
-      {/* 5. EDITORIAL WHY CHOOSE US STRIP */}
-      {sections.valueStrip !== false && (
-        <section className="py-16 border-t border-[#ecece8] bg-[#fcfcfb]">
-          <Container>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 text-center md:text-left">
-              <div className="space-y-2 p-6 rounded-2xl bg-white border border-[#e5e5e2] shadow-xs">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[#f1f3ed] text-[#111413] mb-3 mx-auto md:mx-0">
-                  <ShieldCheck size={20} style={{ color: "var(--red)" }} />
-                </div>
-                <h3 className="font-bold text-sm text-[#111413]">Standar Kurasi Ketat</h3>
-                <p className="text-xs text-[#525854] leading-relaxed">
-                  Setiap unit perangkat melalui pengujian fungsi, performa termal, dan keaslian komponen sebelum dipajang.
-                </p>
-              </div>
-
-              <div className="space-y-2 p-6 rounded-2xl bg-white border border-[#e5e5e2] shadow-xs">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[#f1f3ed] text-[#111413] mb-3 mx-auto md:mx-0">
-                  <Zap size={20} style={{ color: "var(--red)" }} />
-                </div>
-                <h3 className="font-bold text-sm text-[#111413]">Spesifikasi Tepat Sasaran</h3>
-                <p className="text-xs text-[#525854] leading-relaxed">
-                  Tidak perlu bingung spek berlebih. Kami rekomendasikan hardware paling efisien untuk kebutuhan dan anggaran Anda.
-                </p>
-              </div>
-
-              <div className="space-y-2 p-6 rounded-2xl bg-white border border-[#e5e5e2] shadow-xs">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-[#f1f3ed] text-[#111413] mb-3 mx-auto md:mx-0">
-                  <MessageCircle size={20} style={{ color: "var(--red)" }} />
-                </div>
-                <h3 className="font-bold text-sm text-[#111413]">Pendampingan Purna Jual</h3>
-                <p className="text-xs text-[#525854] leading-relaxed">
-                  Dukungan konsultasi berkelanjutan, bantuan klaim garansi, dan upgrade perangkat kapan pun Anda butuhkan.
-                </p>
-              </div>
-            </div>
-          </Container>
-        </section>
-      )}
-
-      {/* 6. STORE LOCATION & VISIT CONTACT */}
-      {sections.storeLocation !== false && (
-        <section className="py-16 border-t border-[#ecece8] bg-white">
-          <Container>
-            <div className="p-8 md:p-12 rounded-3xl bg-[#f4f5f1] border border-[#e0e2d8] flex flex-col lg:flex-row items-center justify-between gap-8">
-              <div className="space-y-3 max-w-xl text-center lg:text-left">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[#818779]">
-                  {config.storeSectionEyebrow || "KUNJUNGI KAMI"}
-                </span>
-                <h2 className="text-2xl md:text-3xl font-black text-[#111413] tracking-tight">
-                  {config.storeSectionTitle || `Ingin Berdiskusi Langsung di Toko ${storeName}?`}
-                </h2>
-                <p className="text-xs md:text-sm text-[#525854] leading-relaxed">
-                  {storeSettings.address || "Hubungi customer care kami via WhatsApp untuk mendapatkan panduan lokasi dan ketersediaan unit."}
-                </p>
-                <div className="flex items-center gap-2 text-xs font-semibold text-[#818779] justify-center lg:justify-start pt-1">
-                  <MapPin size={15} style={{ color: "var(--red)" }} />
-                  <span>{storeSettings.hours || "Buka setiap hari: 08.00 – 22.00 WIB"}</span>
-                </div>
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
-                <WhatsAppButton
-                  label={config.waConsultLabel || `Hubungi ${storeName}`}
-                  phone={storeSettings.whatsapp}
-                  className="px-6 py-3 rounded-full text-xs font-bold text-white shadow-sm transition-all hover:opacity-90"
-                />
-                <Link
-                  href="/lokasi"
-                  className="px-5 py-3 rounded-full text-xs font-bold border border-[#d8d8d4] bg-white text-[#111413] hover:bg-gray-50 shadow-xs"
-                >
-                  Peta Lokasi Toko
-                </Link>
               </div>
             </div>
           </Container>
@@ -333,72 +458,6 @@ export function MinimalistBoutiqueHome({
         className="mobile-floating-whatsapp"
         phone={storeSettings.whatsapp}
       />
-    </div>
-  );
-}
-
-/**
- * Minimalist Boutique Product Card Component
- */
-function BoutiqueProductCard({
-  product,
-  storeSettings,
-}: {
-  product: any;
-  storeSettings: any;
-}) {
-  const hasDiscount = product.originalPrice && product.originalPrice > product.price;
-
-  return (
-    <div className="group relative flex flex-col justify-between rounded-2xl bg-white border border-[#e5e5e2] p-5 shadow-xs transition-all duration-300 hover:shadow-md hover:border-[#111413]/30">
-      {/* Top Badges */}
-      <div className="flex items-center justify-between gap-2 mb-3">
-        <span className="text-[10px] font-mono uppercase font-bold text-[#818779] tracking-wider truncate">
-          {product.brand || product.category || "Hardware"}
-        </span>
-        {hasDiscount && (
-          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold text-red-700 bg-red-50 border border-red-200">
-            Hemat {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
-          </span>
-        )}
-      </div>
-
-      {/* Image Container with smooth hover zoom */}
-      <Link href={`/produk/${product.slug}`} className="w-full h-44 flex items-center justify-center overflow-hidden my-2">
-        <img
-          src={product.images?.[0] || "/images/banners/promo-bundle.png"}
-          alt={product.name}
-          className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
-        />
-      </Link>
-
-      {/* Title & Specs */}
-      <div className="pt-3 border-t border-[#f1f3ed] mt-2">
-        <h3 className="text-xs font-bold text-[#111413] line-clamp-2 leading-snug group-hover:text-red-600 transition-colors">
-          <Link href={`/produk/${product.slug}`}>{product.name}</Link>
-        </h3>
-
-        {/* Pricing */}
-        <div className="mt-3 flex items-baseline justify-between gap-2">
-          <div>
-            <div className="text-sm font-black text-[#111413]">
-              {priceLabel(product.price)}
-            </div>
-            {hasDiscount && (
-              <div className="text-[11px] text-[#818779] line-through font-medium">
-                {product.originalPrice ? rupiah(product.originalPrice) : null}
-              </div>
-            )}
-          </div>
-          <Link
-            href={`/produk/${product.slug}`}
-            className="w-8 h-8 rounded-full border border-[#e5e5e2] flex items-center justify-center text-[#111413] hover:bg-[#111413] hover:text-white transition-all shadow-xs"
-            title="Lihat Detail Produk"
-          >
-            <ArrowUpRight size={14} />
-          </Link>
-        </div>
-      </div>
     </div>
   );
 }

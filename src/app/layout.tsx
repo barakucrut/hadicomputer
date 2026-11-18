@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
 import "@fontsource-variable/plus-jakarta-sans";
+import "./tailwind.css";
 import "./globals.css";
 import "./mobile.css";
+import { headers } from "next/headers";
 import { Header, Footer, ThemeLiveSync } from "@/components/site-shell";
+import { GamingHeader, GamingFooter } from "@/components/storefront/shells/gaming-shell";
+import { BoutiqueHeader, BoutiqueFooter } from "@/components/storefront/shells/boutique-shell";
+import { resolveTemplateId, STORE_PREVIEW_HEADER, TEMPLATE_PREVIEW_HEADER } from "@/lib/storefront-template";
 import { StoreProvider } from "@/components/store-context";
 import { getLiveCategories } from "@/lib/live-repository";
 import { resolveStorefrontTenant } from "@/lib/tenant-resolver";
@@ -77,9 +82,11 @@ export const metadata: Metadata = {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const tenant = await resolveStorefrontTenant();
+  const headerStore = await headers();
+  const tenant = await resolveStorefrontTenant(headerStore.get(STORE_PREVIEW_HEADER) || undefined);
   const store = tenant.settings;
   const liveCategories = await getLiveCategories(tenant.id);
+  const templateId = resolveTemplateId(store.homepageConfig, headerStore.get(TEMPLATE_PREVIEW_HEADER));
 
   const fontFamily = store.fontFamily || "Plus Jakarta Sans";
   const primaryColor = store.primaryColor || "#dd2028";
@@ -145,12 +152,24 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(storeSchema) }}
         />
       </head>
-      <body>
+      <body data-template={templateId}>
         <ThemeLiveSync />
         <StoreProvider store={store}>
-          <Header store={store} categories={liveCategories} />
+          {templateId === "gaming-arena" ? (
+            <GamingHeader store={store} categories={liveCategories} />
+          ) : templateId === "minimalist-boutique" ? (
+            <BoutiqueHeader store={store} categories={liveCategories} />
+          ) : (
+            <Header store={store} categories={liveCategories} />
+          )}
           <main id="main">{children}</main>
-          <Footer store={store} />
+          {templateId === "gaming-arena" ? (
+            <GamingFooter store={store} categories={liveCategories} />
+          ) : templateId === "minimalist-boutique" ? (
+            <BoutiqueFooter store={store} categories={liveCategories} />
+          ) : (
+            <Footer store={store} />
+          )}
         </StoreProvider>
       </body>
     </html>

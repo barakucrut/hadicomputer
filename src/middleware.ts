@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
+import { STORE_PREVIEW_HEADER, TEMPLATE_PREVIEW_HEADER, isTemplateId } from "@/lib/storefront-template";
 
 const ADMIN_JWT_SECRET = new TextEncoder().encode(
   process.env.ADMIN_JWT_SECRET || "hadi-computer-cms-secret-key-32-chars-long-2026"
@@ -17,6 +18,23 @@ const GOD_COOKIE_NAME = "platform_god_session";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // 0. Storefront previews (?template=..., ?store=...): forward them as request headers
+  //    so the root layout renders the same store and header/footer shell as the page.
+  if (!pathname.startsWith("/admin") && !pathname.startsWith("/god-mode")) {
+    const preview = request.nextUrl.searchParams.get("template");
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.delete(TEMPLATE_PREVIEW_HEADER);
+    if (isTemplateId(preview)) {
+      requestHeaders.set(TEMPLATE_PREVIEW_HEADER, preview);
+    }
+    const storePreview = request.nextUrl.searchParams.get("store") || request.nextUrl.searchParams.get("preview");
+    requestHeaders.delete(STORE_PREVIEW_HEADER);
+    if (storePreview && /^[a-z0-9-]{1,100}$/i.test(storePreview)) {
+      requestHeaders.set(STORE_PREVIEW_HEADER, storePreview);
+    }
+    return NextResponse.next({ request: { headers: requestHeaders } });
+  }
 
   // 1. Protect /god-mode routes (except /god-mode/login)
   if (pathname.startsWith("/god-mode") && pathname !== "/god-mode/login") {
@@ -103,5 +121,10 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/god-mode/:path*"],
+  matcher: [
+    "/admin/:path*",
+    "/god-mode/:path*",
+    // Storefront pages (for template preview); skip API, Next internals and static files
+    "/((?!api|_next/static|_next/image|uploads|images|favicon.ico|.*\\..*).*)",
+  ],
 };

@@ -1,0 +1,18 @@
+/*
+ * Tailwind CSS v4 — theme + utilities only.
+ * Preflight (base reset) is intentionally NOT imported so the existing
+ * hand-written storefront (globals.css) and CMS (admin.css) styles keep
+ * their current look. Unlayered rules in those files still win over
+ * Tailwind's layered utilities when both target the same property.
+ */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+@source "../";
+
+/* Merchant-driven tokens: bg-brand, text-brand, border-brand, font-store, ... */
+@theme inline {
+  --color-brand: var(--red);
+  --font-store: var(--font);
+}
