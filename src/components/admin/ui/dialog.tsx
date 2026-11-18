@@ -76,7 +76,7 @@ export function DialogHeader({
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={`flex flex-col space-y-1.5 text-left mb-4 border-b border-[#f1f3ed] pb-3 pr-10 ${className}`}
+      className={`flex flex-col space-y-1.5 text-left mb-4 border-b border-[#e5e3dd] pb-4 pr-10 ${className}`}
       {...props}
     />
   );
