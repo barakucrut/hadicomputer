@@ -47,6 +47,7 @@ import { Switch } from "@/components/admin/ui/switch";
 import { AdminPagination } from "@/components/admin/ui/pagination";
 import { HugeIconEdit, HugeIconTrash } from "@/components/admin/ui/huge-icons";
 import { ConfirmDialog } from "@/components/admin/ui/confirm-dialog";
+import { useCan } from "@/components/admin/permissions";
 import { useToast } from "@/components/admin/ui/toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -309,6 +310,9 @@ const PERMISSION_LABELS: Record<string, string> = Object.fromEntries(
 );
 
 export default function UserRolePage() {
+  const can = useCan();
+  const canManageUsers = can("users:manage");
+  const canManageRoles = can("roles:manage");
   const toast = useToast();
   const [activeTab, setActiveTab] = React.useState<"users" | "roles">("users");
 
@@ -328,6 +332,7 @@ export default function UserRolePage() {
     email: "",
     password: "",
     roleId: "",
+    isActive: true,
   });
   const [submittingUser, setSubmittingUser] = React.useState(false);
 
@@ -404,6 +409,7 @@ export default function UserRolePage() {
         email: user.email || "",
         password: "",
         roleId: user.roleId || user.roleRef?.id || "",
+        isActive: user.isActive !== undefined ? Boolean(user.isActive) : true,
       });
     } else {
       setEditingUser(null);
@@ -412,6 +418,7 @@ export default function UserRolePage() {
         email: "",
         password: "",
         roleId: roles.find((r) => r.slug === "customer_service" || r.slug === "admin_katalog")?.id || roles[0]?.id || "",
+        isActive: true,
       });
     }
     setIsUserModalOpen(true);
@@ -439,8 +446,12 @@ export default function UserRolePage() {
         email: userForm.email,
         roleId: userForm.roleId,
       };
+      if (editingUser) {
+        payload.isActive = userForm.isActive;
+      }
       if (!editingUser) {
         payload.password = userForm.password;
+        payload.isActive = true;
       }
 
       const res = await fetch(url, {
@@ -710,12 +721,14 @@ export default function UserRolePage() {
             TAB 1: DAFTAR PENGGUNA
             ========================================================== */}
         <TabsContent value="users" className="space-y-4">
-          <div className="flex justify-end">
-            <Button onClick={() => handleOpenUserModal()} className="flex items-center gap-1.5">
-              <Plus size={16} />
-              <span>Tambah Pengguna</span>
-            </Button>
-          </div>
+          {canManageUsers && (
+            <div className="flex justify-end">
+              <Button onClick={() => handleOpenUserModal()} className="flex items-center gap-1.5">
+                <Plus size={16} />
+                <span>Tambah Pengguna</span>
+              </Button>
+            </div>
+          )}
 
           <Card>
             <Table>
@@ -767,19 +780,13 @@ export default function UserRolePage() {
                           <Badge variant={isOwner ? "default" : "secondary"}>{roleName}</Badge>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Switch
-                              checked={Boolean(u.isActive)}
-                              onCheckedChange={() => handleToggleUserStatus(u)}
-                              disabled={isOwner}
-                            />
-                            <Badge variant={u.isActive ? "success" : "outline"}>
-                              {u.isActive ? "Aktif" : "Nonaktif"}
-                            </Badge>
-                          </div>
+                          <Badge variant={u.isActive ? "success" : "outline"}>
+                            {u.isActive ? "Aktif" : "Nonaktif"}
+                          </Badge>
                         </TableCell>
                         <TableCell className="text-xs text-[#525854]">{formatDate(u.lastLoginAt)}</TableCell>
                         <TableCell className="text-right">
+                          {canManageUsers ? (
                           <div className="flex items-center justify-end gap-1.5">
                             <button
                               type="button"
@@ -811,6 +818,9 @@ export default function UserRolePage() {
                               <HugeIconTrash size={16} />
                             </button>
                           </div>
+                          ) : (
+                            <span className="text-xs text-[#525854]">-</span>
+                          )}
                         </TableCell>
                       </TableRow>
                     );
@@ -838,12 +848,14 @@ export default function UserRolePage() {
             TAB 2: ROLE & HAK AKSES
             ========================================================== */}
         <TabsContent value="roles" className="space-y-4">
-          <div className="flex justify-end">
-            <Button onClick={() => handleOpenRoleModal()} className="flex items-center gap-1.5">
-              <Plus size={16} />
-              <span>Buat Custom Role</span>
-            </Button>
-          </div>
+          {canManageRoles && (
+            <div className="flex justify-end">
+              <Button onClick={() => handleOpenRoleModal()} className="flex items-center gap-1.5">
+                <Plus size={16} />
+                <span>Buat Custom Role</span>
+              </Button>
+            </div>
+          )}
 
           {loadingRoles ? (
             <Card>
@@ -949,7 +961,7 @@ export default function UserRolePage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          disabled={r.isSystem}
+                          disabled={r.isSystem || !canManageRoles}
                           onClick={() => handleOpenRoleModal(r)}
                           className="flex-1 flex items-center justify-center gap-1.5"
                           title={r.isSystem ? "Role sistem tidak dapat dimodifikasi" : "Edit Hak Akses"}
@@ -957,7 +969,7 @@ export default function UserRolePage() {
                           <SlidersHorizontal size={14} />
                           <span>{r.isSystem ? "Role Bawaan" : "Edit Hak Akses"}</span>
                         </Button>
-                        {!r.isSystem && (
+                        {!r.isSystem && canManageRoles && (
                           <button
                             type="button"
                             onClick={() => setDeleteRoleTarget(r)}
@@ -1058,6 +1070,22 @@ export default function UserRolePage() {
                 Menu CMS yang bisa diakses mengikuti hak akses role ini.
               </p>
             </div>
+
+            {editingUser && !(editingUser.role?.toUpperCase() === "OWNER" || editingUser.roleRef?.slug === "owner") && (
+              <div>
+                <Label htmlFor="user-status">Status Akun</Label>
+                <div className="flex items-center gap-2.5 mt-1.5">
+                  <Switch
+                    id="user-status"
+                    checked={Boolean(userForm.isActive)}
+                    onCheckedChange={(checked) => setUserForm({ ...userForm, isActive: checked })}
+                  />
+                  <span className="text-xs text-[#525854]">
+                    {userForm.isActive ? "Akun Aktif (Staf dapat login ke CMS)" : "Nonaktif (Akses login ditutup)"}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
           <DialogFooter>
