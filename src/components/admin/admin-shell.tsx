@@ -11,6 +11,7 @@ import {
   Wrench,
   MessageSquare,
   Settings,
+  Users,
   ExternalLink,
   LogOut,
   Store,
@@ -32,6 +33,8 @@ interface AdminShellProps {
     tenantId?: string | null;
     tenantName?: string;
     isImpersonating?: boolean;
+    roleName?: string;
+    permissions?: string[];
   } | null;
 }
 
@@ -130,15 +133,27 @@ export function AdminShell({ children, user }: AdminShellProps) {
     return <ToastProvider>{children}</ToastProvider>;
   }
 
-  const navItems = [
-    { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-    { label: "Katalog Produk", href: "/admin/produk", icon: Package },
-    { label: "Kategori & Merek", href: "/admin/kategori", icon: Layers },
-    { label: "Banner Hero", href: "/admin/banner", icon: ImageIcon },
-    { label: "Layanan & Servis", href: "/admin/layanan", icon: Wrench },
-    { label: "Inquiry WhatsApp", href: "/admin/inquiry-analytics", icon: MessageSquare },
-    { label: "Pengaturan Toko", href: "/admin/pengaturan", icon: Settings },
+  const allNavItems = [
+    { label: "Dashboard", href: "/admin", icon: LayoutDashboard, permission: "dashboard:view" },
+    { label: "Katalog Produk", href: "/admin/produk", icon: Package, permission: "products:view" },
+    { label: "Kategori & Merek", href: "/admin/kategori", icon: Layers, permission: "categories:manage" },
+    { label: "Banner Hero", href: "/admin/banner", icon: ImageIcon, permission: "banners:view" },
+    { label: "Layanan & Servis", href: "/admin/layanan", icon: Wrench, permission: "services:view" },
+    { label: "Inquiry WhatsApp", href: "/admin/inquiry-analytics", icon: MessageSquare, permission: "inquiries:view" },
+    { label: "User & Role", href: "/admin/user-role", icon: Users, permission: "users:view" },
+    { label: "Pengaturan Toko", href: "/admin/pengaturan", icon: Settings, permission: "settings:appearance" },
   ];
+
+  const isOwner =
+    user?.role?.toUpperCase() === "OWNER" ||
+    user?.role === "owner" ||
+    user?.permissions?.includes("*");
+
+  const visibleNavItems = allNavItems.filter((item) => {
+    if (isOwner) return true;
+    if (!item.permission) return true;
+    return user?.permissions?.includes(item.permission);
+  });
 
   async function handleLogout() {
     try {
@@ -258,7 +273,7 @@ export function AdminShell({ children, user }: AdminShellProps) {
             overflowY: "auto",
           }}
         >
-          {navItems.map((item) => {
+          {visibleNavItems.map((item) => {
             const Icon = item.icon;
             const isActive =
               item.href === "/admin"
@@ -673,8 +688,13 @@ export function AdminShell({ children, user }: AdminShellProps) {
             )}
 
             <div style={{ textAlign: "right" }} className="hidden sm:block">
-              <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--ink)" }}>
-                {user?.name || "Owner Hadi Computer"}
+              <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--ink)", display: "flex", alignItems: "center", gap: "6px", justifyContent: "flex-end" }}>
+                <span>{user?.name || "Owner Hadi Computer"}</span>
+                {user?.roleName && (
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#f1f3ed] text-[#525854] border border-[#e2e5dc]">
+                    {user.roleName}
+                  </span>
+                )}
               </div>
               <div style={{ fontSize: "11px", color: "var(--muted)" }}>
                 {user?.email || "admin@hadicomputer.com"}

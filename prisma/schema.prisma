@@ -73,6 +73,7 @@ model Tenant {
   
   settings     TenantSetting?
   adminUsers   AdminUser[]
+  roles        AdminRole[]
   products     Product[]
   categories   Category[]
   brands       Brand[]
@@ -127,21 +128,44 @@ model TenantSetting {
 }
 
 // ----------------------------------------------------
-// 1. AUTENTIKASI ADMIN / OWNER
+// 1. AUTENTIKASI ADMIN & USER ROLE
 // ----------------------------------------------------
+model AdminRole {
+  id          String      @id @default(cuid())
+  // null = role sistem bawaan (dipakai bersama semua tenant, read-only)
+  tenantId    String?     @db.VarChar(40)
+  tenant      Tenant?     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name        String      @db.VarChar(100)
+  slug        String      @db.VarChar(100)
+  description String?     @db.VarChar(255)
+  permissions Json        // Array string of permission keys: ["*"] or ["products:view", ...]
+  isSystem    Boolean     @default(false)
+  users       AdminUser[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@unique([tenantId, slug])
+  @@index([tenantId])
+  @@map("admin_roles")
+}
+
 model AdminUser {
-  id           String    @id @default(cuid())
-  email        String    @unique @db.VarChar(191)
-  passwordHash String    @db.VarChar(255)
-  name         String    @db.VarChar(100)
-  role         String    @default("OWNER") @db.VarChar(30)
-  tenantId     String?   @db.VarChar(40)
-  tenant       Tenant?   @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  id           String      @id @default(cuid())
+  email        String      @unique @db.VarChar(191)
+  passwordHash String      @db.VarChar(255)
+  name         String      @db.VarChar(100)
+  role         String      @default("OWNER") @db.VarChar(30)
+  roleId       String?
+  roleRef      AdminRole?  @relation(fields: [roleId], references: [id], onDelete: SetNull)
+  isActive     Boolean     @default(true)
+  tenantId     String?     @db.VarChar(40)
+  tenant       Tenant?     @relation(fields: [tenantId], references: [id], onDelete: SetNull)
   lastLoginAt  DateTime?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 
   @@index([tenantId])
+  @@index([roleId])
   @@map("admin_users")
 }
 
