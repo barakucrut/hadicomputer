@@ -151,7 +151,7 @@ export function LandingPage({ salesPhone }: { salesPhone: string | null }) {
                 <p>Katalog diimpor dari Excel atau website lama Anda.</p>
               </article>
               <article className="b b-wide" data-reveal style={{ ["--d" as string]: "200ms" }}>
-                <span className="tag">PRO</span>
+                <span className="tag">PRO</span> <span className="soon">SEGERA</span>
                 <h3>PC Builder & Trade-In</h3>
                 <p>Pembeli merakit PC sendiri atau menaksir tukar tambah laptop lamanya — fitur yang tidak dimiliki website biasa.</p>
               </article>
@@ -213,8 +213,10 @@ export function LandingPage({ salesPhone }: { salesPhone: string | null }) {
               <p>Bukan sekadar jumlah pengunjung — Anda melihat pertanyaan yang benar-benar masuk, produk apa, dan dari halaman mana.</p>
               <ul className="checks">
                 <li>Klik WhatsApp per produk</li>
-                <li>Produk paling dicari minggu ini</li>
-                <li>Stok habis yang masih banyak ditanya</li>
+                <li>Produk paling banyak ditanyakan</li>
+                <li>
+                  Stok habis yang masih banyak ditanya <span className="soon">SEGERA</span>
+                </li>
               </ul>
             </div>
             <div className="dash" data-reveal style={{ ["--d" as string]: "120ms" }}>

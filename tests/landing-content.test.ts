@@ -26,3 +26,16 @@ test("form minta demo: validasi, honeypot, link toko", () => {
   assert.ok(xss.ok && !xss.data.storeName.includes("<"));
   assert.match(salesWhatsappUrl("6281234567890", "Rig Computer"), /^https:\/\/wa\.me\/6281234567890\?text=Halo%20Rigspace/);
 });
+
+test("landing: fitur paket yang belum dibangun wajib berlabel segera", () => {
+  const all = PLANS.flatMap((p) => p.features);
+  const notShipped = [/pc builder/i, /trade-in/i, /broadcast/i, /keranjang/i, /payment gateway/i];
+  for (const rule of notShipped) {
+    const hits = all.filter((f) => rule.test(f));
+    assert.ok(hits.length > 0, `fitur ${rule} harus tercantum`);
+    for (const f of hits) assert.match(f, /\|segera$/, `"${f}" belum ada di produk → wajib "|segera"`);
+  }
+  const enterprise = PLANS.find((p) => p.id === "enterprise")!;
+  assert.ok(enterprise.features.some((f) => /keranjang/i.test(f)));
+  assert.ok(enterprise.features.some((f) => /payment gateway/i.test(f)));
+});

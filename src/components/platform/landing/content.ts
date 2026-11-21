@@ -62,7 +62,7 @@ export const PLANS = [
     for: "Toko retail komputer & rakit PC",
     price: "Rp 2,79 jt",
     alt: "atau Rp 280rb / bulan",
-    features: ["Semua fitur Starter", "PC Builder Simulator", "Kalkulator Trade-In", "SEO lokal", "Broadcast promo WhatsApp|segera"],
+    features: ["Semua fitur Starter", "SEO lokal", "PC Builder Simulator|segera", "Kalkulator Trade-In|segera", "Broadcast promo WhatsApp|segera"],
     cta: "Minta Demo Gratis",
     highlight: true,
   },
@@ -72,7 +72,7 @@ export const PLANS = [
     for: "Distributor & toko grosir",
     price: "Rp 4,9 jt",
     alt: "+ biaya setup",
-    features: ["Semua fitur Pro", "Fitur & integrasi sesuai kebutuhan", "Pendampingan khusus"],
+    features: ["Semua fitur Pro", "Fitur & integrasi sesuai kebutuhan", "Pendampingan khusus", "Keranjang belanja|segera", "Payment gateway (bayar online)|segera"],
     cta: "Hubungi Sales",
     highlight: false,
   },
@@ -83,7 +83,7 @@ export const FAQS = [
   { q: "Bisa pakai domain sendiri?", a: "Bisa. Atau pakai alamat namatoko.rigspace.id tanpa biaya tambahan." },
   { q: "Produk di marketplace bisa dipindah?", a: "Bisa. Kami bantu impor dari Excel, marketplace, atau website lama." },
   { q: "Data toko milik siapa?", a: "Milik Anda. Katalog bisa diekspor kapan saja." },
-  { q: "Pembeli bayar lewat mana?", a: "Lewat WhatsApp & transfer seperti biasa — langsung ke rekening toko Anda." },
+  { q: "Pembeli bayar lewat mana?", a: "Lewat WhatsApp & transfer seperti biasa — langsung ke rekening toko Anda. Keranjang belanja & payment gateway untuk paket Enterprise segera hadir." },
   { q: "Kalau berhenti langganan?", a: "Website dinonaktifkan di akhir masa langganan, data katalog tetap bisa Anda ekspor." },
 ];
 
