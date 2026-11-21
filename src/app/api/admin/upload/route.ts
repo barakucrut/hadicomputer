@@ -8,6 +8,7 @@ export async function POST(request: Request) {
     "products:create",
     "products:edit",
     "banners:manage",
+    "testimonials:manage",
     "brands:manage",
     "categories:manage",
     "settings:appearance",

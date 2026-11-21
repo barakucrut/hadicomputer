@@ -133,6 +133,7 @@ export default function AdminSettingsPage() {
     address: "Jl. Ahmad Yani No. 45, Lantai 1",
     openHours: "Buka setiap hari: 08.00 – 22.00 WIB",
     mapsEmbedUrl: "",
+    googleReviewUrl: "",
     socialInstagram: "",
     socialTiktok: "",
     socialFacebook: "",
@@ -161,6 +162,7 @@ export default function AdminSettingsPage() {
         latest: true,
         pcGaming: true,
         services: true,
+        testimonials: true,
         storeLocation: true,
       },
     },
@@ -247,6 +249,7 @@ export default function AdminSettingsPage() {
               latest: s.homepageConfig?.sections?.latest !== false,
               pcGaming: s.homepageConfig?.sections?.pcGaming !== false,
               services: s.homepageConfig?.sections?.services !== false,
+              testimonials: s.homepageConfig?.sections?.testimonials !== false,
               storeLocation: s.homepageConfig?.sections?.storeLocation !== false,
             },
           };
@@ -320,7 +323,8 @@ export default function AdminSettingsPage() {
       if (res.ok) {
         toast.success("Pengaturan toko & tema berhasil disimpan!");
       } else {
-        toast.error("Gagal menyimpan pengaturan toko.");
+        const data = await res.json().catch(() => ({}));
+        toast.error(data.error || "Gagal menyimpan pengaturan toko.");
       }
     } catch {
       toast.error("Terjadi kesalahan saat menyimpan pengaturan toko.");
@@ -1036,6 +1040,11 @@ export default function AdminSettingsPage() {
                     desc: "Kartu jasa servis, perawatan, dan reparasi perangkat.",
                   },
                   {
+                    key: "testimonials",
+                    label: "Testimoni Pelanggan",
+                    desc: "Kartu kutipan pelanggan dari menu Testimoni (tersembunyi bila belum ada).",
+                  },
+                  {
                     key: "storeLocation",
                     label: "Peta Lokasi Toko & Google Maps",
                     desc: "Embed interaktif peta fisik toko beserta alamat dan jam buka.",
@@ -1174,6 +1183,23 @@ export default function AdminSettingsPage() {
                 />
                 <span className="admin-form-hint">
                   Buka Google Maps → Bagikan → Sematkan peta → Salin link src iframe.
+                </span>
+              </div>
+
+              <div>
+                <Label htmlFor="set-review-url" className="text-xs font-bold text-[#111413]">
+                  Link Ulasan Google
+                </Label>
+                <Input
+                  id="set-review-url"
+                  type="url"
+                  value={settings.googleReviewUrl || ""}
+                  onChange={(e) => setSettings({ ...settings, googleReviewUrl: e.target.value })}
+                  placeholder="https://g.page/r/.../review"
+                  className="font-mono text-xs h-10 mt-1"
+                />
+                <span className="admin-form-hint">
+                  Opsional. Jika diisi, tombol &ldquo;Lihat semua ulasan di Google&rdquo; muncul di bawah testimoni etalase.
                 </span>
               </div>
             </CardContent>

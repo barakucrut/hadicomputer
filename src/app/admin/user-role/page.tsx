@@ -249,6 +249,23 @@ const PERMISSION_GROUPS: PermissionGroup[] = [
     ],
   },
   {
+    id: "testimonials",
+    title: "Testimoni Pelanggan",
+    desc: "Kutipan pengalaman pelanggan yang tampil di beranda etalase.",
+    items: [
+      {
+        key: "testimonials:view",
+        label: "Lihat Testimoni",
+        desc: "Melihat daftar testimoni beserta status tampilnya.",
+      },
+      {
+        key: "testimonials:manage",
+        label: "Kelola Testimoni",
+        desc: "Tambah, edit, tampilkan/sembunyikan, dan hapus testimoni.",
+      },
+    ],
+  },
+  {
     id: "inquiries",
     title: "Inquiry WhatsApp & Leads",
     desc: "Pemantauan calon pembeli yang menghubungi toko via tombol WhatsApp.",

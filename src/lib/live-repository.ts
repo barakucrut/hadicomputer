@@ -1,5 +1,6 @@
 import { prisma } from "./db";
-import type { Banner, Product, Service, ServiceCaseItem, StoreSettings } from "./types";
+import type { Banner, Product, Service, ServiceCaseItem, StoreSettings, Testimonial } from "./types";
+import { selectHomeTestimonials } from "./testimonials";
 import { resolveStorefrontTenant } from "./tenant-resolver";
 import { stockLabel } from "./stock";
 
@@ -312,6 +313,34 @@ export async function getLiveServiceCases(tenantId?: string, limit = 6): Promise
       images: Array.isArray(c.images) ? (c.images as string[]).filter((u) => typeof u === "string") : [],
       serviceName: c.service?.title ?? null,
       serviceSlug: c.service?.slug ?? null,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Testimoni aktif toko. `limit` bawaan = batas beranda (6); `null` = semua (halaman /testimoni).
+ * Tanpa data contoh: kosong berarti section disembunyikan.
+ */
+export async function getLiveTestimonials(tenantId?: string, limit?: number | null): Promise<Testimonial[]> {
+  try {
+    const rows = await withTimeout(
+      prisma.testimonial.findMany({
+        where: { tenantId: await activeTenantId(tenantId), isActive: true },
+        orderBy: [{ isFeatured: "desc" }, { sortOrder: "asc" }, { createdAt: "desc" }],
+        take: 200,
+      })
+    );
+    return selectHomeTestimonials(rows, limit === null ? Infinity : limit).map((t) => ({
+      id: t.id,
+      name: t.name,
+      descriptor: t.descriptor,
+      quote: t.quote,
+      rating: t.rating,
+      label: t.label,
+      photoUrl: t.photoUrl,
+      source: t.source,
     }));
   } catch {
     return [];

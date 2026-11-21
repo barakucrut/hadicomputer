@@ -10,6 +10,7 @@ import {
   Wrench,
 } from "lucide-react";
 import { Container, CategoryIcon, SectionHeading } from "@/components/ui";
+import { TestimonialsSection } from "@/components/testimonials-section";
 import { HeroSlider } from "@/components/hero-slider";
 import { FeaturedProducts } from "@/components/featured-products";
 import { ProductGrid } from "@/components/product-card";
@@ -32,6 +33,7 @@ export function ClassicRetailHome({
   categories,
   needs,
   services,
+  testimonials,
 }: StorefrontTemplateProps) {
   const storeSettings = tenant.settings;
   const config = storeSettings.homepageConfig || {};
@@ -291,6 +293,14 @@ export function ClassicRetailHome({
             </div>
           </Container>
         </section>
+      )}
+
+      {sections.testimonials !== false && (
+        <TestimonialsSection
+          testimonials={testimonials}
+          googleReviewUrl={storeSettings.googleReviewUrl}
+          storeName={storeName}
+        />
       )}
 
       {sections.storeLocation !== false && (

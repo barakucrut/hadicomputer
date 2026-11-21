@@ -45,6 +45,7 @@ export async function GET() {
         whatsappDefaultTemplate: s.whatsappDefaultTemplate || "",
         address: s.address || "",
         mapsEmbedUrl: s.mapsEmbedUrl || "",
+        googleReviewUrl: s.googleReviewUrl || "",
         openHours: s.openHours || "Buka setiap hari: 08.00 – 22.00 WIB",
         socialInstagram: s.socialInstagram || "",
         socialTiktok: s.socialTiktok || "",
@@ -92,6 +93,16 @@ export async function PUT(request: Request) {
     homepageConfig,
   } = data;
 
+  // Link ulasan Google: hanya https (atau kosong). Tidak dikirim = tidak diubah.
+  let googleReviewUrl: string | null | undefined = undefined;
+  if (data.googleReviewUrl !== undefined) {
+    const raw = typeof data.googleReviewUrl === "string" ? data.googleReviewUrl.trim() : "";
+    if (raw && (!/^https:\/\/[^\s]+$/i.test(raw) || raw.length > 500)) {
+      return NextResponse.json({ error: "Link ulasan Google harus diawali https:// (maks 500 karakter)." }, { status: 400 });
+    }
+    googleReviewUrl = raw || null;
+  }
+
   const tenantId: string | null = auth.tenantId;
 
   if (tenantId) {
@@ -115,6 +126,7 @@ export async function PUT(request: Request) {
         whatsappDefaultTemplate,
         address,
         mapsEmbedUrl,
+        googleReviewUrl,
         openHours,
         socialInstagram,
         socialTiktok,
@@ -135,6 +147,7 @@ export async function PUT(request: Request) {
         whatsappDefaultTemplate,
         address,
         mapsEmbedUrl,
+        googleReviewUrl,
         openHours,
         socialInstagram,
         socialTiktok,

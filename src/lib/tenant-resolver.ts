@@ -43,6 +43,7 @@ const DEFAULT_HOMEPAGE_CONFIG: HomepageConfig = {
     latest: true,
     pcGaming: true,
     services: true,
+    testimonials: true,
     storeLocation: true,
   },
 };
@@ -262,6 +263,7 @@ export async function resolveStorefrontTenant(
       latest: rawConfig?.sections?.latest !== false,
       pcGaming: rawConfig?.sections?.pcGaming !== false,
       services: rawConfig?.sections?.services !== false,
+      testimonials: rawConfig?.sections?.testimonials !== false,
       storeLocation: rawConfig?.sections?.storeLocation !== false,
     },
   };
@@ -299,6 +301,7 @@ export async function resolveStorefrontTenant(
       tiktok: s?.socialTiktok || null,
       facebook: s?.socialFacebook || null,
       mapsUrl: s?.mapsEmbedUrl || null,
+      googleReviewUrl: s?.googleReviewUrl || null,
       homepageConfig: mergedHomepageConfig,
     },
   };

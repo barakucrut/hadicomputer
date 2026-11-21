@@ -129,6 +129,7 @@ model Tenant {
   needs        ProductNeed[]
   inquiryLogs  InquiryLog[]
   serviceCases ServiceCase[]
+  testimonials Testimonial[]
 
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
@@ -197,6 +198,8 @@ model TenantSetting {
   address                 String?  @db.Text
   mapsEmbedUrl            String?  @db.Text
   mapsUrl                 String?  @db.VarChar(255)
+  // Link "Lihat semua ulasan di Google" di bawah section testimoni (opsional)
+  googleReviewUrl         String?  @db.VarChar(500)
   openHours               String   @default("Buka setiap hari: 08.00 – 22.00 WIB") @db.VarChar(200)
   
   // Media Sosial
@@ -595,6 +598,36 @@ model ServiceCase {
   @@index([tenantId])
   @@index([serviceId])
   @@map("service_cases")
+}
+
+enum TestimonialSource {
+  GOOGLE
+  WHATSAPP
+  DIRECT
+}
+
+/// Testimoni pelanggan, diinput manual oleh admin toko (tanpa API Google).
+model Testimonial {
+  id         String            @id @default(cuid())
+  tenantId   String            @db.VarChar(40)
+  tenant     Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name       String            @db.VarChar(100)
+  descriptor String?           @db.VarChar(120)
+  quote      String            @db.VarChar(300)
+  rating     Int?              @db.TinyInt
+  label      String?           @db.VarChar(80)
+  photoUrl   String?           @db.VarChar(255)
+  source     TestimonialSource @default(DIRECT)
+  // Link ulasan asli: arsip admin, tidak ditampilkan ke pengunjung
+  sourceUrl  String?           @db.VarChar(500)
+  isActive   Boolean           @default(true)
+  isFeatured Boolean           @default(false)
+  sortOrder  Int               @default(0)
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+
+  @@index([tenantId, isActive, isFeatured, sortOrder])
+  @@map("testimonials")
 }
 
 model InquiryLog {

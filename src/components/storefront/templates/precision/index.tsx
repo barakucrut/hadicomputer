@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowUpRight, BadgeCheck, MapPin, MessageCircle, PackageCheck, ShieldCheck, Store } from "lucide-react";
 import { Container } from "@/components/ui";
 import { WhatsAppButton } from "@/components/whatsapp-button";
+import { TestimonialAvatar, TestimonialStars, testimonialMeta } from "@/components/testimonials-section";
 import { parseGoogleMaps } from "@/components/location-panel";
 import { rupiah } from "@/lib/catalog";
 import type { StorefrontTemplateProps } from "../../types";
@@ -35,6 +36,7 @@ export function PrecisionHome({
   categories,
   needs,
   services,
+  testimonials = [],
   brands = [],
   serviceCases = [],
   profile = { foundedYear: null, quickSearches: [] },
@@ -339,6 +341,64 @@ export function PrecisionHome({
                 </article>
               ))}
             </div>
+          </section>
+        )}
+
+        {/* TESTIMONI */}
+        {sections.testimonials !== false && testimonials.length > 0 && (
+          <section data-reveal className="mt-12 border-t border-[#e6e6e3] pt-12">
+            <SectionHead
+              index={next()}
+              eyebrow="KATA PELANGGAN"
+              title={`Sudah dibuktikan pelanggan ${storeName}`}
+              action={
+                <Link href="/testimoni" className="border-b border-[#0b0d0c] pb-0.5 text-[13px] font-semibold text-[#0b0d0c] no-underline">
+                  Semua testimoni
+                </Link>
+              }
+            />
+            <ul className="m-0 grid list-none grid-cols-1 gap-4 p-0 md:grid-cols-3">
+              {testimonials.map((t) => (
+                <li key={t.id} className="flex flex-col gap-4 rounded-md border border-[#e6e6e3] bg-white p-5">
+                  <div className="flex min-h-[18px] items-center justify-between gap-3">
+                    {t.rating ? (
+                      <TestimonialStars value={t.rating} size={14} />
+                    ) : (
+                      <span className={`${MONO} text-[11px] uppercase tracking-[0.06em] text-[#6b6f6c]`}>Testimoni</span>
+                    )}
+                    {t.label && (
+                      <span className={`${MONO} truncate rounded-[3px] border border-[#e6e6e3] bg-[#f6f6f4] px-2 py-1 text-[10.5px] uppercase text-[#0b0d0c]`}>
+                        {t.label}
+                      </span>
+                    )}
+                  </div>
+                  <blockquote className="m-0 flex-1">
+                    <p className="m-0 text-[14px] leading-relaxed text-[#0b0d0c]">&ldquo;{t.quote}&rdquo;</p>
+                  </blockquote>
+                  <div className="flex items-center gap-3 border-t border-[#e6e6e3] pt-4">
+                    <TestimonialAvatar
+                      name={t.name}
+                      photoUrl={t.photoUrl}
+                      className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full bg-[#0b0d0c] text-[12px] font-bold text-white [&>img]:h-full [&>img]:w-full [&>img]:object-cover"
+                    />
+                    <div className="min-w-0">
+                      <strong className={`${DISPLAY} block truncate text-[14px] font-bold text-[#0b0d0c]`}>{t.name}</strong>
+                      {testimonialMeta(t) && <span className="block truncate text-[12px] text-[#6b6f6c]">{testimonialMeta(t)}</span>}
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            {store.googleReviewUrl && (
+              <a
+                href={store.googleReviewUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-5 inline-flex items-center gap-1.5 border-b border-[#0b0d0c] pb-0.5 text-[13px] font-semibold text-[#0b0d0c] no-underline"
+              >
+                Lihat semua ulasan di Google <ArrowUpRight size={14} />
+              </a>
+            )}
           </section>
         )}
 

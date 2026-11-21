@@ -24,6 +24,8 @@ export const SALES_CMS_PERMISSIONS: string[] = [
   "banners:manage",
   "services:view",
   "services:manage",
+  "testimonials:view",
+  "testimonials:manage",
   "inquiries:view",
   "settings:appearance",
   "settings:store_info",

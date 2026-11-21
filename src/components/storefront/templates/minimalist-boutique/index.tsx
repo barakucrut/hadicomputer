@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, ArrowUpRight, Clock, MapPin } from "lucide-react";
 import { Container } from "@/components/ui";
 import { WhatsAppButton } from "@/components/whatsapp-button";
+import { TestimonialAvatar, TestimonialStars, testimonialMeta } from "@/components/testimonials-section";
 import { parseGoogleMaps } from "@/components/location-panel";
 import { rupiah, priceLabel } from "@/lib/catalog";
 import type { Product } from "@/lib/types";
@@ -103,6 +104,7 @@ export function MinimalistBoutiqueHome({
   categories,
   needs,
   services,
+  testimonials,
 }: StorefrontTemplateProps) {
   const storeSettings = tenant.settings;
   const config = storeSettings.homepageConfig || {};
@@ -386,6 +388,53 @@ export function MinimalistBoutiqueHome({
                 </Link>
               ))}
             </div>
+          </Container>
+        </section>
+      )}
+
+      {/* 8b. TESTIMONI */}
+      {sections.testimonials !== false && testimonials.length > 0 && (
+        <section className="border-t border-[#dedcd5] py-20 md:py-28">
+          <Container>
+            <SectionHead
+              eyebrow="Kata mereka"
+              title={`Cerita dari pelanggan ${storeName}.`}
+              href="/testimoni"
+              linkLabel="Semua testimoni"
+            />
+            <ul className="m-0 grid list-none grid-cols-1 gap-12 p-0 md:grid-cols-3 md:gap-10">
+              {testimonials.map((t) => (
+                <li key={t.id} className="flex flex-col gap-6 border-t border-[#dedcd5] pt-6">
+                  {t.rating ? <TestimonialStars value={t.rating} size={13} /> : <span className="h-1.5 w-1.5 rounded-full bg-brand" />}
+                  <blockquote className="m-0 flex-1">
+                    <p className="m-0 text-xl font-light leading-snug tracking-[-0.01em] text-[#141412]">&ldquo;{t.quote}&rdquo;</p>
+                  </blockquote>
+                  <div className="flex items-center gap-3">
+                    <TestimonialAvatar
+                      name={t.name}
+                      photoUrl={t.photoUrl}
+                      className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full bg-[#ecebe6] text-xs font-medium text-[#141412] grayscale [&>img]:h-full [&>img]:w-full [&>img]:object-cover"
+                    />
+                    <div className="min-w-0">
+                      <span className="block truncate text-sm font-medium text-[#141412]">{t.name}</span>
+                      <span className="block truncate text-xs text-[#8a8a83]">
+                        {[testimonialMeta(t), t.label].filter(Boolean).join(" · ")}
+                      </span>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            {storeSettings.googleReviewUrl && (
+              <a
+                href={storeSettings.googleReviewUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-14 inline-flex items-center gap-2 text-sm font-medium text-[#141412] underline decoration-brand decoration-1 underline-offset-[6px] hover:text-brand"
+              >
+                Lihat semua ulasan di Google <ArrowUpRight size={15} />
+              </a>
+            )}
           </Container>
         </section>
       )}

@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Container, CategoryIcon } from "@/components/ui";
 import { WhatsAppButton } from "@/components/whatsapp-button";
+import { TestimonialAvatar, TestimonialStars, testimonialMeta } from "@/components/testimonials-section";
 import { parseGoogleMaps } from "@/components/location-panel";
 import { rupiah, priceLabel } from "@/lib/catalog";
 import type { Product } from "@/lib/types";
@@ -64,6 +65,7 @@ export function GamingArenaHome({
   categories,
   needs,
   services,
+  testimonials,
 }: StorefrontTemplateProps) {
   const storeSettings = tenant.settings;
   const config = storeSettings.homepageConfig || {};
@@ -367,6 +369,47 @@ export function GamingArenaHome({
                 </Link>
               ))}
             </div>
+          </Container>
+        </section>
+      )}
+
+      {/* 9b. TESTIMONI — PLAYER REVIEWS */}
+      {sections.testimonials !== false && testimonials.length > 0 && (
+        <section className={s.section}>
+          <Container>
+            <div className={s.sectionHead}>
+              <div>
+                <span className={s.eyebrow}>Player Reviews</span>
+                <h2 className={s.title}>Kata Pelanggan</h2>
+                <p className={s.subtitle}>Pengalaman nyata pelanggan {storeName}.</p>
+              </div>
+              <Link href="/testimoni" className={s.moreLink}>
+                Semua Testimoni <ArrowRight size={14} />
+              </Link>
+            </div>
+            <ul className={s.reviewGrid}>
+              {testimonials.map((t) => (
+                <li key={t.id} className={s.reviewCard}>
+                  <div className={s.reviewTop}>
+                    {t.rating ? <TestimonialStars value={t.rating} size={14} /> : <span className={s.reviewQuoteMark}>&ldquo;</span>}
+                    {t.label && <span className={s.cardBrand}>{t.label}</span>}
+                  </div>
+                  <p className={s.reviewText}>&ldquo;{t.quote}&rdquo;</p>
+                  <div className={s.reviewPerson}>
+                    <TestimonialAvatar name={t.name} photoUrl={t.photoUrl} className={s.reviewAvatar} />
+                    <div style={{ minWidth: 0 }}>
+                      <p className={s.reviewName}>{t.name}</p>
+                      {testimonialMeta(t) && <p className={s.reviewMeta}>{testimonialMeta(t)}</p>}
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            {storeSettings.googleReviewUrl && (
+              <a href={storeSettings.googleReviewUrl} target="_blank" rel="noopener noreferrer" className={s.moreLink} style={{ marginTop: 24, display: "inline-flex" }}>
+                Lihat semua ulasan di Google <ArrowUpRight size={14} />
+              </a>
+            )}
           </Container>
         </section>
       )}

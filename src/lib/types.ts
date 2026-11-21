@@ -95,6 +95,7 @@ export type HomepageSectionToggles = {
   latest?: boolean;
   pcGaming?: boolean;
   services?: boolean;
+  testimonials?: boolean;
   storeLocation?: boolean;
 };
 
@@ -132,8 +133,21 @@ export type StoreSettings = {
   tiktok: string | null;
   facebook: string | null;
   mapsUrl: string | null;
+  /** Link "Lihat semua ulasan di Google" (opsional) */
+  googleReviewUrl?: string | null;
   homepageConfig?: HomepageConfig | null;
   /** Tampilan stok di etalase (diisi layout dari pengaturan toko) */
   stockDisplay?: "hidden" | "exact" | "limited";
   lowStockThreshold?: number;
+};
+
+export type Testimonial = {
+  id: string;
+  name: string;
+  descriptor: string | null;
+  quote: string;
+  rating: number | null;
+  label: string | null;
+  photoUrl: string | null;
+  source: "GOOGLE" | "WHATSAPP" | "DIRECT";
 };

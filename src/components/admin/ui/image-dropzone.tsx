@@ -20,7 +20,7 @@ export function ImageDropzone({
 }: {
   value: string | null | undefined;
   onChange: (url: string | null) => void;
-  folder: "products" | "banners" | "services" | "brands" | "logos";
+  folder: "products" | "banners" | "services" | "testimonials" | "brands" | "logos";
   label?: string;
   hint?: string;
   previewHeight?: number;

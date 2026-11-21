@@ -8,6 +8,7 @@ export const UPLOAD_FOLDERS: Record<string, { profile: ImageProfile; trim: boole
   products: { profile: "photo", trim: false },
   banners: { profile: "photo", trim: false },
   services: { profile: "photo", trim: false },
+  testimonials: { profile: "photo", trim: false },
   brands: { profile: "logo", trim: true },
   logos: { profile: "logo", trim: true },
   favicons: { profile: "logo", trim: true },

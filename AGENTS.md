@@ -51,6 +51,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 | Starter Pack (data contoh) | `src/lib/starter-pack.ts`, `src/data/starter-pack.json`, `scripts/build-starter-pack.ts` | |
 | Validasi SEO/analitik | `src/lib/store-seo.ts` | |
 | Komponen UI admin | `src/components/admin/ui/*`, `src/components/ui/*` | lihat Bagian 9 |
+| Testimoni pelanggan | `src/lib/testimonials.ts`, `src/components/testimonials-section.tsx`, `/admin/testimoni`, `/testimoni` | input manual admin (tanpa API Google); validasi `validateTestimonial()`, urutan beranda `selectHomeTestimonials()` (maks. 6, unggulan dulu); foto hanya `/uploads`; tampil di semua template via saklar `sections.testimonials`; link "ulasan Google" = `TenantSetting.googleReviewUrl`. **Dilarang** mengisi testimoni karangan untuk toko nyata |
 
 ---
 
@@ -160,7 +161,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## 8. Gambar, Import & Data Contoh
 
-- Folder upload resmi: `products`, `banners`, `services`, `brands`, `logos`, `favicons` (`UPLOAD_FOLDERS`). Folder lain jatuh ke `products`.
+- Folder upload resmi: `products`, `banners`, `services`, `testimonials`, `brands`, `logos`, `favicons` (`UPLOAD_FOLDERS`). Folder lain jatuh ke `products`.
 - `public/uploads` = **data milik toko, bukan kode**. Hanya ikut git untuk **deploy pertama**; sesudahnya dikeluarkan dari git (`.gitignore`) dan di server berada di folder persisten (`shared/uploads`, symlink) yang ikut backup bersama database. Mengeluarkannya dari git wajib mengikuti urutan `docs/DEPLOYMENT.md` Bagian 6.1 — `git pull` biasa akan menghapus foto di server.
 - File lama di server bisa dioptimasi ulang: `npm run optimize:uploads` (dry run) / `-- --apply` (backup ke `.upload-backups/`).
 - Foto katalog berbingkai poster (bingkai warna + logo/nama toko) dirapikan dengan `npx tsx scripts/clean-product-photos.ts <slug>` (pratinjau) / `--apply` (foto baru, foto lama tidak dihapus; rollback `--revert .upload-backups/clean-photos-*.json`). Logika di `src/lib/product-photo-clean.ts`: produk tunggal dipusatkan di kanvas putih & logo toko dibuang; poster brand hanya dibuang bingkainya.

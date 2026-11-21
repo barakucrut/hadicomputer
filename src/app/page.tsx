@@ -9,6 +9,7 @@ import {
   getLiveBrands,
   getLiveServiceCases,
   getLiveStoreProfile,
+  getLiveTestimonials,
 } from "@/lib/live-repository";
 import {
   ClassicRetailHome,
@@ -35,12 +36,13 @@ export default async function HomePage({
   // Template resolution: query preview takes precedence, then store config, fallback to classic-retail
   const templateId = resolveTemplateId(config, resolvedParams.template);
 
-  const [products, liveBanners, liveCategories, liveNeeds, liveServices] = await Promise.all([
+  const [products, liveBanners, liveCategories, liveNeeds, liveServices, testimonials] = await Promise.all([
     getLiveProducts(tenant.id),
     getLiveBanners(tenant.id),
     getLiveCategories(tenant.id),
     getLiveNeeds(tenant.id),
     getLiveServices(tenant.id),
+    getLiveTestimonials(tenant.id),
   ]);
 
   const templateProps = {
@@ -50,6 +52,7 @@ export default async function HomePage({
     categories: liveCategories,
     needs: liveNeeds,
     services: liveServices,
+    testimonials,
   };
 
   if (templateId === "precision") {
