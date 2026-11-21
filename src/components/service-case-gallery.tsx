@@ -24,11 +24,15 @@ export function ServiceCaseGallery({
   const dialog = useRef<HTMLDialogElement>(null);
   const [active, setActive] = useState<ServiceCaseItem | null>(null);
   const [photo, setPhoto] = useState(0);
+  // Isi popup tidak dikosongkan saat ditutup: event "close" datang belakangan dan bisa
+  // menimpa kartu yang baru dibuka (popup jadi kosong). Cukup tandai terbuka/tertutup.
+  const [isOpen, setIsOpen] = useState(false);
 
   const open = (c: ServiceCaseItem) => {
     setActive(c);
     setPhoto(0);
-    dialog.current?.showModal();
+    setIsOpen(true);
+    if (!dialog.current?.open) dialog.current?.showModal();
   };
   const close = () => dialog.current?.close();
 
@@ -37,14 +41,14 @@ export function ServiceCaseGallery({
 
   // Panah kiri/kanan untuk berpindah foto saat popup terbuka
   useEffect(() => {
-    if (!active || count < 2) return;
+    if (!isOpen || count < 2) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") step(-1);
       if (e.key === "ArrowRight") step(1);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [active, count, step]);
+  }, [isOpen, count, step]);
 
   return (
     <>
@@ -85,7 +89,7 @@ export function ServiceCaseGallery({
         ref={dialog}
         className="service-case-dialog"
         aria-label={active ? `Detail portofolio: ${active.title}` : "Detail portofolio"}
-        onClose={() => setActive(null)}
+        onClose={() => setIsOpen(false)}
         onClick={(e) => {
           if (e.target === e.currentTarget) close();
         }}

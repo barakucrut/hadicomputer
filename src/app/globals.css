@@ -2391,10 +2391,18 @@
   cursor: pointer;
 }
 .service-case-close:hover { background: var(--surface-hover); }
+.service-case-dialog {
+  --case-gap: 32px;
+  /* Atas foto = atas badge di kolom kanan (ruang untuk tombol tutup) */
+  --case-top: calc(var(--case-gap) + 36px);
+}
+/* Foto: atas sejajar badge, bawah sejajar tombol "Tanya servis serupa" */
 .service-case-visual {
   display: flex;
   flex-direction: column;
+  gap: 16px;
   min-height: 0;
+  padding: var(--case-top) var(--case-gap) var(--case-gap);
   background: var(--surface);
 }
 .service-case-viewer {
@@ -2403,15 +2411,17 @@
   min-height: 0;
   display: grid;
   place-items: center;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--surface-hover);
   color: var(--muted);
 }
-.service-case-dialog { --case-gap: 32px; }
 .service-case-viewer img {
   position: absolute;
-  inset: var(--case-gap) var(--case-gap) 0;
-  width: calc(100% - var(--case-gap) * 2);
-  height: calc(100% - var(--case-gap));
-  object-fit: contain;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   animation: service-case-fade 0.25s ease both;
 }
 .service-case-nav {
@@ -2430,12 +2440,12 @@
   cursor: pointer;
   box-shadow: var(--shadow-xs);
 }
-.service-case-nav.prev { left: calc(var(--case-gap) + 8px); }
-.service-case-nav.next { right: calc(var(--case-gap) + 8px); }
+.service-case-nav.prev { left: 12px; }
+.service-case-nav.next { right: 12px; }
 .service-case-counter {
   position: absolute;
-  bottom: 8px;
-  right: calc(var(--case-gap) + 8px);
+  bottom: 12px;
+  right: 12px;
   z-index: 1;
   padding: 3px 10px;
   border-radius: 999px;
@@ -2448,7 +2458,7 @@
   flex: none;
   display: flex;
   gap: 8px;
-  padding: 16px var(--case-gap) var(--case-gap);
+  padding: 0;
   overflow-x: auto;
 }
 .service-case-thumbs button {
@@ -2473,8 +2483,7 @@
 .service-case-info {
   min-height: 0;
   overflow-y: auto;
-  padding: var(--case-gap);
-  padding-top: calc(var(--case-gap) + 36px);
+  padding: var(--case-top) var(--case-gap) var(--case-gap);
 }
 .service-case-tags {
   display: flex;
@@ -2605,8 +2614,7 @@
   .service-case-visual { flex: none; }
   .service-case-info { flex: 1; }
   .service-case-viewer { flex: none; height: min(38dvh, 300px); }
-  .service-case-dialog { --case-gap: 16px; }
-  .service-case-info { padding-top: var(--case-gap); }
+  .service-case-dialog { --case-gap: 16px; --case-top: 16px; }
   .service-case-info h3 { font-size: 18px; }
   .service-case-close { background: rgba(255, 255, 255, 0.92); }
 }
