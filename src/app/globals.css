@@ -2377,8 +2377,8 @@
 }
 .service-case-close {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 16px;
+  right: 16px;
   z-index: 2;
   width: 36px;
   height: 36px;
@@ -2405,11 +2405,12 @@
   place-items: center;
   color: var(--muted);
 }
+.service-case-dialog { --case-gap: 32px; }
 .service-case-viewer img {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  inset: var(--case-gap) var(--case-gap) 0;
+  width: calc(100% - var(--case-gap) * 2);
+  height: calc(100% - var(--case-gap));
   object-fit: contain;
   animation: service-case-fade 0.25s ease both;
 }
@@ -2429,12 +2430,12 @@
   cursor: pointer;
   box-shadow: var(--shadow-xs);
 }
-.service-case-nav.prev { left: 12px; }
-.service-case-nav.next { right: 12px; }
+.service-case-nav.prev { left: calc(var(--case-gap) + 8px); }
+.service-case-nav.next { right: calc(var(--case-gap) + 8px); }
 .service-case-counter {
   position: absolute;
-  bottom: 12px;
-  right: 12px;
+  bottom: 8px;
+  right: calc(var(--case-gap) + 8px);
   z-index: 1;
   padding: 3px 10px;
   border-radius: 999px;
@@ -2447,9 +2448,8 @@
   flex: none;
   display: flex;
   gap: 8px;
-  padding: 12px;
+  padding: 16px var(--case-gap) var(--case-gap);
   overflow-x: auto;
-  border-top: 1px solid var(--border);
 }
 .service-case-thumbs button {
   flex: none;
@@ -2473,7 +2473,8 @@
 .service-case-info {
   min-height: 0;
   overflow-y: auto;
-  padding: 56px 28px 28px;
+  padding: var(--case-gap);
+  padding-top: calc(var(--case-gap) + 36px);
 }
 .service-case-tags {
   display: flex;
@@ -2510,9 +2511,9 @@
 /* Tombol tanya selalu terlihat meski ceritanya panjang */
 .service-case-cta {
   position: sticky;
-  bottom: -28px;
-  margin: auto -28px -28px;
-  padding: 16px 28px 28px;
+  bottom: calc(var(--case-gap) * -1);
+  margin: auto calc(var(--case-gap) * -1) calc(var(--case-gap) * -1);
+  padding: 16px var(--case-gap) var(--case-gap);
   background: linear-gradient(to bottom, rgba(255, 255, 255, 0), white 18px);
 }
 @keyframes service-case-pop {
@@ -2590,7 +2591,7 @@
 }
 @media (max-width: 760px) {
   .service-case-dialog {
-    height: auto;
+    height: fit-content;
     max-height: calc(100dvh - 32px);
   }
   .service-case-dialog[open] { display: flex; }
@@ -2603,13 +2604,9 @@
   }
   .service-case-visual { flex: none; }
   .service-case-info { flex: 1; }
-  .service-case-cta {
-    bottom: -20px;
-    margin: auto -16px -20px;
-    padding: 14px 16px 20px;
-  }
   .service-case-viewer { flex: none; height: min(38dvh, 300px); }
-  .service-case-info { padding: 16px 16px 20px; }
+  .service-case-dialog { --case-gap: 16px; }
+  .service-case-info { padding-top: var(--case-gap); }
   .service-case-info h3 { font-size: 18px; }
   .service-case-close { background: rgba(255, 255, 255, 0.92); }
 }
