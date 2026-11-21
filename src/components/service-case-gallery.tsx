@@ -95,6 +95,7 @@ export function ServiceCaseGallery({
             <button type="button" className="service-case-close" onClick={close} aria-label="Tutup">
               <X size={18} />
             </button>
+            <div className="service-case-visual">
             <div className="service-case-viewer">
               {count > 0 ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -133,6 +134,7 @@ export function ServiceCaseGallery({
                 ))}
               </div>
             )}
+            </div>
             <div className="service-case-info">
               <div className="service-case-tags">
                 {active.serviceName && <span>{active.serviceName}</span>}
@@ -145,12 +147,14 @@ export function ServiceCaseGallery({
               {caseMeta(active) && <span className="service-case-meta">{caseMeta(active)}</span>}
               <h3>{active.title}</h3>
               <p>{active.summary}</p>
+              <div className="service-case-cta">
               <WhatsAppButton
                 phone={phone}
                 label="Tanya servis serupa"
                 message={`Halo ${storeName}, saya lihat portofolio "${active.title}". Perangkat saya juga butuh penanganan serupa.\n\nKendala saya: `}
                 trackingData={{ inquiryType: "SERVICE" }}
               />
+              </div>
             </div>
           </div>
         )}
