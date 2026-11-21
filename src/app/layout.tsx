@@ -141,6 +141,8 @@ export default async function RootLayout({
     return (
       <html lang="id" data-scroll-behavior="smooth">
         <body data-area="platform" style={{ margin: 0, background: "#fff" }}>
+          {/* GA4 platform: tenant = "platform" agar landing terpisah dari etalase toko di laporan */}
+          <StorefrontAnalytics platformGaId={seo.analytics.platformGaId} tenantGaId={null} gtmId={null} tenantSlug="platform" />
           <LandingPage salesPhone={sales?.phone ?? null} />
         </body>
       </html>

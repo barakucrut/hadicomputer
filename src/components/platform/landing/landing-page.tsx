@@ -1,7 +1,8 @@
 import { MessageCircle } from "lucide-react";
 import { salesWhatsappUrl } from "@/lib/demo-request";
 import { AUDIENCE, BRAND_LINE, FAQS, PLANS, PROBLEMS, STEPS, TEMPLATES } from "./content";
-import { DemoForm, HeroPreview, RevealOnScroll } from "./client";
+import { DemoForm, HeroPreview, LandingTracker, RevealOnScroll } from "./client";
+import { LANDING_EVENTS as E, track } from "./tracking";
 import "./landing.css";
 
 function Mark({ size = 36 }: { size?: number }) {
@@ -43,6 +44,7 @@ export function LandingPage({ salesPhone }: { salesPhone: string | null }) {
   return (
     <div className="rsl">
       <RevealOnScroll />
+      <LandingTracker />
 
       <header className="nav">
         <div className="wrap">
@@ -55,16 +57,16 @@ export function LandingPage({ salesPhone }: { salesPhone: string | null }) {
           </a>
           <nav className="nav-links" aria-label="Navigasi">
             {NAV.map((n) => (
-              <a key={n.href} href={n.href}>
+              <a key={n.href} href={n.href} {...track(E.navClick, { target: n.href.slice(1), location: "nav" })}>
                 {n.label}
               </a>
             ))}
           </nav>
           <div className="nav-cta">
-            <a href="/admin/login" className="btn btn-ghost">
+            <a href="/admin/login" className="btn btn-ghost" {...track(E.loginClick, { location: "nav" })}>
               Masuk
             </a>
-            <a href="#minta-demo" className="btn btn-dark">
+            <a href="#minta-demo" className="btn btn-dark" {...track(E.ctaClick, { location: "nav" })}>
               Minta Demo
             </a>
           </div>
@@ -279,7 +281,11 @@ export function LandingPage({ salesPhone }: { salesPhone: string | null }) {
                       );
                     })}
                   </ul>
-                  <a href="#minta-demo" className={`btn ${p.highlight ? "btn-gold" : "btn-ghost"}`}>
+                  <a
+                    href="#minta-demo"
+                    className={`btn ${p.highlight ? "btn-gold" : "btn-ghost"}`}
+                    {...track(E.selectPlan, { plan: p.id, location: "pricing" })}
+                  >
                     {p.cta}
                   </a>
                 </article>
@@ -318,7 +324,13 @@ export function LandingPage({ salesPhone }: { salesPhone: string | null }) {
                 <h2 id="demo-h">Website toko Anda bisa jadi minggu ini.</h2>
                 <p>Kirim nama toko Anda. Tim kami siapkan demonya dengan produk Anda sendiri, gratis dan tanpa komitmen.</p>
                 {waUrl && (
-                  <a href={waUrl} target="_blank" rel="noopener noreferrer" className="btn btn-wa">
+                  <a
+                    href={waUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-wa"
+                    {...track(E.generateLead, { method: "whatsapp", location: "final" })}
+                  >
                     <MessageCircle size={18} /> Chat Tim Sales di WhatsApp
                   </a>
                 )}
@@ -339,10 +351,18 @@ export function LandingPage({ salesPhone }: { salesPhone: string | null }) {
             </span>
           </a>
           <nav aria-label="Footer">
-            <a href="#fitur">Fitur</a>
-            <a href="#harga">Harga</a>
-            <a href="/admin/login">Masuk CMS</a>
-            <a href="#minta-demo">Kontak</a>
+            <a href="#fitur" {...track(E.navClick, { target: "fitur", location: "footer" })}>
+              Fitur
+            </a>
+            <a href="#harga" {...track(E.navClick, { target: "harga", location: "footer" })}>
+              Harga
+            </a>
+            <a href="/admin/login" {...track(E.loginClick, { location: "footer" })}>
+              Masuk CMS
+            </a>
+            <a href="#minta-demo" {...track(E.ctaClick, { location: "footer" })}>
+              Kontak
+            </a>
           </nav>
           <div>© {year} Rigspace.id</div>
         </div>

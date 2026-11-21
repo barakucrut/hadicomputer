@@ -80,6 +80,31 @@ diambil **sesudah** commit foto, supaya isi database cocok dengan foto yang diki
 - Batas upload proxy **≥ 16 MB** (`MAX_INPUT_BYTES` = 15 MB), contoh Nginx `client_max_body_size 20m;`.
 - Proses manager: PM2 atau systemd (`npm start` = `next start --hostname 0.0.0.0`, port 3000).
 
+### Google Analytics 4
+
+Satu property GA4 platform (`NEXT_PUBLIC_PLATFORM_GA_ID`, format `G-XXXXXXXXXX`) melacak landing
+`rigspace.id` **dan** semua etalase toko. Pembeda: parameter `tenant` (slug toko, atau `platform` untuk
+landing). Sekali saja di GA4:
+
+1. **Admin → Custom definitions → Create custom dimension**: nama `Toko`, scope *Event*, parameter `tenant`.
+2. **Admin → Events** (muncul setelah ada data) → tandai `generate_lead` sebagai **Key event**.
+3. Opsional: custom dimension event `location`, `plan`, `method`, `section` untuk laporan lebih rinci.
+
+Event landing page:
+
+| Event | Kapan | Parameter |
+|---|---|---|
+| `cta_click` | Klik "Minta Demo" (nav, hero, footer) | `location` |
+| `select_plan` | Klik tombol paket di Harga | `plan` (starter/pro/enterprise), `location` |
+| `generate_lead` | Form demo terkirim / klik WhatsApp sales | `method` (form/whatsapp), `plan`, `location` |
+| `form_start` / `form_error` | Mulai isi form / form ditolak | `form`, `status` |
+| `try_store_name` / `try_brand_color` | Coba hero interaktif | `color` |
+| `faq_open` | Buka pertanyaan FAQ | `question` |
+| `section_view` | Section terlihat (sekali per kunjungan) | `section` |
+| `nav_click` / `login_click` | Klik menu / Masuk CMS | `target`, `location` |
+
+Tidak ada data pribadi (nama toko, nomor WA, kota) yang dikirim ke GA.
+
 ### DNS & SSL (Cloudflare)
 
 | Record | Nilai |

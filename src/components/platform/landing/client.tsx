@@ -2,10 +2,70 @@
 
 import * as React from "react";
 import { MessageCircle } from "lucide-react";
+import { trackEvent } from "@/components/storefront-analytics";
 import { BRAND_COLORS, HERO, previewSlug } from "./content";
+import { LANDING_EVENTS, readTrack } from "./tracking";
 
 const STORE_EVENT = "rsl-store-name";
 let lastStoreName = "";
+/** Paket terakhir yang diklik di bagian Harga, ikut dikirim saat lead masuk. */
+let lastPlan = "";
+
+/**
+ * Pelacak event landing: klik elemen [data-track] (delegasi), buka FAQ, dan section terlihat.
+ * Tanpa GA terpasang, trackEvent() tidak melakukan apa-apa.
+ */
+export function LandingTracker() {
+  React.useEffect(() => {
+    const root = document.querySelector(".rsl");
+    if (!root) return;
+
+    const onClick = (e: Event) => {
+      const el = (e.target as Element | null)?.closest<HTMLElement>("[data-track]");
+      if (!el || !root.contains(el)) return;
+      const parsed = readTrack(el.dataset);
+      if (!parsed) return;
+      if (parsed.event === LANDING_EVENTS.selectPlan && parsed.params.plan) lastPlan = parsed.params.plan;
+      trackEvent(parsed.event, parsed.params);
+    };
+
+    // "toggle" pada <details> tidak bubble -> tangkap di fase capture
+    const onToggle = (e: Event) => {
+      const el = e.target as HTMLDetailsElement;
+      if (el.tagName !== "DETAILS" || !el.open || !el.classList.contains("faq")) return;
+      const question = el.querySelector("summary")?.textContent?.trim().slice(0, 100) || "";
+      trackEvent(LANDING_EVENTS.faqOpen, { question });
+    };
+
+    root.addEventListener("click", onClick);
+    root.addEventListener("toggle", onToggle, true);
+
+    let io: IntersectionObserver | null = null;
+    if ("IntersectionObserver" in window) {
+      const seen = new Set<string>();
+      io = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            const id = (entry.target as HTMLElement).id;
+            if (!entry.isIntersecting || !id || seen.has(id)) continue;
+            seen.add(id);
+            trackEvent(LANDING_EVENTS.sectionView, { section: id });
+            io?.unobserve(entry.target);
+          }
+        },
+        { threshold: 0.35 }
+      );
+      root.querySelectorAll("section[id]").forEach((el) => io?.observe(el));
+    }
+
+    return () => {
+      root.removeEventListener("click", onClick);
+      root.removeEventListener("toggle", onToggle, true);
+      io?.disconnect();
+    };
+  }, []);
+  return null;
+}
 
 /** Animasi muncul saat di-scroll: menandai root .rsl-js lalu mengamati [data-reveal]. */
 export function RevealOnScroll() {
@@ -47,6 +107,7 @@ export function HeroPreview({ desktopSrc, mobileSrc }: { desktopSrc: string; mob
   const [name, setName] = React.useState("Rig Computer");
   const [color, setColor] = React.useState(BRAND_COLORS[0]);
   const [pulse, setPulse] = React.useState(0);
+  const typedRef = React.useRef(false);
   const slug = previewSlug(name);
   const words = name.trim().split(/\s+/).filter(Boolean);
   const first = (words[0] || "Toko").slice(0, 14);
@@ -87,7 +148,13 @@ export function HeroPreview({ desktopSrc, mobileSrc }: { desktopSrc: string; mob
               value={name}
               maxLength={40}
               autoComplete="organization"
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setName(e.target.value);
+                if (!typedRef.current) {
+                  typedRef.current = true;
+                  trackEvent(LANDING_EVENTS.tryStoreName);
+                }
+              }}
               placeholder="Nama toko Anda"
             />
             <span>.rigspace.id</span>
@@ -102,14 +169,24 @@ export function HeroPreview({ desktopSrc, mobileSrc }: { desktopSrc: string; mob
                 style={{ background: c }}
                 aria-label={`Warna ${c}`}
                 aria-pressed={c === color}
-                onClick={() => setColor(c)}
+                onClick={() => {
+                  setColor(c);
+                  trackEvent(LANDING_EVENTS.tryBrandColor, { color: c });
+                }}
               />
             ))}
           </div>
         </div>
 
         <div className="hero-ctas">
-          <button type="button" className="btn btn-dark" onClick={scrollToForm}>
+          <button
+            type="button"
+            className="btn btn-dark"
+            onClick={() => {
+              trackEvent(LANDING_EVENTS.ctaClick, { location: "hero" });
+              scrollToForm();
+            }}
+          >
             {HERO.cta} →
           </button>
         </div>
@@ -165,6 +242,12 @@ export function DemoForm({ waUrl }: { waUrl: string | null }) {
   const [touchedName, setTouchedName] = React.useState(false);
   const [status, setStatus] = React.useState<"idle" | "sending" | "done">("idle");
   const [error, setError] = React.useState<string | null>(null);
+  const startedRef = React.useRef(false);
+  const onFormFocus = () => {
+    if (startedRef.current) return;
+    startedRef.current = true;
+    trackEvent(LANDING_EVENTS.formStart, { form: "demo" });
+  };
 
   React.useEffect(() => {
     const apply = (value: string) => {
@@ -187,7 +270,12 @@ export function DemoForm({ waUrl }: { waUrl: string | null }) {
         body: JSON.stringify(form),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || "Gagal mengirim permintaan.");
+      if (!res.ok) {
+        trackEvent(LANDING_EVENTS.formError, { form: "demo", status: String(res.status) });
+        throw new Error(data.error || "Gagal mengirim permintaan.");
+      }
+      // Lead utama — tandai "generate_lead" sebagai Key event di GA4. Tanpa data pribadi.
+      trackEvent(LANDING_EVENTS.generateLead, { method: "form", form: "demo", ...(lastPlan ? { plan: lastPlan } : {}) });
       setStatus("done");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Gagal mengirim permintaan.");
@@ -210,7 +298,7 @@ export function DemoForm({ waUrl }: { waUrl: string | null }) {
   const set = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => setForm({ ...form, [key]: e.target.value });
 
   return (
-    <form className="form" onSubmit={submit} noValidate>
+    <form className="form" onSubmit={submit} onFocus={onFormFocus} noValidate>
       <b>Minta Demo Gratis</b>
       {error && (
         <div className="err" role="alert">
@@ -258,7 +346,15 @@ export function DemoForm({ waUrl }: { waUrl: string | null }) {
           <>
             {" "}
             Atau{" "}
-            <a href={waUrl} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 700, textDecoration: "underline" }}>
+            <a
+              href={waUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ fontWeight: 700, textDecoration: "underline" }}
+              data-track={LANDING_EVENTS.generateLead}
+              data-track-method="whatsapp"
+              data-track-location="form"
+            >
               chat langsung
             </a>
             .
