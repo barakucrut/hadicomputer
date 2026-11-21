@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { headers } from "next/headers";
+import { storePublicUrl } from "@/lib/platform-domain";
 import { prisma } from "@/lib/db";
 import { requireAdminSession } from "@/lib/auth";
 import { countSampleData } from "@/lib/starter-pack";
@@ -29,6 +31,9 @@ export default async function AdminDashboardPage() {
   if (!tenantId) notFound();
 
   const sampleData = await countSampleData(tenantId);
+  const headerStore = await headers();
+  const tenant = await prisma.tenant.findFirst({ where: { id: tenantId }, select: { slug: true } });
+  const storeUrl = storePublicUrl(tenant?.slug, headerStore.get("x-forwarded-host") || headerStore.get("host"));
 
   // Fetch overview stats (selalu dibatasi ke toko milik sesi)
   const [
@@ -92,7 +97,7 @@ export default async function AdminDashboardPage() {
               <span>Tambah Produk</span>
             </Button>
           </Link>
-          <a href="/" target="_blank" rel="noopener noreferrer">
+          <a href={storeUrl} target="_blank" rel="noopener noreferrer">
             <Button variant="outline" className="flex items-center gap-2">
               <span>Buka Website</span>
               <ExternalLink size={14} />
