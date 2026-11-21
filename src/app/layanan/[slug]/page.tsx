@@ -104,7 +104,7 @@ export default async function ServiceDetailPage({
           />
         </div>
       </div>
-      <ServiceCasesSection cases={cases} storeName={store.name || "kami"} />
+      <ServiceCasesSection cases={cases} storeName={store.name || "kami"} phone={store.whatsapp} />
       <div className="service-description">
         <h2>Kenali layanannya.</h2>
         <p>{service.description}</p>
