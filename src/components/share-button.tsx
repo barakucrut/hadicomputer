@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Share2, Check, Copy, MessageCircle } from "lucide-react";
 import type { Product } from "@/lib/types";
 import { priceLabel, rupiah } from "@/lib/catalog";
+import { useStoreSettings } from "@/components/store-context";
 
 export function ShareButton({
   product,
@@ -16,6 +17,7 @@ export function ShareButton({
   savings?: number | null;
   className?: string;
 }) {
+  const storeName = useStoreSettings()?.name || "toko kami";
   const [copied, setCopied] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -36,8 +38,8 @@ export function ShareButton({
   async function handleShare() {
     const currentUrl = typeof window !== "undefined" ? window.location.href : "";
     const savingsText = savings ? ` (Hemat ${rupiah(savings)})` : "";
-    const title = `${product.name} | Hadi Computer`;
-    const text = `Cek ${product.name} di Hadi Computer: ${priceLabel(offerPrice)}${savingsText}`;
+    const title = `${product.name} | ${storeName}`;
+    const text = `Cek ${product.name} di ${storeName}: ${priceLabel(offerPrice)}${savingsText}`;
 
     // 1. Native Web Share API (Primary for smartphones / modern browsers)
     if (
@@ -74,7 +76,7 @@ export function ShareButton({
   const currentUrl = typeof window !== "undefined" ? window.location.href : "";
   const savingsText = savings ? ` (Hemat ${rupiah(savings)})` : "";
   const waShareUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(
-    `Cek ${product.name} di Hadi Computer: ${priceLabel(offerPrice)}${savingsText}\n${currentUrl}`,
+    `Cek ${product.name} di ${storeName}: ${priceLabel(offerPrice)}${savingsText}\n${currentUrl}`,
   )}`;
 
   return (

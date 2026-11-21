@@ -8,10 +8,10 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url);
   const type = searchParams.get("type");
-  const limit = Number(searchParams.get("limit")) || 100;
+  const limit = Math.min(Number(searchParams.get("limit")) || 100, 5000);
   const format = searchParams.get("format");
 
-  const whereClause: any = {};
+  const whereClause: any = { tenantId: auth.tenantId };
   if (type) whereClause.inquiryType = type;
 
   const logs = await prisma.inquiryLog.findMany({

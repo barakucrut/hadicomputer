@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { CheckCheck, ShieldCheck, MessageCircle, ZoomIn } from "lucide-react";
 import type { Product } from "@/lib/types";
+import { useStoreSettings } from "@/components/store-context";
 import {
   availabilityLabel,
   effectiveOffer,
@@ -21,6 +22,7 @@ export function ProductDetail({
   product: Product;
   whatsappPhone?: string | null;
 }) {
+  const storeSettings = useStoreSettings();
   const [image, setImage] = useState(0),
     [variantId, setVariantId] = useState(product.variants[0]?.id);
   const [isZoomed, setIsZoomed] = useState(false);
@@ -48,6 +50,7 @@ export function ProductDetail({
     product,
     variant,
     `{origin}/produk/${product.slug}`,
+    storeSettings?.name,
   );
   const label =
     offer.availability === "habis"
@@ -127,8 +130,8 @@ export function ProductDetail({
               >
                 {product.condition === "bekas" ? "Bekas pilihan" : "Produk baru"}
               </span>
-              {product.labels.includes("Pilihan Hadi") && (
-                <span className="badge badge-red">Pilihan Hadi</span>
+              {product.labels.includes("Pilihan Toko") && (
+                <span className="badge badge-red">Pilihan Toko</span>
               )}
             </div>
             <ShareButton
@@ -169,6 +172,9 @@ export function ProductDetail({
             <span className={`stock stock-${offer.availability}`}>
               <i />
               {availabilityLabel[offer.availability]}
+              {product.stockLabel && (
+                <strong style={{ color: "var(--red)", fontWeight: 700 }}>{" · "}{product.stockLabel}</strong>
+              )}
             </span>
           </div>
           {product.variants.length > 0 && (
@@ -260,7 +266,7 @@ export function ProductDetail({
           <strong className={discount ? "promo-price" : ""}>{priceLabel(offer.price)}</strong>
         </div>
         <WhatsAppButton
-          label={offer.availability === "habis" ? "Tanya Stok" : "Tanya Hadi"}
+          label={offer.availability === "habis" ? "Tanya Stok" : `Tanya ${storeSettings?.name || "Toko"}`}
           message={message}
           trackingData={trackingData}
           phone={whatsappPhone}

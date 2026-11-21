@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { authorizeAdmin } from "@/lib/auth";
+import { applyStockRule, normalizeStock } from "@/lib/stock";
 import { deletedSlug, getNextSku, isSkuTaken, isUniqueViolation, normalizeSku } from "@/lib/product-sku";
 
 export async function GET(request: Request) {
@@ -24,7 +25,7 @@ export async function GET(request: Request) {
   const limitParam = searchParams.get("limit");
   const limit = limitParam === "all" ? 1000 : Math.max(1, parseInt(limitParam || "10", 10));
 
-  const whereClause: any = { deletedAt: null };
+  const whereClause: any = { tenantId: auth.tenantId, deletedAt: null };
 
   if (q) {
     whereClause.OR = [
@@ -51,7 +52,7 @@ export async function GET(request: Request) {
   }
 
   if (collection) {
-    if (collection === "Pilihan Hadi" || collection === "featured") whereClause.isFeatured = true;
+    if (collection === "Pilihan Toko" || collection === "Pilihan Hadi" || collection === "featured") whereClause.isFeatured = true;
     else if (collection === "Terbaru" || collection === "newArrival") whereClause.isNewArrival = true;
     else if (collection === "Terlaris" || collection === "bestSeller") whereClause.isBestSeller = true;
     else if (collection === "Promo" || collection === "promo") whereClause.isPromo = true;
@@ -113,7 +114,8 @@ export async function POST(request: Request) {
       condition = "BARU",
       basePrice,
       originalPrice,
-      availability = "TERSEDIA",
+      availability: rawAvailability = "TERSEDIA",
+      stock: rawStock,
       warranty,
       bonus,
       isFeatured = false,
@@ -136,6 +138,18 @@ export async function POST(request: Request) {
       );
     }
 
+    const stock = normalizeStock(rawStock);
+    const availability = applyStockRule(stock, rawAvailability);
+
+    // Kategori & merek wajib milik toko yang sama
+    const [ownCategory, ownBrand] = await Promise.all([
+      prisma.category.findFirst({ where: { id: categoryId, tenantId: auth.tenantId }, select: { id: true } }),
+      prisma.brand.findFirst({ where: { id: brandId, tenantId: auth.tenantId }, select: { id: true } }),
+    ]);
+    if (!ownCategory || !ownBrand) {
+      return NextResponse.json({ error: "Kategori atau merek tidak ditemukan di toko ini." }, { status: 400 });
+    }
+
     const finalSlug =
       slug ||
       name
@@ -145,6 +159,7 @@ export async function POST(request: Request) {
 
     const createWithCode = (finalCode: string) => prisma.product.create({
       data: {
+        tenantId: auth.tenantId,
         name,
         code: finalCode,
         slug: finalSlug,
@@ -154,6 +169,7 @@ export async function POST(request: Request) {
         basePrice: basePrice !== null && basePrice !== undefined ? BigInt(basePrice) : null,
         originalPrice: originalPrice !== null && originalPrice !== undefined ? BigInt(originalPrice) : null,
         availability,
+        stock,
         warranty: warranty || "Garansi Toko 1 Bulan",
         bonus: bonus || null,
         isFeatured,
@@ -205,7 +221,7 @@ export async function POST(request: Request) {
     const manualCode = normalizeSku(code);
     let product;
     if (manualCode) {
-      if (await isSkuTaken(manualCode)) {
+      if (await isSkuTaken(auth.tenantId, manualCode)) {
         return NextResponse.json(
           { error: `SKU ${manualCode} sudah dipakai produk lain. Gunakan kode lain atau kosongkan agar dibuat otomatis.` },
           { status: 409 }
@@ -221,7 +237,7 @@ export async function POST(request: Request) {
       }
     } else {
       for (let attempt = 0; attempt < 5 && !product; attempt++) {
-        const nextCode = await getNextSku();
+        const nextCode = await getNextSku(auth.tenantId);
         try {
           product = await createWithCode(nextCode);
         } catch (err) {
@@ -239,7 +255,7 @@ export async function POST(request: Request) {
   } catch (err: any) {
     console.error("Create product error:", err);
     if (isUniqueViolation(err, "slug")) {
-      return NextResponse.json({ error: "Slug URL sudah dipakai produk lain." }, { status: 409 });
+      return NextResponse.json({ error: "Slug URL sudah dipakai produk lain di toko ini." }, { status: 409 });
     }
     return NextResponse.json(
       { error: err.message || "Gagal membuat produk baru" },
@@ -265,7 +281,7 @@ export async function DELETE(request: Request) {
 
     // Soft delete: gambar, varian, spek & riwayat inquiry tetap tersimpan
     const targets = await prisma.product.findMany({
-      where: { id: { in: ids }, deletedAt: null },
+      where: { id: { in: ids }, tenantId: auth.tenantId, deletedAt: null },
       select: { id: true, slug: true },
     });
     const now = new Date();

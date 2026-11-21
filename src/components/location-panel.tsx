@@ -29,7 +29,7 @@ export function parseGoogleMaps(raw?: string | null, address?: string | null) {
   // 4. If Google Maps Share Link or custom URL
   if (str.startsWith("http")) {
     return {
-      embedUrl: `https://maps.google.com/maps?q=${encodeURIComponent(address || "Hadi Computer")}&hl=id&z=16&output=embed`,
+      embedUrl: `https://maps.google.com/maps?q=${encodeURIComponent(address || "")}&hl=id&z=16&output=embed`,
       directUrl: str,
     };
   }
@@ -64,7 +64,7 @@ export function LocationPanel({ store }: { store?: StoreSettings }) {
           allowFullScreen
           loading="lazy"
           referrerPolicy="no-referrer-when-downgrade"
-          title={`Peta Lokasi ${store?.name || "Hadi Computer"}`}
+          title={`Peta Lokasi ${store?.name || "Toko"}`}
         />
         {mapData.directUrl && (
           <a
@@ -103,7 +103,7 @@ export function LocationPanel({ store }: { store?: StoreSettings }) {
           stroke="white"
           strokeWidth={1.4}
         />
-        <strong>{store?.name || "Hadi Computer"}</strong>
+        <strong>{store?.name || "Toko"}</strong>
         <span>{store?.address || "Lokasi akan dilengkapi"}</span>
       </div>
       <span className="map-label">

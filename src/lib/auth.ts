@@ -2,7 +2,9 @@ import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { prisma } from "./db";
-import { getGodSession } from "./god-auth";
+import { getPlatformSession, tenantScope, type PlatformSession } from "./god-auth";
+import { PLATFORM_ROLE_LABEL } from "./platform-access";
+import { IMPERSONATION_COOKIE, platformCmsPermissions, platformCmsSessionId } from "./platform-cms";
 
 const JWT_SECRET = new TextEncoder().encode(
   process.env.ADMIN_JWT_SECRET || "hadi-computer-cms-secret-key-32-chars-long-2026"
@@ -65,10 +67,23 @@ export async function verifyAdminToken(token: string): Promise<AdminSessionPaylo
   }
 }
 
-/** Tenant yang sedang di-impersonate oleh god-mode (atau tenant pertama). */
-async function resolveGodTenant() {
+/**
+ * Tenant CMS yang dibuka tim platform lewat god-mode.
+ * - Superadmin: tenant dari cookie impersonasi, atau tenant pertama.
+ * - CMO/Marketing: HANYA tenant dari cookie yang masih dalam lingkupnya (dicek live ke database).
+ *   Tidak ada fallback ke toko lain: di luar lingkup = tidak punya akses CMS.
+ */
+async function resolvePlatformCmsTenant(platform: PlatformSession) {
   const cookieStore = await cookies();
-  const impersonatedTenantId = cookieStore.get("god_impersonated_tenant_id")?.value;
+  const impersonatedTenantId = cookieStore.get(IMPERSONATION_COOKIE)?.value;
+
+  if (platform.role !== "SUPERADMIN") {
+    if (!impersonatedTenantId) return null;
+    return prisma.tenant.findFirst({
+      where: { id: impersonatedTenantId, ...tenantScope(platform) },
+      select: { id: true, name: true, slug: true },
+    });
+  }
 
   let tenant = null;
   if (impersonatedTenantId) {
@@ -86,19 +101,39 @@ async function resolveGodTenant() {
   return tenant;
 }
 
+/** Sesi CMS untuk tim platform yang sedang membuka toko lewat god-mode (null bila tidak berlaku). */
+async function resolvePlatformCmsSession(): Promise<ResolvedAdminSession | null> {
+  const platform = await getPlatformSession();
+  if (!platform) return null;
+  const tenant = await resolvePlatformCmsTenant(platform);
+  // Tim penjualan tanpa tenant sah -> bukan sesi CMS (jatuh ke login admin toko biasa)
+  if (platform.role !== "SUPERADMIN" && !tenant) return null;
+  const label = platform.role === "SUPERADMIN" ? "Superadmin God-Mode" : `${platform.name} (${PLATFORM_ROLE_LABEL[platform.role]})`;
+  return {
+    id: platformCmsSessionId(platform.role, platform.userId),
+    email: platform.username,
+    name: label,
+    role: platform.role,
+    roleName: platform.role === "SUPERADMIN" ? "Superadmin" : `${PLATFORM_ROLE_LABEL[platform.role]} Rigspace`,
+    permissions: platformCmsPermissions(platform.role),
+    tenantId: tenant?.id || null,
+    tenantName: tenant?.name || "RigSpace",
+    isImpersonating: true,
+  };
+}
+
 /** Sesi mentah dari cookie (JWT). Untuk keputusan izin gunakan requireAdminSession / authorizeAdmin. */
 export async function getAdminSession(): Promise<AdminSessionPayload | null> {
-  // 1. Superadmin God-Mode session (prioritas)
-  const godSession = await getGodSession();
-  if (godSession) {
-    const tenant = await resolveGodTenant();
+  // 1. Tim platform yang membuka CMS toko lewat god-mode (prioritas)
+  const platformCms = await resolvePlatformCmsSession();
+  if (platformCms) {
     return {
-      id: "god-mode-superadmin",
-      email: godSession.username,
-      name: "Superadmin God-Mode",
-      role: "SUPERADMIN",
-      tenantId: tenant?.id || null,
-      permissions: ["*"],
+      id: platformCms.id,
+      email: platformCms.email,
+      name: platformCms.name,
+      role: platformCms.role,
+      tenantId: platformCms.tenantId,
+      permissions: platformCms.permissions,
     };
   }
 
@@ -114,22 +149,9 @@ export async function getAdminSession(): Promise<AdminSessionPayload | null> {
  * izin role terkini (bukan dari JWT, jadi perubahan role langsung berlaku).
  */
 export async function requireAdminSession(): Promise<ResolvedAdminSession | null> {
-  // 1. Superadmin God-Mode (Impersonation Mode)
-  const godSession = await getGodSession();
-  if (godSession) {
-    const tenant = await resolveGodTenant();
-    return {
-      id: "god-mode-superadmin",
-      email: godSession.username,
-      name: "Superadmin God-Mode",
-      role: "SUPERADMIN",
-      roleName: "Superadmin",
-      permissions: ["*"],
-      tenantId: tenant?.id || null,
-      tenantName: tenant?.name || "RigSpace",
-      isImpersonating: true,
-    };
-  }
+  // 1. Tim platform via god-mode (superadmin: semua toko; CMO/marketing: toko miliknya saja)
+  const platformCms = await resolvePlatformCmsSession();
+  if (platformCms) return platformCms;
 
   // 2. Admin tenant biasa
   const session = await getAdminSession();
@@ -145,12 +167,13 @@ export async function requireAdminSession(): Promise<ResolvedAdminSession | null
         role: true,
         isActive: true,
         tenantId: true,
-        tenant: { select: { id: true, name: true, slug: true } },
+        tenant: { select: { id: true, name: true, slug: true, status: true } },
         roleRef: { select: { id: true, name: true, slug: true, permissions: true } },
       },
     });
 
     if (!user || user.isActive === false) return null;
+    if (user.tenant?.status === "SUSPENDED") return null;
 
     const permissions = Array.isArray(user.roleRef?.permissions)
       ? (user.roleRef.permissions as string[])

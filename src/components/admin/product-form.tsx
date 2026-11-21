@@ -52,6 +52,10 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
     initialData?.originalPrice ? String(initialData.originalPrice) : ""
   );
   const [availability, setAvailability] = React.useState(initialData?.availability || "TERSEDIA");
+  // Stok opsional: kosong = tidak dilacak
+  const [stock, setStock] = React.useState<string>(
+    initialData?.stock !== null && initialData?.stock !== undefined ? String(initialData.stock) : ""
+  );
   const [warranty, setWarranty] = React.useState(initialData?.warranty || "Garansi Toko 1 Bulan");
   const [bonus, setBonus] = React.useState(initialData?.bonus || "");
   const [categoryId, setCategoryId] = React.useState(initialData?.categoryId || "");
@@ -236,6 +240,7 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
       basePrice: basePrice ? Number(basePrice) : null,
       originalPrice: originalPrice ? Number(originalPrice) : null,
       availability,
+      stock: stock.trim() === "" ? null : Number(stock),
       warranty,
       bonus: bonus || null,
       isFeatured,
@@ -697,13 +702,32 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                 <Label htmlFor="prod-avail">Ketersediaan Showcase</Label>
                 <Select
                   id="prod-avail"
-                  value={availability}
+                  value={stock.trim() === "0" ? "HABIS" : availability}
                   onChange={(e) => setAvailability(e.target.value)}
+                  disabled={stock.trim() === "0"}
                 >
                   <option value="TERSEDIA">Tersedia (Siap Kirim / Diambil)</option>
                   <option value="PREORDER">Preorder (Estimasi Pengadaan)</option>
                   <option value="HABIS">Habis (Stok Kosong)</option>
                 </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="prod-stock">Jumlah Stok (Opsional)</Label>
+                <Input
+                  id="prod-stock"
+                  type="number"
+                  min={0}
+                  inputMode="numeric"
+                  value={stock}
+                  onChange={(e) => setStock(e.target.value.replace(/[^\d]/g, ""))}
+                  placeholder="Kosongkan bila stok tidak dilacak"
+                />
+                <p className="admin-form-hint mt-1">
+                  {stock.trim() === "0"
+                    ? "Stok 0 — produk otomatis berstatus Habis."
+                    : "Stok 0 otomatis membuat produk Habis. Tampilan stok di etalase diatur di Pengaturan → Katalog & Stok."}
+                </p>
               </div>
 
               <div>
@@ -842,7 +866,7 @@ export function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
                   onChange={(e) => setIsFeatured(e.target.checked)}
                   className="rounded text-[#cc252b] focus:ring-[#cc252b]"
                 />
-                <span className="font-semibold text-[#111413]">⭐ Pilihan Hadi (Featured)</span>
+                <span className="font-semibold text-[#111413]">⭐ Pilihan Toko (Featured)</span>
               </label>
 
               <label className="flex items-center gap-2 cursor-pointer">

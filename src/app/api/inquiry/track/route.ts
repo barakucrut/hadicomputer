@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/db";
+import { resolveStorefrontTenant } from "@/lib/tenant-resolver";
 
 export async function POST(request: Request) {
   try {
@@ -13,11 +14,29 @@ export async function POST(request: Request) {
     const forwardedFor = headersList.get("x-forwarded-for");
     const visitorIp = forwardedFor ? forwardedFor.split(",")[0].trim() : undefined;
 
+    // Tenant diambil dari produk/layanan itu sendiri (tidak percaya input klien);
+    // inquiry umum memakai tenant storefront yang sedang dibuka.
+    let tenantId: string | null = null;
+    let validProductId: string | undefined;
+    let validServiceId: string | undefined;
+    if (productId) {
+      const p = await prisma.product.findUnique({ where: { id: String(productId) }, select: { id: true, tenantId: true } });
+      if (p) { tenantId = p.tenantId; validProductId = p.id; }
+    } else if (serviceId) {
+      const sv = await prisma.service.findUnique({ where: { id: String(serviceId) }, select: { id: true, tenantId: true } });
+      if (sv) { tenantId = sv.tenantId; validServiceId = sv.id; }
+    }
+    if (!tenantId) {
+      const storefront = await resolveStorefrontTenant();
+      tenantId = storefront.id !== "default" ? storefront.id : null;
+    }
+
     await prisma.inquiryLog.create({
       data: {
+        tenantId,
         inquiryType: inquiryType === "SERVICE" ? "SERVICE" : inquiryType === "GENERAL" ? "GENERAL" : "PRODUCT",
-        productId: productId || undefined,
-        serviceId: serviceId || undefined,
+        productId: validProductId,
+        serviceId: validServiceId,
         variantName: variantName || undefined,
         priceAtInquiry: priceAtInquiry ? BigInt(priceAtInquiry) : undefined,
         visitorIp: visitorIp ? visitorIp.slice(0, 50) : undefined,

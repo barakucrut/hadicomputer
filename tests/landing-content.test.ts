@@ -1,0 +1,28 @@
+import assert from "node:assert/strict";
+import { test } from "node:test";
+import { previewSlug, PLANS } from "../src/components/platform/landing/content";
+import { parseDemoRequest, salesWhatsappUrl } from "../src/lib/demo-request";
+
+test("landing: slug pratinjau dari nama toko", () => {
+  assert.equal(previewSlug("Rig Computer"), "rigcomputer");
+  assert.equal(previewSlug("Toko Jaya Abadi!! 99"), "tokojayaabadi99");
+  assert.equal(previewSlug("Café Komputer"), "cafekomputer");
+  assert.equal(previewSlug("   "), "namatoko");
+  assert.equal(previewSlug("<script>"), "script");
+  assert.ok(PLANS.find((p) => p.highlight)?.id === "pro");
+});
+
+test("form minta demo: validasi, honeypot, link toko", () => {
+  const ok = parseDemoRequest({ storeName: " Rig  Computer ", city: "Jember", whatsapp: "0812-3456-7890", storeLink: "tokopedia.com/rig" });
+  assert.ok(ok.ok);
+  assert.deepEqual(ok.ok && ok.data, { storeName: "Rig Computer", city: "Jember", whatsapp: "6281234567890", storeLink: "https://tokopedia.com/rig" });
+  assert.equal(parseDemoRequest({ storeName: "R", city: "Jember", whatsapp: "081234567890" }).ok, false);
+  assert.equal(parseDemoRequest({ storeName: "Rig", city: "", whatsapp: "081234567890" }).ok, false);
+  assert.equal(parseDemoRequest({ storeName: "Rig", city: "Jember", whatsapp: "12345" }).ok, false);
+  assert.equal(parseDemoRequest({ storeName: "Rig", city: "Jember", whatsapp: "081234567890", storeLink: "javascript:alert(1)" }).ok, false);
+  const spam = parseDemoRequest({ storeName: "Rig", city: "Jember", whatsapp: "081234567890", website: "http://spam" });
+  assert.ok(!spam.ok && spam.spam);
+  const xss = parseDemoRequest({ storeName: "<b>Rig</b>", city: "Jember", whatsapp: "081234567890" });
+  assert.ok(xss.ok && !xss.data.storeName.includes("<"));
+  assert.match(salesWhatsappUrl("6281234567890", "Rig Computer"), /^https:\/\/wa\.me\/6281234567890\?text=Halo%20Rigspace/);
+});

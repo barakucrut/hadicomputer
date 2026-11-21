@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { tenantStorefrontHost } from "@/lib/platform-domain";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -30,6 +31,8 @@ import {
   ChevronLeft,
   Zap,
   Receipt,
+  UserRoundCog,
+  Link2,
   X,
 } from "lucide-react";
 import { Button } from "@/components/admin/ui/button";
@@ -63,7 +66,10 @@ import {
 } from "@/components/admin/ui/dialog";
 import { ConfirmDialog } from "@/components/admin/ui/confirm-dialog";
 import { HugeIconTrash, HugeIconEdit } from "@/components/admin/ui/huge-icons";
+import { AssignMarketingDialog } from "@/components/god-mode/assign-marketing-dialog";
+import { SiteStatusDialog, SiteStatusBadge, demoViewsLabel } from "@/components/god-mode/site-status-dialog";
 import { useToast, ToastProvider } from "@/components/admin/ui/toast";
+import { GodRoleBadge, GodSidebar, useGodSession } from "@/components/god-mode/god-shell";
 import "@/app/admin.css";
 
 interface TenantData {
@@ -94,16 +100,53 @@ interface TenantData {
     socialTiktok: string | null;
     socialFacebook: string | null;
   } | null;
-  _count?: {
-    products: number;
-    categories: number;
-  };
+  _count?: { products: number; categories: number; demoViews?: number };
+  acquiredBy: { id: string; name: string; email: string } | null;
+  siteStatus: "DEMO" | "LIVE";
+  lastDemoViewAt: string | null;
   createdAt: string;
 }
+
+interface TeamOption {
+  id: string;
+  name: string;
+  email?: string;
+  role: "SUPERADMIN" | "CMO" | "MARKETING";
+  isActive: boolean;
+}
+
+const SUPER_ONLY_HINT = "Paket, status, domain & fitur hanya bisa diubah Superadmin.";
 
 function TenantsManagementContent() {
   const router = useRouter();
   const toast = useToast();
+  const { user } = useGodSession();
+  // UI hanya menyembunyikan; API tetap menolak/mengabaikan aksi di luar hak peran
+  const isSuper = user?.role === "SUPERADMIN";
+  const [team, setTeam] = React.useState<TeamOption[]>([]);
+  const [newAcquiredById, setNewAcquiredById] = React.useState("");
+  const [editAcquiredById, setEditAcquiredById] = React.useState("");
+
+  React.useEffect(() => {
+    if (!isSuper) return;
+    fetch("/api/god-mode/team")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => data?.members && setTeam(data.members))
+      .catch(() => undefined);
+  }, [isSuper]);
+
+  // Ditolak masuk CMS (toko sudah bukan milik marketing ini): /god-mode/tenants?cms=ditolak
+  React.useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("cms") === "ditolak") {
+      toast.error("Anda tidak punya akses ke CMS toko tersebut. Toko mungkin sudah dipindahkan ke marketing lain.");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Link "Tenant Baru" dari dashboard marketing: /god-mode/tenants?new=1
+  React.useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("new") === "1") setIsAddModalOpen(true);
+  }, []);
 
   const [tenants, setTenants] = React.useState<TenantData[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -132,6 +175,7 @@ function TenantsManagementContent() {
   const [newPlan, setNewPlan] = React.useState<"STARTER" | "PRO" | "ENTERPRISE">("PRO");
   const [newPhone, setNewPhone] = React.useState("628");
   const [newColor, setNewColor] = React.useState("#cc252b");
+  const [withStarterPack, setWithStarterPack] = React.useState(true);
   const [newFeatures, setNewFeatures] = React.useState({
     pcBuilder: true,
     tradeIn: true,
@@ -145,6 +189,7 @@ function TenantsManagementContent() {
   const [editStatus, setEditStatus] = React.useState<"ACTIVE" | "TRIAL" | "SUSPENDED">("ACTIVE");
   const [editPhone, setEditPhone] = React.useState("");
   const [editColor, setEditColor] = React.useState("#cc252b");
+  const [editSecondary, setEditSecondary] = React.useState("#111413");
   const [editAddress, setEditAddress] = React.useState("");
   const [editOpenHours, setEditOpenHours] = React.useState("");
   const [editFeatures, setEditFeatures] = React.useState({
@@ -159,9 +204,11 @@ function TenantsManagementContent() {
     setEditPlan(t.plan);
     setEditStatus(t.status);
     setEditColor(t.settings?.primaryColor || "#cc252b");
+    setEditSecondary(t.settings?.secondaryColor || "#111413");
     setEditPhone(t.settings?.whatsappNumber || "628");
     setEditAddress(t.settings?.address || "");
     setEditOpenHours(t.settings?.openHours || "Senin - Sabtu: 09:00 - 20:00");
+    setEditAcquiredById(t.acquiredBy?.id || "");
     setEditFeatures({
       pcBuilder: !!t.features.pcBuilder,
       tradeIn: !!t.features.tradeIn,
@@ -180,14 +227,20 @@ function TenantsManagementContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: editName,
-          customDomain: editDomain || null,
-          plan: editPlan,
-          status: editStatus,
           primaryColor: editColor,
+          secondaryColor: editSecondary,
           whatsappNumber: editPhone,
           address: editAddress,
           openHours: editOpenHours,
-          features: editFeatures,
+          ...(isSuper
+            ? {
+                customDomain: editDomain || null,
+                plan: editPlan,
+                status: editStatus,
+                features: editFeatures,
+                acquiredById: editAcquiredById || null,
+              }
+            : {}),
         }),
       });
 
@@ -266,40 +319,6 @@ function TenantsManagementContent() {
     }
   }
 
-  // Feature Toggle
-  async function handleToggleFeature(
-    tenantId: string,
-    featureKey: "pcBuilder" | "tradeIn" | "instantCheckout",
-    currentVal: boolean
-  ) {
-    const tenant = tenants.find((t) => t.id === tenantId);
-    if (!tenant) return;
-
-    const updatedFeatures = {
-      ...tenant.features,
-      [featureKey]: !currentVal,
-    };
-
-    setTenants((prev) =>
-      prev.map((t) =>
-        t.id === tenantId ? { ...t, features: updatedFeatures } : t
-      )
-    );
-
-    try {
-      const res = await fetch(`/api/god-mode/tenants/${tenantId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ features: updatedFeatures }),
-      });
-      if (!res.ok) throw new Error("Gagal menyimpan perubahan fitur");
-      toast.success(`Fitur ${featureKey} untuk ${tenant.name} berhasil diperbarui.`);
-    } catch (err) {
-      console.error("Toggle feature error:", err);
-      toast.error("Gagal memperbarui fitur. Silakan coba lagi.");
-      fetchTenants();
-    }
-  }
 
   // Create Tenant
   async function handleCreateTenant(e: React.FormEvent) {
@@ -317,18 +336,20 @@ function TenantsManagementContent() {
         body: JSON.stringify({
           name: newName.trim(),
           slug: newSlug.trim().toLowerCase(),
-          customDomain: newDomain.trim() || null,
-          plan: newPlan,
           primaryColor: newColor,
           whatsappNumber: newPhone.trim(),
-          features: newFeatures,
+          withStarterPack,
+          ...(isSuper
+            ? { customDomain: newDomain.trim() || null, plan: newPlan, features: newFeatures, acquiredById: newAcquiredById || null }
+            : {}),
         }),
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Gagal membuat tenant");
 
-      toast.success(`Tenant toko "${data.tenant?.name}" berhasil ditambahkan!`);
+      const sample = data.starterPack?.products ? ` dengan ${data.starterPack.products} produk contoh` : "";
+      toast.success(`Tenant toko "${data.tenant?.name}" berhasil ditambahkan${sample}!`);
       setIsAddModalOpen(false);
       setNewName("");
       setNewSlug("");
@@ -343,6 +364,8 @@ function TenantsManagementContent() {
 
   // Delete Tenant
   const [deleteTarget, setDeleteTarget] = React.useState<TenantData | null>(null);
+  const [assignTarget, setAssignTarget] = React.useState<TenantData | null>(null);
+  const [siteTarget, setSiteTarget] = React.useState<TenantData | null>(null);
   const [deleting, setDeleting] = React.useState(false);
 
   async function executeDeleteTenant() {
@@ -399,103 +422,7 @@ function TenantsManagementContent() {
   return (
     <div className="admin-shell-root">
       {/* Sidebar for God Mode */}
-      <aside className="admin-sidebar">
-        <div className="admin-sidebar-header">
-          <Link
-            href="/god-mode"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              fontWeight: 800,
-              fontSize: "17px",
-              color: "var(--ink)",
-              textDecoration: "none",
-            }}
-          >
-            <div
-              style={{
-                height: "36px",
-                width: "36px",
-                borderRadius: "10px",
-                backgroundColor: "var(--red)",
-                color: "#ffffff",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontWeight: 900,
-                fontSize: "15px",
-                boxShadow: "0 4px 10px rgba(221, 32, 40, 0.25)",
-              }}
-            >
-              ⚡
-            </div>
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <span style={{ lineHeight: 1.2, fontWeight: 900, fontSize: "16px", letterSpacing: "-0.3px" }}>Rigspace</span>
-              <span style={{ fontSize: "10px", color: "var(--red)", fontWeight: 800 }}>
-                MASTER ENGINE
-              </span>
-            </div>
-          </Link>
-        </div>
-
-        <nav
-          style={{
-            flex: 1,
-            padding: "16px 12px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "4px",
-          }}
-        >
-          <Link href="/god-mode" className="admin-nav-item">
-            <LayoutDashboard size={19} />
-            <span>Dashboard Summary</span>
-          </Link>
-          <Link href="/god-mode/tenants" className="admin-nav-item active">
-            <Store size={19} />
-            <span>Daftar Tenant Toko</span>
-          </Link>
-          <Link href="/god-mode/transactions" className="admin-nav-item">
-            <Receipt size={19} />
-            <span>Transaksi Keuangan</span>
-          </Link>
-          <Link href="/god-mode/styleguide" className="admin-nav-item">
-            <Palette size={19} />
-            <span>Design Guide</span>
-          </Link>
-        </nav>
-
-        <div className="admin-sidebar-footer" style={{ padding: "14px", borderTop: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: "12px" }}>
-          <button
-            type="button"
-            onClick={handleLogout}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "8px 10px",
-              borderRadius: "8px",
-              border: "1px solid var(--border)",
-              backgroundColor: "transparent",
-              color: "var(--red)",
-              fontSize: "12px",
-              fontWeight: 700,
-              cursor: "pointer",
-              transition: "all 0.15s ease",
-            }}
-          >
-            <LogOut size={15} />
-            <span>Keluar God-Mode</span>
-          </button>
-
-          <div style={{ fontSize: "11px", color: "var(--muted)", lineHeight: 1.4 }}>
-            Rigspace.id
-            <br />
-            <strong>The OS for PC Retailers</strong>
-          </div>
-        </div>
-      </aside>
+      <GodSidebar active="/god-mode/tenants" />
 
       {/* Main Area */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
@@ -505,13 +432,12 @@ function TenantsManagementContent() {
             <span style={{ fontSize: "14px", fontWeight: 800, color: "var(--ink)" }}>
               Manajemen Tenant Toko
             </span>
-            <Badge variant="default" className="text-[11px] bg-red-600">
-              SUPERADMIN
-            </Badge>
+            <GodRoleBadge />
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-            {/* Topbar Dropdown Switcher */}
+            {/* Topbar Dropdown Switcher: daftar sudah dibatasi lingkup peran (marketing = tokonya saja) */}
+            {tenants.length > 0 && (
             <div ref={dropdownRef} style={{ position: "relative" }}>
               <button
                 type="button"
@@ -625,6 +551,7 @@ function TenantsManagementContent() {
                 </div>
               )}
             </div>
+            )}
 
             <Button onClick={() => setIsAddModalOpen(true)} className="flex items-center gap-1.5 h-10 px-4 text-xs font-bold">
               <Plus size={16} />
@@ -747,7 +674,7 @@ function TenantsManagementContent() {
                   </span>
                 </CardTitle>
                 <CardDescription>
-                  Setiap tenant memiliki database terisolasi dan fitur modular yang bisa di-toggle secara langsung.
+                  Setiap tenant memiliki data terisolasi. Fitur modular diatur lewat tombol Edit.
                 </CardDescription>
               </CardHeader>
 
@@ -756,8 +683,7 @@ function TenantsManagementContent() {
                   <TableHeader>
                     <TableRow className="bg-[#fcfcfc]">
                       <TableHead className="py-3.5 px-6">Toko & Identitas</TableHead>
-                      <TableHead className="py-3.5 px-6">Paket</TableHead>
-                      <TableHead className="py-3.5 px-6">Fitur Modular (Real-time Toggle)</TableHead>
+                      <TableHead className="py-3.5 px-6">{isSuper ? "Paket & Marketing" : "Paket"}</TableHead>
                       <TableHead className="py-3.5 px-6">Status</TableHead>
                       <TableHead className="py-3.5 px-6 text-right">Aksi</TableHead>
                     </TableRow>
@@ -765,13 +691,13 @@ function TenantsManagementContent() {
                   <TableBody>
                     {loading ? (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center py-12 text-sm text-[#818779]">
+                        <TableCell colSpan={4} className="text-center py-12 text-sm text-[#818779]">
                           Memuat data merchant...
                         </TableCell>
                       </TableRow>
                     ) : paginatedTenants.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center py-12 text-sm text-[#818779]">
+                        <TableCell colSpan={4} className="text-center py-12 text-sm text-[#818779]">
                           Tidak ada tenant toko yang sesuai dengan kriteria filter.
                         </TableCell>
                       </TableRow>
@@ -805,7 +731,7 @@ function TenantsManagementContent() {
                                   )}
                                 </div>
                                 <div className="text-xs text-[#818779] flex items-center gap-1.5 mt-0.5">
-                                  <span>{t.slug}.tokopc.id</span>
+                                  <span>{tenantStorefrontHost(t.slug)}</span>
                                   {t.customDomain && (
                                     <>
                                       <span>•</span>
@@ -830,35 +756,11 @@ function TenantsManagementContent() {
                             >
                               {t.plan}
                             </Badge>
-                          </TableCell>
-
-                          {/* Modular Switches */}
-                          <TableCell className="py-4 px-6" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex flex-col gap-2">
-                              <label className="flex items-center gap-2 cursor-pointer text-xs" onClick={(e) => e.stopPropagation()}>
-                                <Switch
-                                  checked={!!t.features.pcBuilder}
-                                  onCheckedChange={() =>
-                                    handleToggleFeature(t.id, "pcBuilder", !!t.features.pcBuilder)
-                                  }
-                                />
-                                <span className={t.features.pcBuilder ? "font-bold text-[#111413]" : "text-[#818779]"}>
-                                  PC Builder Simulator
-                                </span>
-                              </label>
-
-                              <label className="flex items-center gap-2 cursor-pointer text-xs" onClick={(e) => e.stopPropagation()}>
-                                <Switch
-                                  checked={!!t.features.tradeIn}
-                                  onCheckedChange={() =>
-                                    handleToggleFeature(t.id, "tradeIn", !!t.features.tradeIn)
-                                  }
-                                />
-                                <span className={t.features.tradeIn ? "font-bold text-[#111413]" : "text-[#818779]"}>
-                                  Kalkulator Trade-In
-                                </span>
-                              </label>
-                            </div>
+                            {isSuper && (
+                              <div className="mt-1.5 text-[11px] text-[#818779]">
+                                {t.acquiredBy ? t.acquiredBy.name : "Tanpa marketing"}
+                              </div>
+                            )}
                           </TableCell>
 
                           {/* Status */}
@@ -874,12 +776,46 @@ function TenantsManagementContent() {
                             >
                               {t.status}
                             </Badge>
+                            <div className="mt-1.5 flex flex-col items-start gap-1">
+                              <SiteStatusBadge status={t.siteStatus} />
+                              {t.siteStatus === "DEMO" && (
+                                <span className="text-[11px] text-[#818779]">
+                                  {demoViewsLabel(t._count?.demoViews ?? 0, t.lastDemoViewAt)}
+                                </span>
+                              )}
+                            </div>
                           </TableCell>
 
                           {/* Actions */}
                           <TableCell className="py-4 px-6 text-right" onClick={(e) => e.stopPropagation()}>
                             <div className="flex items-center justify-end gap-1.5">
-                              {/* Impersonate Button - Icon Only */}
+                              {/* Status website & link demo (semua peran; aktivasi superadmin) */}
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSiteTarget(t);
+                                }}
+                                className="admin-action-btn"
+                                title={t.siteStatus === "DEMO" ? `Link demo ${t.name}` : `Status website ${t.name}`}
+                                aria-label={t.siteStatus === "DEMO" ? `Link demo ${t.name}` : `Status website ${t.name}`}
+                              >
+                                <Link2 size={16} />
+                              </button>
+
+                              {/* Lihat etalase publik (semua peran) */}
+                              <a
+                                href={`/?store=${encodeURIComponent(t.slug)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="admin-action-btn"
+                                title={`Lihat etalase ${t.name}`}
+                              >
+                                <ExternalLink size={16} />
+                              </a>
+
+                              {/* Masuk CMS toko: superadmin semua toko, marketing/CMO hanya tokonya (dicek di server) */}
+                              {(
                               <button
                                 type="button"
                                 onClick={(e) => {
@@ -891,6 +827,23 @@ function TenantsManagementContent() {
                               >
                                 <Zap size={16} className="text-amber-500 fill-amber-500" />
                               </button>
+                              )}
+
+                              {/* Pindahkan ke marketing lain - superadmin saja */}
+                              {isSuper && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setAssignTarget(t);
+                                  }}
+                                  className="admin-action-btn"
+                                  title={`Pindahkan ${t.name} ke marketing`}
+                                  aria-label={`Pindahkan ${t.name} ke marketing`}
+                                >
+                                  <UserRoundCog size={16} />
+                                </button>
+                              )}
 
                               {/* Edit Button */}
                               <button
@@ -906,7 +859,7 @@ function TenantsManagementContent() {
                               </button>
 
                               {/* Delete button (except Hadi Computer) */}
-                              {t.slug !== "hadicomputer" && (
+                              {isSuper && t.slug !== "hadicomputer" && (
                                 <button
                                   type="button"
                                   onClick={(e) => {
@@ -1038,13 +991,14 @@ function TenantsManagementContent() {
                     placeholder="berkahjaya"
                   />
                 </div>
-                <p className="text-[11px] text-[#818779] mt-1">{newSlug || "slug"}.tokopc.id</p>
+                <p className="text-[11px] text-[#818779] mt-1">{tenantStorefrontHost(newSlug || "slug")}</p>
               </div>
 
               <div>
                 <Label htmlFor="t-plan">Paket Langganan</Label>
                 <Select
                   id="t-plan"
+                  disabled={!isSuper}
                   value={newPlan}
                   onChange={(e) => setNewPlan(e.target.value as any)}
                 >
@@ -1059,6 +1013,7 @@ function TenantsManagementContent() {
               <Label htmlFor="t-domain">Custom Domain (Opsional)</Label>
               <Input
                 id="t-domain"
+                disabled={!isSuper}
                 value={newDomain}
                 onChange={(e) => setNewDomain(e.target.value.toLowerCase())}
                 placeholder="e.g. berkahjayakomputer.com"
@@ -1097,8 +1052,10 @@ function TenantsManagementContent() {
 
             <div className="border border-[#e5e5e2] rounded-lg p-3 space-y-2 bg-[#fcfcfc]">
               <div className="text-xs font-bold text-[#111413]">Fitur Awal yang Diaktifkan:</div>
+              {!isSuper && <p className="admin-form-hint">Tenant baru Anda otomatis berstatus TRIAL atas nama Anda. {SUPER_ONLY_HINT}</p>}
               <label className="flex items-center gap-2 text-xs cursor-pointer">
                 <Switch
+                  disabled={!isSuper}
                   checked={newFeatures.pcBuilder}
                   onCheckedChange={(c) => setNewFeatures({ ...newFeatures, pcBuilder: c })}
                 />
@@ -1106,12 +1063,35 @@ function TenantsManagementContent() {
               </label>
               <label className="flex items-center gap-2 text-xs cursor-pointer">
                 <Switch
+                  disabled={!isSuper}
                   checked={newFeatures.tradeIn}
                   onCheckedChange={(c) => setNewFeatures({ ...newFeatures, tradeIn: c })}
                 />
                 <span>Kalkulator Tukar Tambah Laptop (Trade-In)</span>
               </label>
             </div>
+
+            {isSuper && (
+              <div>
+                <Label htmlFor="t-marketing">Marketing Penanggung Jawab</Label>
+                <Select id="t-marketing" value={newAcquiredById} onChange={(e) => setNewAcquiredById(e.target.value)}>
+                  <option value="">— Tanpa marketing (dikelola pusat) —</option>
+                  {team.filter((m) => m.role !== "SUPERADMIN" && m.isActive).map((m) => (
+                    <option key={m.id} value={m.id}>{m.name}</option>
+                  ))}
+                </Select>
+              </div>
+            )}
+
+            <label className="flex items-start justify-between gap-3 border border-[#e5e5e2] rounded-lg p-3 cursor-pointer">
+              <span>
+                <span className="text-xs font-bold text-[#111413] block">Isi dengan data contoh (Starter Pack)</span>
+                <span className="admin-form-hint block mt-0.5">
+                  22 produk, banner & layanan contoh agar toko langsung siap didemokan. Bisa dihapus sekali klik dari dashboard toko. Toko tidak diindeks Google selama data contoh ada.
+                </span>
+              </span>
+              <Switch checked={withStarterPack} onCheckedChange={setWithStarterPack} />
+            </label>
 
             <DialogFooter className="pt-2">
               <Button
@@ -1159,7 +1139,7 @@ function TenantsManagementContent() {
               <div>
                 <Label>Subdomain (Locked ID)</Label>
                 <div className="mt-1 flex items-center h-10 px-3 rounded-lg border border-[#e5e5e2] bg-[#f9f9f8] text-xs font-mono text-[#525854]">
-                  {editingTenant?.slug}.tokopc.id
+                  {tenantStorefrontHost(editingTenant?.slug || "slug")}
                 </div>
               </div>
 
@@ -1167,6 +1147,7 @@ function TenantsManagementContent() {
                 <Label htmlFor="edit-domain">Custom Domain (Opsional)</Label>
                 <Input
                   id="edit-domain"
+                  disabled={!isSuper}
                   value={editDomain}
                   onChange={(e) => setEditDomain(e.target.value)}
                   placeholder="e.g. plazabitcom.com"
@@ -1179,6 +1160,7 @@ function TenantsManagementContent() {
                 <Label htmlFor="edit-plan">Paket Subscription</Label>
                 <Select
                   id="edit-plan"
+                  disabled={!isSuper}
                   value={editPlan}
                   onChange={(e) => setEditPlan(e.target.value as any)}
                 >
@@ -1192,6 +1174,7 @@ function TenantsManagementContent() {
                 <Label htmlFor="edit-status">Status Operasional</Label>
                 <Select
                   id="edit-status"
+                  disabled={!isSuper}
                   value={editStatus}
                   onChange={(e) => setEditStatus(e.target.value as any)}
                 >
@@ -1203,7 +1186,7 @@ function TenantsManagementContent() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
+              <div className="md:col-span-2">
                 <Label htmlFor="edit-phone">Nomor WhatsApp Toko</Label>
                 <Input
                   id="edit-phone"
@@ -1214,7 +1197,7 @@ function TenantsManagementContent() {
               </div>
 
               <div>
-                <Label htmlFor="edit-color">Warna Aksen Brand</Label>
+                <Label htmlFor="edit-color">Warna Primer (Tombol)</Label>
                 <div className="flex items-center gap-2 mt-1">
                   <input
                     type="color"
@@ -1230,6 +1213,26 @@ function TenantsManagementContent() {
                     className="font-mono text-xs uppercase"
                   />
                 </div>
+              </div>
+
+              <div>
+                <Label htmlFor="edit-secondary">Warna Sekunder (Topbar & Footer)</Label>
+                <div className="flex items-center gap-2 mt-1">
+                  <input
+                    type="color"
+                    id="edit-secondary"
+                    value={/^#[0-9a-f]{6}$/i.test(editSecondary) ? editSecondary : "#111413"}
+                    onChange={(e) => setEditSecondary(e.target.value)}
+                    className="w-10 h-10 rounded cursor-pointer border border-[#e5e5e2] p-1 bg-white"
+                  />
+                  <Input
+                    value={editSecondary}
+                    onChange={(e) => setEditSecondary(e.target.value)}
+                    placeholder="#111413"
+                    className="font-mono text-xs uppercase"
+                  />
+                </div>
+                <span className="admin-form-hint">Teks & ikon di atas warna ini otomatis putih/hitam.</span>
               </div>
             </div>
 
@@ -1253,10 +1256,30 @@ function TenantsManagementContent() {
               />
             </div>
 
+            {isSuper && (
+              <div>
+                <Label htmlFor="edit-marketing">Marketing Penanggung Jawab</Label>
+                <Select id="edit-marketing" value={editAcquiredById} onChange={(e) => setEditAcquiredById(e.target.value)}>
+                  <option value="">— Tanpa marketing (dikelola pusat) —</option>
+                  {team
+                    .filter((m) => (m.role !== "SUPERADMIN" && m.isActive) || m.id === editAcquiredById)
+                    .map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.name}
+                        {m.isActive ? "" : " (nonaktif)"}
+                      </option>
+                    ))}
+                </Select>
+                <p className="admin-form-hint mt-1">Marketing hanya melihat & mengelola tenant yang ditugaskan kepadanya.</p>
+              </div>
+            )}
+
             <div className="border border-[#e5e5e2] rounded-lg p-3 space-y-2 bg-[#fcfcfc]">
               <div className="text-xs font-bold text-[#111413]">Fitur Modular Toko:</div>
+              {!isSuper && <p className="admin-form-hint">{SUPER_ONLY_HINT}</p>}
               <label className="flex items-center gap-2 text-xs cursor-pointer">
                 <Switch
+                  disabled={!isSuper}
                   checked={editFeatures.pcBuilder}
                   onCheckedChange={(c) => setEditFeatures({ ...editFeatures, pcBuilder: c })}
                 />
@@ -1264,6 +1287,7 @@ function TenantsManagementContent() {
               </label>
               <label className="flex items-center gap-2 text-xs cursor-pointer">
                 <Switch
+                  disabled={!isSuper}
                   checked={editFeatures.tradeIn}
                   onCheckedChange={(c) => setEditFeatures({ ...editFeatures, tradeIn: c })}
                 />
@@ -1289,6 +1313,20 @@ function TenantsManagementContent() {
       </Dialog>
 
       {/* Delete Confirmation Modal (Standard Shadcn ConfirmDialog) */}
+      <SiteStatusDialog
+        tenant={siteTarget}
+        isSuper={isSuper}
+        onOpenChange={(open) => !open && setSiteTarget(null)}
+        onChanged={fetchTenants}
+      />
+
+      <AssignMarketingDialog
+        tenant={assignTarget}
+        team={team}
+        onOpenChange={(open) => !open && setAssignTarget(null)}
+        onSaved={fetchTenants}
+      />
+
       <ConfirmDialog
         open={Boolean(deleteTarget)}
         onOpenChange={(open) => !open && setDeleteTarget(null)}

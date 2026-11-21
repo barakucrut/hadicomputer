@@ -30,10 +30,12 @@ export function HeroSlider({ slides }: { slides: Banner[] }) {
     setActive((index + slides.length) % slides.length);
     setPaused(true);
   }
+  // Toko baru tanpa banner: jangan render slider kosong (dan jangan crash)
+  if (slides.length === 0) return null;
   return (
     <section
       className={`hero hero-${slides[active].theme}`}
-      aria-label="Kampanye Hadi Computer"
+      aria-label="Kampanye toko"
       aria-roledescription="carousel"
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}

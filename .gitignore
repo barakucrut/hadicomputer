@@ -7,3 +7,6 @@ out/
 .DS_Store
 playwright-report/
 test-results/
+
+# Backup original dari scripts/optimize-uploads.ts
+.upload-backups/

@@ -14,5 +14,11 @@
 /* Merchant-driven tokens: bg-brand, text-brand, border-brand, font-store, ... */
 @theme inline {
   --color-brand: var(--red);
+  /* Teks di atas bg-brand: putih/hitam otomatis sesuai terang-gelap aksen (lihat src/lib/brand-color.ts) */
+  --color-brand-ink: var(--brand-ink, #ffffff);
+  /* Warna sekunder: permukaan (topbar info, footer) + teks & aksen otomatis */
+  --color-brand-2: var(--brand-2, #111413);
+  --color-brand-2-ink: var(--brand-2-ink, #ffffff);
+  --color-brand-2-accent: var(--brand-2-accent, #f6e3a1);
   --font-store: var(--font);
 }

@@ -9,8 +9,6 @@ import {
   Palette,
   Layout,
   Lock,
-  Eye,
-  EyeOff,
   Check,
   Type,
   Sparkles,
@@ -20,6 +18,8 @@ import {
   Upload,
   Trash2,
   X,
+  Search,
+  Package,
 } from "lucide-react";
 import { Button } from "@/components/admin/ui/button";
 import { Badge } from "@/components/admin/ui/badge";
@@ -34,6 +34,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/admin/ui/toast";
+import { SeoAnalyticsPanel, CatalogStockPanel } from "@/components/admin/settings/advanced-settings-panels";
+import { SecondaryColorField } from "@/components/admin/settings/secondary-color-field";
+import { ChangePasswordForm } from "@/components/account/change-password-dialog";
 
 const FONT_OPTIONS = [
   {
@@ -74,7 +77,7 @@ const FONT_OPTIONS = [
 ];
 
 const COLOR_PRESETS = [
-  { name: "Hadi Crimson", hex: "#dd2028", label: "Merah Sporty (Hadi Computer)" },
+  { name: "Crimson", hex: "#dd2028", label: "Merah Sporty" },
   { name: "Bitcom Cobalt", hex: "#0066cc", label: "Biru Elektrik (Plaza Bitcom)" },
   { name: "Emerald GeForce", hex: "#059669", label: "Hijau Tech & Hardware" },
   { name: "Cyber Violet", hex: "#7c3aed", label: "Ungu Kreator & Gaming" },
@@ -83,6 +86,13 @@ const COLOR_PRESETS = [
 ];
 
 const TEMPLATE_OPTIONS = [
+  {
+    id: "precision",
+    name: "Precision",
+    badge: "Spec-Sheet Store (Baru)",
+    description: "Bersih & presisi: pencarian besar di depan, hero bento dengan banner berharga coret, indeks kategori, papan harga, dinding logo merek, dan portofolio servis.",
+    tag: "Clean & Awesome",
+  },
   {
     id: "classic-retail",
     name: "Classic Hardware Retail",
@@ -108,10 +118,10 @@ const TEMPLATE_OPTIONS = [
 
 export default function AdminSettingsPage() {
   const toast = useToast();
-  const [activeTab, setActiveTab] = React.useState<"appearance" | "homepage" | "contact" | "security">("appearance");
+  const [activeTab, setActiveTab] = React.useState<"appearance" | "homepage" | "contact" | "seo" | "catalog" | "security">("appearance");
 
   const [settings, setSettings] = React.useState<any>({
-    storeName: "Hadi Computer",
+    storeName: "",
     tagline: "Teknologi untuk keseharianmu.",
     logoUrl: "",
     faviconUrl: "",
@@ -159,14 +169,6 @@ export default function AdminSettingsPage() {
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
 
-  // Password change state
-  const [currentPassword, setCurrentPassword] = React.useState("");
-  const [newPassword, setNewPassword] = React.useState("");
-  const [confirmPassword, setConfirmPassword] = React.useState("");
-  const [showCurrentPassword, setShowCurrentPassword] = React.useState(false);
-  const [showNewPassword, setShowNewPassword] = React.useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
-  const [passwordSaving, setPasswordSaving] = React.useState(false);
 
   // Logo upload state
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -294,11 +296,16 @@ export default function AdminSettingsPage() {
       try {
         localStorage.setItem(
           "rigspace_live_theme_sync",
-          JSON.stringify({ primaryColor: color, fontFamily: settings.fontFamily, timestamp: Date.now() })
+          JSON.stringify({
+            primaryColor: color,
+            secondaryColor: settings.secondaryColor,
+            fontFamily: settings.fontFamily,
+            timestamp: Date.now(),
+          })
         );
       } catch {}
     }
-  }, [settings.primaryColor, settings.fontFamily]);
+  }, [settings.primaryColor, settings.secondaryColor, settings.fontFamily]);
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
@@ -322,41 +329,6 @@ export default function AdminSettingsPage() {
     }
   }
 
-  async function handleChangePassword(e: React.FormEvent) {
-    e.preventDefault();
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      toast.error("Semua kolom password wajib diisi.");
-      return;
-    }
-    if (newPassword.length < 6) {
-      toast.error("Password baru minimal 6 karakter.");
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      toast.error("Konfirmasi password baru tidak sesuai.");
-      return;
-    }
-
-    setPasswordSaving(true);
-    try {
-      const res = await fetch("/api/admin/auth/change-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ currentPassword, newPassword, confirmPassword }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Gagal mengubah password.");
-
-      toast.success("Password admin berhasil diperbarui!");
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-    } catch (err: any) {
-      toast.error(err.message || "Terjadi kesalahan saat mengubah password.");
-    } finally {
-      setPasswordSaving(false);
-    }
-  }
 
   const toggleSection = (sectionKey: string) => {
     setSettings((prev: any) => ({
@@ -393,6 +365,7 @@ export default function AdminSettingsPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          {activeTab !== "seo" && activeTab !== "catalog" && (
           <Button
             type="button"
             onClick={handleSave}
@@ -402,6 +375,7 @@ export default function AdminSettingsPage() {
             <Save size={16} />
             <span>{saving ? "Menyimpan..." : "Simpan Perubahan"}</span>
           </Button>
+          )}
         </div>
       </div>
 
@@ -432,6 +406,24 @@ export default function AdminSettingsPage() {
         >
           <Phone size={15} />
           <span>Kontak & Lokasi Toko</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("seo")}
+          className={`admin-tab-trigger ${activeTab === "seo" ? "active" : ""}`}
+        >
+          <Search size={15} />
+          <span>SEO & Analitik</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("catalog")}
+          className={`admin-tab-trigger ${activeTab === "catalog" ? "active" : ""}`}
+        >
+          <Package size={15} />
+          <span>Katalog & Stok</span>
         </button>
 
         <button
@@ -599,7 +591,7 @@ export default function AdminSettingsPage() {
                 <span>Warna Tema & Identitas Toko</span>
               </CardTitle>
               <CardDescription>
-                Warna primer menentukan warna tombol aksi utama (CTA), badge diskon, hover links, dan aksen navigasi.
+                Warna primer untuk tombol aksi utama (CTA, WhatsApp, pencarian), badge diskon & aksen navigasi. Warna sekunder untuk permukaan seperti topbar info & footer.
               </CardDescription>
             </CardHeader>
             <CardContent className="p-6 space-y-4">
@@ -718,6 +710,23 @@ export default function AdminSettingsPage() {
                   Format: #RRGGBB (misal: #0066CC untuk Plaza Bitcom)
                 </span>
               </div>
+
+              <hr
+                style={{
+                  width: "100%",
+                  height: "1px",
+                  backgroundColor: "var(--border)",
+                  border: "none",
+                  margin: "16px 0",
+                  display: "block",
+                }}
+              />
+
+              <SecondaryColorField
+                value={settings.secondaryColor || ""}
+                primary={settings.primaryColor}
+                onChange={(hex) => setSettings({ ...settings, secondaryColor: hex })}
+              />
             </CardContent>
           </Card>
 
@@ -842,7 +851,7 @@ export default function AdminSettingsPage() {
                       atau <span className="text-red-600 font-bold underline">klik untuk memilih dari komputer</span>
                     </p>
                     <p className="admin-form-hint mt-2">
-                      Format yang didukung: PNG transparan, JPEG, WebP, SVG (Maksimal 2MB)
+                      Format: PNG transparan, JPEG, WebP, SVG (maks. 15MB) — otomatis dikompres &amp; dirapikan
                     </p>
                   </div>
                 )}
@@ -1226,108 +1235,28 @@ export default function AdminSettingsPage() {
         </div>
       )}
 
+      {/* TAB: SEO & ANALITIK */}
+      {activeTab === "seo" && <SeoAnalyticsPanel primaryColor={settings.primaryColor} />}
+
+      {/* TAB: KATALOG & STOK */}
+      {activeTab === "catalog" && <CatalogStockPanel primaryColor={settings.primaryColor} />}
+
       {/* TAB 4: KEAMANAN & PASSWORD */}
       {activeTab === "security" && (
-        <form onSubmit={handleChangePassword}>
-          <Card className="border-[#e5e5e2] shadow-sm rounded-2xl overflow-hidden max-w-2xl">
-            <CardHeader className="p-6 border-b border-[#e5e5e2] bg-[#fcfcfc]">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Lock size={18} style={{ color: settings.primaryColor }} />
-                <span>Ubah Password Akun Pengelola</span>
-              </CardTitle>
-              <CardDescription>
-                Perbarui kata sandi akun untuk menjaga keamanan akses ke CMS toko ini.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-6 space-y-4">
-              <div>
-                <Label htmlFor="curr-pass" className="text-xs font-bold text-[#111413]">
-                  Password Saat Ini *
-                </Label>
-                <div className="admin-password-wrapper mt-1">
-                  <Input
-                    id="curr-pass"
-                    type={showCurrentPassword ? "text" : "password"}
-                    required
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="text-xs h-10 pr-10 w-full"
-                    placeholder="Masukkan password saat ini"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                    className="admin-password-toggle-btn"
-                    title={showCurrentPassword ? "Sembunyikan password" : "Lihat password"}
-                  >
-                    {showCurrentPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="new-pass" className="text-xs font-bold text-[#111413]">
-                  Password Baru (Minimal 6 Karakter) *
-                </Label>
-                <div className="admin-password-wrapper mt-1">
-                  <Input
-                    id="new-pass"
-                    type={showNewPassword ? "text" : "password"}
-                    required
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    className="text-xs h-10 pr-10 w-full"
-                    placeholder="Masukkan password baru"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="admin-password-toggle-btn"
-                    title={showNewPassword ? "Sembunyikan password" : "Lihat password"}
-                  >
-                    {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="confirm-pass" className="text-xs font-bold text-[#111413]">
-                  Konfirmasi Password Baru *
-                </Label>
-                <div className="admin-password-wrapper mt-1">
-                  <Input
-                    id="confirm-pass"
-                    type={showConfirmPassword ? "text" : "password"}
-                    required
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="text-xs h-10 pr-10 w-full"
-                    placeholder="Ulangi password baru"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="admin-password-toggle-btn"
-                    title={showConfirmPassword ? "Sembunyikan password" : "Lihat password"}
-                  >
-                    {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-              </div>
-
-              <div className="pt-4">
-                <Button
-                  type="submit"
-                  disabled={passwordSaving}
-                  className="h-10 px-5 text-xs font-bold flex items-center gap-2"
-                >
-                  <Lock size={15} />
-                  <span>{passwordSaving ? "Memperbarui Password..." : "Update Password"}</span>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </form>
+        <Card className="border-[#e5e5e2] shadow-sm rounded-2xl overflow-hidden max-w-2xl">
+          <CardHeader className="p-6 border-b border-[#e5e5e2] bg-[#fcfcfc]">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Lock size={18} style={{ color: settings.primaryColor }} />
+              <span>Ubah Password Akun Pengelola</span>
+            </CardTitle>
+            <CardDescription>
+              Perbarui kata sandi akun Anda. Bisa juga lewat tombol &quot;Ubah Password&quot; di sidebar.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-6">
+            <ChangePasswordForm endpoint="/api/admin/auth/change-password" submitLabel="Update Password" />
+          </CardContent>
+        </Card>
       )}
     </div>
   );

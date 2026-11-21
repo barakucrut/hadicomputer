@@ -7,5 +7,5 @@ export async function GET() {
   const auth = await authorizeAdmin(["products:create"]);
   if (!auth.ok) return auth.response;
 
-  return NextResponse.json({ code: await getNextSku() });
+  return NextResponse.json({ code: await getNextSku(auth.tenantId) });
 }

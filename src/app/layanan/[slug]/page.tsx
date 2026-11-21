@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getStoreBrand } from "@/lib/store-brand";
 import { notFound } from "next/navigation";
 import { Check, ArrowRight } from "lucide-react";
 import { getService, services } from "@/lib/repository";
@@ -18,10 +19,11 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
+  const { brand } = await getStoreBrand();
   const { slug } = await params,
     service = await getLiveService(slug);
   if (!service) {
-    return { title: "Layanan Tidak Ditemukan | Hadi Computer" };
+    return { title: `Layanan Tidak Ditemukan | ${brand}` };
   }
 
   const title = `${service.name} — Layanan Spesialis`;
@@ -34,8 +36,8 @@ export async function generateMetadata({
       type: "article",
       locale: "id_ID",
       url: `/layanan/${service.slug}`,
-      siteName: "Hadi Computer",
-      title: `${title} | Hadi Computer`,
+      siteName: `${brand}`,
+      title: `${title} | ${brand}`,
       description,
       images: [
         {
@@ -48,7 +50,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: `${title} | Hadi Computer`,
+      title: `${title} | ${brand}`,
       description,
       images: [service.image],
     },
@@ -68,7 +70,7 @@ export default async function ServiceDetailPage({
     getLiveStoreSettings(),
   ]);
   if (!service) notFound();
-  const message = `Halo Hadi Computer, saya ingin konsultasi layanan ${service.name}.\n\nTautan: {origin}/layanan/${service.slug}\n\nKebutuhan atau kendala saya: `;
+  const message = `Halo ${store.name || "kak"}, saya ingin konsultasi layanan ${service.name}.\n\nTautan: {origin}/layanan/${service.slug}\n\nKebutuhan atau kendala saya: `;
   return (
     <Container className="page-container">
       <Breadcrumbs
@@ -133,7 +135,7 @@ export default async function ServiceDetailPage({
       </section>
       <section className="consultation-panel">
         <div>
-          <h2>Siap cerita ke Hadi?</h2>
+          <h2>Siap cerita ke {store.name || "kami"}?</h2>
           <p>
             Kita mulai dengan kebutuhanmu, lalu diskusikan pilihan solusinya.
           </p>

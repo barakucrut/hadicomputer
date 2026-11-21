@@ -43,6 +43,7 @@ import {
   TableCell,
 } from "@/components/admin/ui/table";
 import { useToast, ToastProvider } from "@/components/admin/ui/toast";
+import { GodRoleBadge, GodSidebar } from "@/components/god-mode/god-shell";
 import "@/app/admin.css";
 
 function GodModeStyleguideContent() {
@@ -73,103 +74,7 @@ function GodModeStyleguideContent() {
   return (
     <div className="admin-shell-root">
       {/* Sidebar for God Mode */}
-      <aside className="admin-sidebar">
-        <div className="admin-sidebar-header">
-          <Link
-            href="/god-mode"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              fontWeight: 800,
-              fontSize: "17px",
-              color: "var(--ink)",
-              textDecoration: "none",
-            }}
-          >
-            <div
-              style={{
-                height: "36px",
-                width: "36px",
-                borderRadius: "10px",
-                backgroundColor: "var(--red)",
-                color: "#ffffff",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontWeight: 900,
-                fontSize: "15px",
-                boxShadow: "0 4px 10px rgba(221, 32, 40, 0.25)",
-              }}
-            >
-              ⚡
-            </div>
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <span style={{ lineHeight: 1.2, fontWeight: 900, fontSize: "16px", letterSpacing: "-0.3px" }}>Rigspace</span>
-              <span style={{ fontSize: "10px", color: "var(--red)", fontWeight: 800 }}>
-                MASTER ENGINE
-              </span>
-            </div>
-          </Link>
-        </div>
-
-        <nav
-          style={{
-            flex: 1,
-            padding: "16px 12px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "4px",
-          }}
-        >
-          <Link href="/god-mode" className="admin-nav-item">
-            <LayoutDashboard size={19} />
-            <span>Dashboard Summary</span>
-          </Link>
-          <Link href="/god-mode/tenants" className="admin-nav-item">
-            <Store size={19} />
-            <span>Daftar Tenant Toko</span>
-          </Link>
-          <Link href="/god-mode/transactions" className="admin-nav-item">
-            <Receipt size={19} />
-            <span>Transaksi Keuangan</span>
-          </Link>
-          <Link href="/god-mode/styleguide" className="admin-nav-item active">
-            <Palette size={19} />
-            <span>Design Guide</span>
-          </Link>
-        </nav>
-
-        <div className="admin-sidebar-footer" style={{ padding: "14px", borderTop: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: "12px" }}>
-          <button
-            type="button"
-            onClick={handleLogout}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "8px 10px",
-              borderRadius: "8px",
-              border: "1px solid var(--border)",
-              backgroundColor: "transparent",
-              color: "var(--red)",
-              fontSize: "12px",
-              fontWeight: 700,
-              cursor: "pointer",
-              transition: "all 0.15s ease",
-            }}
-          >
-            <LogOut size={15} />
-            <span>Keluar God-Mode</span>
-          </button>
-
-          <div style={{ fontSize: "11px", color: "var(--muted)", lineHeight: 1.4 }}>
-            Multi-Tenant Platform SaaS
-            <br />
-            <strong>Version 2.0 (Live)</strong>
-          </div>
-        </div>
-      </aside>
+      <GodSidebar active="/god-mode/styleguide" />
 
       {/* Main Area */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>

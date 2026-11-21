@@ -88,6 +88,9 @@ function GalleryCard({ product, size = "md" }: { product: Product; size?: "md" |
             <span className="text-xs text-[#a3a39c] line-through">{rupiah(product.originalPrice!)}</span>
           )}
         </div>
+        {product.stockLabel && (
+          <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-brand">{product.stockLabel}</span>
+        )}
       </div>
     </Link>
   );

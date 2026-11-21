@@ -57,6 +57,7 @@ export const ROUTE_PERMISSIONS: { match: (path: string) => boolean; required: st
   { match: (p) => p.startsWith("/admin/kategori"), required: ["categories:manage", "brands:manage"] },
   { match: (p) => p.startsWith("/admin/banner"), required: ["banners:view", "banners:manage"] },
   { match: (p) => p.startsWith("/admin/layanan"), required: ["services:view", "services:manage"] },
+  { match: (p) => p.startsWith("/admin/portofolio"), required: ["services:view", "services:manage"] },
   { match: (p) => p.startsWith("/admin/inquiry-analytics"), required: ["inquiries:view"] },
   { match: (p) => p.startsWith("/admin/user-role"), required: ["users:view", "users:manage", "roles:manage"] },
   // /admin/pengaturan stays open to every user: it also holds "Ganti Password".

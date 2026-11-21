@@ -11,6 +11,8 @@ import {
   X,
   MessageSquare,
   RotateCcw,
+  FileUp,
+  FileDown,
 } from "lucide-react";
 import {
   HugeIconEye,
@@ -28,6 +30,7 @@ import { CurrencyInput } from "@/components/ui/currency-input";
 import { AdminPagination } from "@/components/admin/ui/pagination";
 import { ConfirmDialog } from "@/components/admin/ui/confirm-dialog";
 import { useCan } from "@/components/admin/permissions";
+import { ProductImportDialog } from "@/components/admin/product-import-dialog";
 import { useToast } from "@/components/admin/ui/toast";
 import {
   Table,
@@ -47,6 +50,7 @@ export default function AdminProductsPage() {
   const can = useCan();
   const canCreate = can("products:create");
   const canEdit = can("products:edit");
+  const [importOpen, setImportOpen] = React.useState(false);
   const canDelete = can("products:delete");
   const router = useRouter();
   const toast = useToast();
@@ -368,6 +372,25 @@ export default function AdminProductsPage() {
             )}
           </Button>
 
+          <a href="/api/admin/products/export" title="Export seluruh katalog ke Excel">
+            <Button type="button" variant="outline" className="flex items-center gap-2">
+              <FileDown size={16} />
+              <span>Export</span>
+            </Button>
+          </a>
+
+          {canCreate && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setImportOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <FileUp size={16} />
+              <span>Import</span>
+            </Button>
+          )}
+
           {canCreate && (
             <Link href="/admin/produk/baru">
               <Button className="flex items-center gap-2">
@@ -683,6 +706,11 @@ export default function AdminProductsPage() {
                           {p.availability}
                         </Badge>
                       </button>
+                      {p.stock !== null && p.stock !== undefined && (
+                        <div className={`text-[11px] font-semibold mt-1 ${p.stock === 0 ? "text-red-600" : "text-[#525854]"}`}>
+                          Stok: {p.stock}
+                        </div>
+                      )}
                     </TableCell>
 
                     {/* Inquiry WA Count */}
@@ -955,7 +983,7 @@ export default function AdminProductsPage() {
                   onChange={(e) => setDraftFilters((prev) => ({ ...prev, collection: e.target.value }))}
                 >
                   <option value="">Semua koleksi</option>
-                  <option value="Pilihan Hadi">Pilihan Hadi</option>
+                  <option value="Pilihan Toko">Pilihan Toko</option>
                   <option value="Terbaru">Terbaru</option>
                   <option value="Terlaris">Terlaris</option>
                   <option value="Promo">Promo</option>
@@ -1029,6 +1057,12 @@ export default function AdminProductsPage() {
         variant="destructive"
         onConfirm={executeBulkDelete}
         loading={bulkDeleting}
+      />
+
+      <ProductImportDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        onImported={() => fetchProducts()}
       />
     </>
   );

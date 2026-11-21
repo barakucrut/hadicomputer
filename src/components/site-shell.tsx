@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { categories } from "@/lib/repository";
 import type { StoreSettings } from "@/lib/types";
+import { brandCssVars } from "@/lib/brand-color";
 import { WhatsAppButton } from "./whatsapp-button";
 import { HeaderSearch } from "./header-search";
 import { SocialLinks } from "./social-links";
@@ -33,7 +34,7 @@ export function Logo({ store }: { store?: StoreSettings }) {
   }
 
   return (
-    <Link href="/" aria-label={`${store?.name || "Hadi Computer"} — Beranda`} className="logo">
+    <Link href="/" aria-label={`${store?.name || "Toko"} — Beranda`} className="logo">
       <span
         style={{
           fontSize: "18px",
@@ -55,7 +56,7 @@ export function Logo({ store }: { store?: StoreSettings }) {
             flexShrink: 0,
           }}
         />
-        <span>{store?.name || "Hadi Computer"}</span>
+        <span>{store?.name || "Toko"}</span>
       </span>
     </Link>
   );
@@ -131,7 +132,7 @@ export function Header({
           <HeaderSearch />
           <div className="header-contact">
             <WhatsAppButton
-              label={store?.homepageConfig?.waConsultLabel || `Tanya ${store?.name || "Hadi"}`}
+              label={store?.homepageConfig?.waConsultLabel || `Tanya ${store?.name || "Toko"}`}
               phone={store?.whatsapp}
             />
           </div>
@@ -277,7 +278,7 @@ export function Footer({ store }: { store?: StoreSettings }) {
     return null;
   }
 
-  const storeName = store?.name || "Hadi Computer";
+  const storeName = store?.name || "Toko";
   const featuredTitle = store?.homepageConfig?.featuredTitle || `Pilihan ${storeName}`;
 
   return (
@@ -354,10 +355,10 @@ export function ThemeLiveSync() {
         try {
           const payload = JSON.parse(e.newValue);
           if (payload.primaryColor) {
-            document.documentElement.style.setProperty("--red", payload.primaryColor);
-            document.documentElement.style.setProperty("--red-dark", payload.primaryColor);
-            document.documentElement.style.setProperty("--border-focus", payload.primaryColor);
-            document.documentElement.style.setProperty("--ring", `${payload.primaryColor}33`);
+            const root = document.documentElement;
+            const current = getComputedStyle(root).getPropertyValue("--brand-2").trim();
+            const vars = brandCssVars(payload.primaryColor, payload.secondaryColor || current);
+            for (const [key, value] of Object.entries(vars)) root.style.setProperty(key, value);
           }
           if (payload.fontFamily) {
             document.documentElement.style.setProperty(

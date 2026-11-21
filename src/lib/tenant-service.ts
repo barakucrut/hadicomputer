@@ -44,22 +44,41 @@ export interface TenantWithSettings {
     products: number;
     categories: number;
   };
+  acquiredBy: { id: string; name: string; email: string } | null;
   createdAt: Date;
+  siteStatus: "DEMO" | "LIVE";
+  liveAt: Date | null;
+  demoTokenExpiresAt: Date | null;
+  lastDemoViewAt: Date | null;
 }
 
-export async function getAllTenants(): Promise<TenantWithSettings[]> {
+/** Daftar tenant; `where` dipakai god-mode untuk membatasi marketing ke tenant miliknya. */
+export async function getAllTenants(where: { acquiredById?: string | { in: string[] } } = {}): Promise<TenantWithSettings[]> {
   const tenants = await prisma.tenant.findMany({
+    where,
     orderBy: { createdAt: "desc" },
     include: {
       settings: true,
+      acquiredBy: { select: { id: true, name: true, email: true } },
       _count: {
         select: {
           products: true,
           categories: true,
+          demoViews: true,
         },
       },
     },
   });
+
+  // Link demo terakhir dibuka calon klien (per tenant)
+  const lastViews = tenants.length
+    ? await prisma.demoView.groupBy({
+        by: ["tenantId"],
+        where: { tenantId: { in: tenants.map((t) => t.id) } },
+        _max: { createdAt: true },
+      })
+    : [];
+  const lastViewBy = new Map(lastViews.map((v) => [v.tenantId, v._max.createdAt]));
 
   return tenants.map((t: any) => ({
     id: t.id,
@@ -87,7 +106,12 @@ export async function getAllTenants(): Promise<TenantWithSettings[]> {
         }
       : null,
     _count: t._count,
+    acquiredBy: t.acquiredBy || null,
     createdAt: t.createdAt,
+    siteStatus: t.siteStatus as "DEMO" | "LIVE",
+    liveAt: t.liveAt,
+    demoTokenExpiresAt: t.demoTokenExpiresAt,
+    lastDemoViewAt: lastViewBy.get(t.id) || null,
   }));
 }
 
@@ -112,6 +136,10 @@ export async function createTenant(data: {
     tradeIn?: boolean;
     instantCheckout?: boolean;
   };
+  status?: "ACTIVE" | "TRIAL" | "SUSPENDED";
+  siteStatus?: "DEMO" | "LIVE";
+  /** Marketing yang membawa tenant ini */
+  acquiredById?: string | null;
 }) {
   const id = generateTenantId(data.slug);
   const plan = data.plan || "PRO";
@@ -128,8 +156,10 @@ export async function createTenant(data: {
       name: data.name.trim(),
       customDomain: data.customDomain ? data.customDomain.toLowerCase().trim() : null,
       plan,
-      status: "ACTIVE",
+      status: data.status || "ACTIVE",
+      siteStatus: data.siteStatus || "DEMO",
       features,
+      acquiredById: data.acquiredById || null,
       settings: {
         create: {
           primaryColor: data.primaryColor || "#cc252b",
@@ -138,6 +168,8 @@ export async function createTenant(data: {
           address: data.address || "Indonesia",
           openHours: data.openHours || "Buka setiap hari: 08.00 – 22.00 WIB",
           whatsappDefaultTemplate: `Halo ${data.name}, saya ingin konsultasi perangkat komputer/laptop.`,
+          // Toko baru memakai template Precision (bisa diganti di Pengaturan → Tampilan)
+          homepageConfig: { templateId: "precision" },
         },
       },
     },
@@ -175,9 +207,11 @@ export interface UpdateTenantInput {
   status?: "ACTIVE" | "TRIAL" | "SUSPENDED";
   features?: Record<string, boolean>;
   primaryColor?: string;
+  secondaryColor?: string;
   whatsappNumber?: string;
   address?: string;
   openHours?: string;
+  acquiredById?: string | null;
 }
 
 export async function updateTenantFull(tenantId: string, data: UpdateTenantInput) {
@@ -189,9 +223,11 @@ export async function updateTenantFull(tenantId: string, data: UpdateTenantInput
   if (data.plan !== undefined) tenantUpdateData.plan = data.plan;
   if (data.status !== undefined) tenantUpdateData.status = data.status;
   if (data.features !== undefined) tenantUpdateData.features = data.features;
+  if (data.acquiredById !== undefined) tenantUpdateData.acquiredById = data.acquiredById;
 
   const settingsUpdateData: any = {};
   if (data.primaryColor !== undefined) settingsUpdateData.primaryColor = data.primaryColor;
+  if (data.secondaryColor !== undefined) settingsUpdateData.secondaryColor = data.secondaryColor;
   if (data.whatsappNumber !== undefined) settingsUpdateData.whatsappNumber = data.whatsappNumber.trim();
   if (data.address !== undefined) settingsUpdateData.address = data.address.trim() || null;
   if (data.openHours !== undefined) settingsUpdateData.openHours = data.openHours.trim();
@@ -206,6 +242,7 @@ export async function updateTenantFull(tenantId: string, data: UpdateTenantInput
               upsert: {
                 create: {
                   primaryColor: data.primaryColor || "#cc252b",
+                  ...(data.secondaryColor ? { secondaryColor: data.secondaryColor } : {}),
                   whatsappNumber: data.whatsappNumber || "6281234567890",
                   address: data.address || null,
                   openHours: data.openHours || "Senin - Sabtu: 09:00 - 20:00",
@@ -224,7 +261,11 @@ export async function deleteTenant(tenantId: string) {
   if (tenantId === HADI_TENANT_ID) {
     throw new Error("Toko utama Hadi Computer (Tenant #1) tidak dapat dihapus.");
   }
-  return await prisma.tenant.delete({
-    where: { id: tenantId },
+  return await prisma.$transaction(async (tx) => {
+    // Produk menunjuk kategori/merek tanpa cascade: hapus produk dulu agar urutan FK tidak bentrok
+    await tx.product.deleteMany({ where: { tenantId } });
+    // Akun admin toko ikut dihapus (relasinya SetNull: tanpa ini akun tertinggal tanpa toko)
+    await tx.adminUser.deleteMany({ where: { tenantId } });
+    return tx.tenant.delete({ where: { id: tenantId } });
   });
 }

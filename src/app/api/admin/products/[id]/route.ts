@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { authorizeAdmin } from "@/lib/auth";
+import { applyStockRule, normalizeStock, type AvailabilityStatus } from "@/lib/stock";
 import { deletedSlug, isSkuTaken, isUniqueViolation, normalizeSku } from "@/lib/product-sku";
 
 export async function GET(
@@ -13,7 +14,7 @@ export async function GET(
 
   const { id } = await params;
   const product = await prisma.product.findFirst({
-    where: { id, deletedAt: null },
+    where: { id, tenantId: auth.tenantId, deletedAt: null },
     include: {
       category: true,
       brand: true,
@@ -61,6 +62,7 @@ export async function PUT(
       basePrice,
       originalPrice,
       availability,
+      stock: rawStock,
       warranty,
       bonus,
       isFeatured,
@@ -77,21 +79,44 @@ export async function PUT(
     } = data;
 
     const current = await prisma.product.findFirst({
-      where: { id, deletedAt: null },
-      select: { code: true },
+      where: { id, tenantId: auth.tenantId, deletedAt: null },
+      select: { code: true, stock: true },
     });
     if (!current) {
       return NextResponse.json({ error: "Produk tidak ditemukan" }, { status: 404 });
     }
 
+    // Kategori & merek (bila diubah) wajib milik toko yang sama
+    if (categoryId) {
+      const ok = await prisma.category.findFirst({ where: { id: categoryId, tenantId: auth.tenantId }, select: { id: true } });
+      if (!ok) return NextResponse.json({ error: "Kategori tidak ditemukan di toko ini." }, { status: 400 });
+    }
+    if (brandId) {
+      const ok = await prisma.brand.findFirst({ where: { id: brandId, tenantId: auth.tenantId }, select: { id: true } });
+      if (!ok) return NextResponse.json({ error: "Merek tidak ditemukan di toko ini." }, { status: 400 });
+    }
+
     // SKU: kosong = tetap pakai SKU lama; diubah = wajib unik
     const finalCode = normalizeSku(code) || current.code;
-    if (finalCode !== current.code && (await isSkuTaken(finalCode, id))) {
+    if (finalCode !== current.code && (await isSkuTaken(auth.tenantId, finalCode, id))) {
       return NextResponse.json(
         { error: `SKU ${finalCode} sudah dipakai produk lain.` },
         { status: 409 }
       );
     }
+
+    // Stok: hanya diubah bila dikirim; status ketersediaan mengikuti aturan stok
+    const stockProvided = Object.prototype.hasOwnProperty.call(data, "stock");
+    const stock = stockProvided ? normalizeStock(rawStock) : current.stock;
+    // - stok diubah  -> aturan penuh (0 = Habis, restock dari Habis = Tersedia)
+    // - stok tidak diubah -> status manual dihormati, kecuali stok 0 selalu Habis
+    const finalAvailability = availability
+      ? stockProvided
+        ? applyStockRule(stock, availability as AvailabilityStatus)
+        : stock === 0
+        ? "HABIS"
+        : (availability as AvailabilityStatus)
+      : undefined;
 
     // Update Product Info
     await prisma.product.update({
@@ -105,7 +130,8 @@ export async function PUT(
         condition,
         basePrice: basePrice !== null && basePrice !== undefined ? BigInt(basePrice) : null,
         originalPrice: originalPrice !== null && originalPrice !== undefined ? BigInt(originalPrice) : null,
-        availability,
+        availability: finalAvailability,
+        ...(stockProvided ? { stock } : {}),
         warranty,
         bonus,
         isFeatured,
@@ -193,7 +219,7 @@ export async function DELETE(
   const { id } = await params;
   try {
     const existing = await prisma.product.findFirst({
-      where: { id, deletedAt: null },
+      where: { id, tenantId: auth.tenantId, deletedAt: null },
       select: { id: true, slug: true },
     });
     if (!existing) {

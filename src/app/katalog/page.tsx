@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getStoreBrand } from "@/lib/store-brand";
 import Link from "next/link";
 import { X } from "lucide-react";
 import { getProducts } from "@/lib/repository";
@@ -13,6 +14,7 @@ export async function generateMetadata({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }): Promise<Metadata> {
+  const { brand } = await getStoreBrand();
   const raw = await searchParams;
   const kategori = typeof raw.kategori === "string" ? raw.kategori : "";
   const kondisi = typeof raw.kondisi === "string" ? raw.kondisi : "";
@@ -30,7 +32,7 @@ export async function generateMetadata({
   else if (q) title = `Hasil Pencarian "${q}"`;
 
   const description =
-    "Jelajahi laptop baru & bekas pilihan, PC gaming rakitan, tablet, smartphone, dan aksesoris komputer bergaransi dengan penawaran harga terbaik di Hadi Computer.";
+    "Jelajahi laptop baru & bekas pilihan, PC gaming rakitan, tablet, smartphone, dan aksesoris komputer bergaransi dengan penawaran harga terbaik di ${brand}.";
 
   return {
     title,
@@ -39,21 +41,21 @@ export async function generateMetadata({
       type: "website",
       locale: "id_ID",
       url: "/katalog",
-      siteName: "Hadi Computer",
-      title: `${title} | Hadi Computer`,
+      siteName: `${brand}`,
+      title: `${title} | ${brand}`,
       description,
       images: [
         {
           url: "/images/banners/promo-bundle.png",
           width: 1200,
           height: 630,
-          alt: "Katalog Hadi Computer",
+          alt: `Katalog ${brand}`,
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
-      title: `${title} | Hadi Computer`,
+      title: `${title} | ${brand}`,
       description,
       images: ["/images/banners/promo-bundle.png"],
     },
@@ -73,6 +75,7 @@ export default async function CatalogPage({
       (entry): entry is [string, string] => typeof entry[1] === "string",
     ),
   ) as CatalogQuery;
+  const { brand } = await getStoreBrand();
   const [products, liveCategories, liveBrands, liveNeeds] = await Promise.all([
     getLiveProducts(),
     getLiveCategories(),
@@ -85,7 +88,8 @@ export default async function CatalogPage({
   const dbBrands = liveBrands.map((b) => b.name);
   const allBrands = [...new Set([...dbBrands, ...productBrands])].filter(Boolean).sort();
   const chips = Object.entries(query).filter(
-    ([key, value]) => value && !["page", "urut"].includes(key),
+    // store/preview/template = parameter pratinjau toko, bukan filter produk
+    ([key, value]) => value && !["page", "urut", "store", "preview", "template"].includes(key),
   );
   return (
     <Container className="page-container">
@@ -95,7 +99,7 @@ export default async function CatalogPage({
         <h1>Perangkat untuk setiap kebutuhan.</h1>
         <p>
           Jelajahi pilihan baru dan bekas. Pilih, kenali, lalu ngobrol dengan
-          Hadi.
+          {brand}.
         </p>
       </div>
       <div className="catalog-layout">

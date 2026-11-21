@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getStoreBrand } from "@/lib/store-brand";
 import { MapPin, Clock3, MessageCircle, Info } from "lucide-react";
 import { Container, Breadcrumbs } from "@/components/ui";
 import { LocationPanel } from "@/components/location-panel";
@@ -9,38 +10,41 @@ import { getLiveStoreSettings } from "@/lib/live-repository";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export const metadata: Metadata = {
+export async function generateMetadata(): Promise<Metadata> {
+  const { brand, store } = await getStoreBrand();
+  return {
   title: "Lokasi Toko Fisik & Jam Operasional",
   description:
-    "Kunjungi toko fisik Hadi Computer di Jl. Ahmad Yani No. 45, Lantai 1. Buka setiap hari 08.00 – 22.00 WIB. Konsultasi unit dan servis langsung dengan owner.",
+    `Kunjungi toko fisik ${brand} ${store.address ? `di ${store.address}. ` : ""}${store.hours || ""} Konsultasi unit dan servis langsung dengan owner.`,
   openGraph: {
     type: "website",
     locale: "id_ID",
     url: "/lokasi",
-    siteName: "Hadi Computer",
-    title: "Lokasi Toko Fisik & Jam Buka | Hadi Computer",
+    siteName: `${brand}`,
+    title: `Lokasi Toko Fisik & Jam Buka | ${brand}`,
     description:
-      "Kunjungi toko fisik Hadi Computer di Jl. Ahmad Yani No. 45, Lantai 1. Buka setiap hari 08.00 – 22.00 WIB.",
+      `Kunjungi toko fisik ${brand} ${store.address ? `di ${store.address}. ` : ""}${store.hours || ""}`,
     images: [
       {
         url: "/images/banners/work.png",
         width: 1200,
         height: 630,
-        alt: "Lokasi Toko Hadi Computer",
+        alt: `Lokasi Toko ${brand}`,
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Lokasi Toko Fisik & Jam Buka | Hadi Computer",
+    title: `Lokasi Toko Fisik & Jam Buka | ${brand}`,
     description:
-      "Kunjungi toko fisik Hadi Computer di Jl. Ahmad Yani No. 45. Buka setiap hari 08.00 – 22.00 WIB.",
+      `Kunjungi toko fisik ${brand} ${store.address ? `di ${store.address}. ` : ""}${store.hours || ""}`,
     images: ["/images/banners/work.png"],
   },
   alternates: {
     canonical: "/lokasi",
   },
 };
+}
 export default async function LocationPage() {
   const store = await getLiveStoreSettings();
   return (

@@ -44,8 +44,8 @@ export function ProductCard({
               Hemat {rupiah(discount.savings)}
             </span>
           )}
-          {product.labels.includes("Pilihan Hadi") && !discount && (
-            <span className="badge badge-red">Pilihan Hadi</span>
+          {product.labels.includes("Pilihan Toko") && !discount && (
+            <span className="badge badge-red">Pilihan Toko</span>
           )}
         </div>
         <span className="product-open" aria-hidden="true">
@@ -85,6 +85,11 @@ export function ProductCard({
         <span className={`stock stock-${offer.availability}`}>
           <i />
           {availabilityLabel[offer.availability]}
+          {product.stockLabel && (
+            <strong className="stock-label-urgent" style={{ color: "var(--red)", fontWeight: 700 }}>
+              {" · "}{product.stockLabel}
+            </strong>
+          )}
           {product.variants.length > 0 && (
             <span className="variant-count">
               · {product.variants.length} varian

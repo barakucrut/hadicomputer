@@ -1,12 +1,27 @@
 import type { MetadataRoute } from "next";
+import { getStorefrontSeo } from "@/lib/tenant-seo";
 
-export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+/** robots.txt per domain toko. Toko yang tidak boleh diindeks -> disallow semua. */
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  const seo = await getStorefrontSeo();
+  // Landing page platform rigspace.id: boleh diindeks (kecuali CMS & API)
+  if (seo.tenant.resolution === "platform-root") {
+    return {
+      rules: { userAgent: "*", allow: "/", disallow: ["/admin", "/god-mode", "/api/", "/demo/"] },
+      sitemap: `${seo.origin}/sitemap.xml`,
+      host: seo.origin,
+    };
+  }
+  if (!seo.indexable) {
+    return { rules: { userAgent: "*", disallow: "/" } };
+  }
   return {
     rules: {
       userAgent: "*",
       allow: "/",
+      disallow: ["/admin", "/god-mode", "/api/", "/docs"],
     },
-    sitemap: `${baseUrl}/sitemap.xml`,
+    sitemap: `${seo.origin}/sitemap.xml`,
+    host: seo.origin,
   };
 }

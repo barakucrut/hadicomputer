@@ -1,36 +1,33 @@
 import { NextResponse } from "next/server";
-import { checkGodCredentials, signGodToken, GOD_COOKIE_NAME } from "@/lib/god-auth";
+import { checkGodCredentials, checkPlatformUserCredentials, signGodToken, GOD_COOKIE_NAME, type GodSessionPayload } from "@/lib/god-auth";
 
 export async function POST(request: Request) {
   try {
-    const { username, password } = await request.json();
+    const body = await request.json().catch(() => ({}));
+    const username = typeof body.username === "string" ? body.username.trim() : "";
+    const password = typeof body.password === "string" ? body.password : "";
 
     if (!username || !password) {
-      return NextResponse.json(
-        { error: "Username dan password wajib diisi" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Email dan password wajib diisi" }, { status: 400 });
     }
 
-    const isValid = checkGodCredentials(username, password);
-    if (!isValid) {
-      return NextResponse.json(
-        { error: "Kredensial Superadmin tidak valid. Periksa username dan password." },
-        { status: 401 }
-      );
+    // 1. Superadmin bawaan dari env, 2. akun tim platform (superadmin/marketing) di database
+    let payload: GodSessionPayload | null = null;
+    if (checkGodCredentials(username, password)) {
+      payload = { username, role: "SUPERADMIN" };
+    } else {
+      const user = await checkPlatformUserCredentials(username, password);
+      if (user) payload = { username: user.email, role: user.role, userId: user.id, name: user.name };
     }
 
-    const token = await signGodToken({
-      username: username.trim(),
-      role: "SUPERADMIN",
-    });
+    if (!payload) {
+      return NextResponse.json({ error: "Email atau password salah, atau akun sedang dinonaktifkan." }, { status: 401 });
+    }
 
+    const token = await signGodToken(payload);
     const response = NextResponse.json({
       success: true,
-      user: {
-        username: username.trim(),
-        role: "SUPERADMIN",
-      },
+      user: { username: payload.username, name: payload.name || "Superadmin", role: payload.role },
     });
 
     response.cookies.set({
@@ -42,13 +39,12 @@ export async function POST(request: Request) {
       path: "/",
       maxAge: 60 * 60 * 24 * 2, // 2 days
     });
+    // Sesi impersonasi lama tidak boleh terbawa ke akun lain
+    response.cookies.delete("god_impersonated_tenant_id");
 
     return response;
   } catch (error) {
     console.error("God-mode login error:", error);
-    return NextResponse.json(
-      { error: "Terjadi kesalahan server saat autentikasi God Mode" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Terjadi kesalahan server saat login." }, { status: 500 });
   }
 }

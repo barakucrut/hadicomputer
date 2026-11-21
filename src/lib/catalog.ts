@@ -73,7 +73,7 @@ export function queryCatalog(
                 Boolean(v.price) &&
                 (v.originalPrice as number) > (v.price as number),
             )
-          : product.labels.includes(query.koleksi))) &&
+          : product.labels.includes(query.koleksi === "Pilihan Hadi" ? "Pilihan Toko" : query.koleksi))) &&
       (!query.kebutuhan || product.needs.includes(query.kebutuhan)) &&
       (!(hasMin || hasMax) ||
         (offer.price !== null &&
@@ -107,6 +107,7 @@ export function productMessage(
   product: Product,
   variant: ProductVariant | undefined,
   url: string,
+  storeName = "",
 ) {
   const offer = effectiveOffer(product, variant);
   const discount = getProductDiscount(product, variant);
@@ -115,5 +116,5 @@ export function productMessage(
     : "";
   const bonusLine = product.bonus ? `\nBonus: ${product.bonus}` : "";
 
-  return `Halo Hadi Computer, saya ingin bertanya tentang:\n\nProduk: ${product.name}\nKode: ${product.code}${variant ? `\nVarian: ${variant.name}` : ""}\nHarga katalog: ${priceLabel(offer.price)}${discountLine}${bonusLine}\nTautan: ${url}\n\nApakah produk ini masih tersedia?`;
+  return `Halo ${storeName || "kak"}, saya ingin bertanya tentang:\n\nProduk: ${product.name}\nKode: ${product.code}${variant ? `\nVarian: ${variant.name}` : ""}\nHarga katalog: ${priceLabel(offer.price)}${discountLine}${bonusLine}\nTautan: ${url}\n\nApakah produk ini masih tersedia?`;
 }

@@ -26,6 +26,10 @@ export type Product = {
   conditionNote?: string;
   specs: { name: string; value: string }[];
   variants: ProductVariant[];
+  /** Jumlah stok (null = tidak dilacak) */
+  stock?: number | null;
+  /** Label stok siap tampil sesuai pengaturan toko, mis. "Sisa 4 unit" / "Stok terbatas" */
+  stockLabel?: string | null;
   labels: string[];
   needs: string[];
   publishedAt: string;
@@ -58,6 +62,28 @@ export type Banner = {
   cta: string;
   theme: "light" | "dark" | "sage";
   hotspots?: BannerHotspot[];
+  /** "hero" = banner utama (slide), "tile" = kartu samping */
+  placement?: "hero" | "tile";
+  /** Harga (dari produk tertaut atau isian manual) */
+  price?: number | null;
+  originalPrice?: number | null;
+  /** Spek ringkas produk tertaut, mis. ["i7-13650HX", "RTX 4050"] */
+  specs?: string[];
+  productSlug?: string | null;
+  /** "studio" = foto produk transparan di panggung gelap; "photo" = gambar banner biasa */
+  style?: "studio" | "photo";
+};
+
+export type ServiceCaseItem = {
+  id: string;
+  title: string;
+  device: string | null;
+  summary: string;
+  durationText: string | null;
+  completedAt: string | null;
+  images: string[];
+  serviceName: string | null;
+  serviceSlug: string | null;
 };
 export type HomepageSectionToggles = {
   heroSlider?: boolean;
@@ -107,4 +133,7 @@ export type StoreSettings = {
   facebook: string | null;
   mapsUrl: string | null;
   homepageConfig?: HomepageConfig | null;
+  /** Tampilan stok di etalase (diisi layout dari pengaturan toko) */
+  stockDisplay?: "hidden" | "exact" | "limited";
+  lowStockThreshold?: number;
 };

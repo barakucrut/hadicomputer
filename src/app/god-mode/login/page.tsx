@@ -2,13 +2,14 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { ShieldAlert, User, Lock, AlertCircle, ArrowRight, Eye, EyeOff, Sparkles } from "lucide-react";
+import { RigspaceMark } from "@/components/admin/rigspace-mark";
+import { ShieldAlert, User, Lock, AlertCircle, ArrowRight, Eye, EyeOff } from "lucide-react";
 import "@/app/admin.css";
 
 export default function GodModeLoginPage() {
   const router = useRouter();
-  const [username, setUsername] = React.useState("superadmin@platform.com");
-  const [password, setPassword] = React.useState("SuperGodMode2026!");
+  const [username, setUsername] = React.useState("");
+  const [password, setPassword] = React.useState("");
   const [showPassword, setShowPassword] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -44,43 +45,17 @@ export default function GodModeLoginPage() {
       <div className="admin-login-wrapper">
         {/* Brand Header */}
         <div className="admin-login-header">
-          <div
-            className="admin-login-brand-icon"
-            style={{
-              backgroundColor: "var(--red)",
-              color: "#ffffff",
-              boxShadow: "0 6px 16px rgba(221, 32, 40, 0.3)",
-            }}
-          >
-            ⚡
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+            <RigspaceMark size={56} />
           </div>
           <h1 className="admin-login-title">Pusat Kendali God-Mode</h1>
-          <p className="admin-login-subtitle">
-            Platform Multi-Tenant & Sistem Manajemen Retailer Terpusat
-          </p>
+          <p className="admin-login-subtitle">Masuk untuk tim Rigspace.id</p>
         </div>
 
         {/* Shadcn Card Box */}
         <div className="admin-login-card">
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "4px" }}>
-            <h2 className="admin-login-card-title">Akses Superadmin</h2>
-            <span
-              style={{
-                fontSize: "11px",
-                fontWeight: 800,
-                color: "var(--red)",
-                backgroundColor: "rgba(221, 32, 40, 0.1)",
-                padding: "3px 8px",
-                borderRadius: "6px",
-                letterSpacing: "0.5px",
-              }}
-            >
-              ISOLATED ACCESS
-            </span>
-          </div>
-          <p className="admin-login-card-desc">
-            Kredensial master untuk monitoring ekosistem toko, database SHA-1, dan toggle modul runtime.
-          </p>
+          <h2 className="admin-login-card-title">Akses Tim Platform</h2>
+          <p className="admin-login-card-desc">Masukkan email dan password akun tim Anda.</p>
 
           {error && (
             <div
@@ -107,7 +82,7 @@ export default function GodModeLoginPage() {
             {/* Username/Email Field */}
             <div className="admin-form-group">
               <label className="shadcn-label" htmlFor="god-username">
-                Username / Email Master Superadmin
+                Email Akun Tim Platform
               </label>
               <div className="admin-input-wrapper">
                 <span className="admin-input-icon-left">
@@ -119,7 +94,7 @@ export default function GodModeLoginPage() {
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="superadmin@platform.com atau godmode"
+                  placeholder="nama@rigspace.id"
                   className="admin-input-styled has-left-icon"
                   autoComplete="username"
                 />
@@ -129,7 +104,7 @@ export default function GodModeLoginPage() {
             {/* Password Field with Eye Toggle */}
             <div className="admin-form-group">
               <label className="shadcn-label" htmlFor="god-password">
-                Master Security Key / Password
+                Password
               </label>
               <div className="admin-input-wrapper">
                 <span className="admin-input-icon-left">
@@ -141,7 +116,7 @@ export default function GodModeLoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder="Masukkan password"
                   className="admin-input-styled has-left-icon has-right-icon"
                   autoComplete="current-password"
                 />
@@ -155,27 +130,6 @@ export default function GodModeLoginPage() {
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
-            </div>
-
-            {/* Quick credentials helper badge */}
-            <div
-              style={{
-                marginBottom: "20px",
-                padding: "10px 12px",
-                borderRadius: "8px",
-                backgroundColor: "var(--surface)",
-                border: "1px solid var(--border)",
-                fontSize: "12px",
-                color: "var(--muted)",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-              }}
-            >
-              <Sparkles size={14} className="text-amber-500" style={{ flexShrink: 0 }} />
-              <span>
-                Default dev: <strong style={{ color: "var(--ink)" }}>superadmin@platform.com</strong> / <strong style={{ color: "var(--ink)" }}>SuperGodMode2026!</strong>
-              </span>
             </div>
 
             {/* Submit Button */}
@@ -192,7 +146,7 @@ export default function GodModeLoginPage() {
 
         {/* Footer info */}
         <p className="admin-login-footer-text">
-          &copy; {new Date().getFullYear()} Platform Multi-Tenant SaaS. Dilindungi sesi terenkripsi JWT.
+          &copy; {new Date().getFullYear()} Rigspace.id
         </p>
       </div>
     </div>

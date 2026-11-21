@@ -1,5 +1,9 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
+import { requireAdminSession } from "@/lib/auth";
+import { countSampleData } from "@/lib/starter-pack";
+import { SampleDataNotice } from "@/components/admin/sample-data-notice";
+import { notFound } from "next/navigation";
 import { effectiveOffer, rupiah } from "@/lib/catalog";
 import {
   Package,
@@ -20,7 +24,13 @@ import { Button } from "@/components/admin/ui/button";
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
-  // Fetch overview stats
+  const session = await requireAdminSession();
+  const tenantId = session?.tenantId;
+  if (!tenantId) notFound();
+
+  const sampleData = await countSampleData(tenantId);
+
+  // Fetch overview stats (selalu dibatasi ke toko milik sesi)
   const [
     totalProducts,
     availableProducts,
@@ -33,22 +43,23 @@ export default async function AdminDashboardPage() {
     topInquiredProducts,
     recentProducts,
   ] = await Promise.all([
-    prisma.product.count({ where: { deletedAt: null } }),
-    prisma.product.count({ where: { availability: "TERSEDIA", deletedAt: null } }),
-    prisma.product.count({ where: { availability: "PREORDER", deletedAt: null } }),
-    prisma.product.count({ where: { availability: "HABIS", deletedAt: null } }),
-    prisma.banner.count({ where: { isActive: true } }),
-    prisma.service.count({ where: { isActive: true } }),
-    prisma.inquiryLog.count(),
+    prisma.product.count({ where: { tenantId, deletedAt: null } }),
+    prisma.product.count({ where: { availability: "TERSEDIA", deletedAt: null, tenantId } }),
+    prisma.product.count({ where: { availability: "PREORDER", deletedAt: null, tenantId } }),
+    prisma.product.count({ where: { availability: "HABIS", deletedAt: null, tenantId } }),
+    prisma.banner.count({ where: { tenantId, isActive: true } }),
+    prisma.service.count({ where: { tenantId, isActive: true } }),
+    prisma.inquiryLog.count({ where: { tenantId } }),
     prisma.inquiryLog.count({
       where: {
+        tenantId,
         createdAt: {
           gte: new Date(new Date().setHours(0, 0, 0, 0)),
         },
       },
     }),
     prisma.product.findMany({
-      where: { deletedAt: null },
+      where: { tenantId, deletedAt: null },
       include: {
         category: true,
         _count: { select: { inquiryLogs: true } },
@@ -57,7 +68,7 @@ export default async function AdminDashboardPage() {
       take: 5,
     }),
     prisma.product.findMany({
-      where: { deletedAt: null },
+      where: { tenantId, deletedAt: null },
       include: { category: true, brand: true },
       orderBy: { createdAt: "desc" },
       take: 5,
@@ -89,6 +100,12 @@ export default async function AdminDashboardPage() {
           </a>
         </div>
       </div>
+
+      <SampleDataNotice
+        products={sampleData.products}
+        banners={sampleData.banners}
+        services={sampleData.services}
+      />
 
       {/* KPI Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -282,7 +299,7 @@ export default async function AdminDashboardPage() {
         <div>
           <h3 className="text-lg font-bold">Kelola Hotspot Interaktif pada Banner Hero</h3>
           <p className="text-xs md:text-sm text-white/80 mt-1 max-w-2xl">
-            Tambahkan label bonus fisik seperti "FREE Gaming Mouse" atau "FREE Kaos Hadi" langsung di atas gambar banner hero Anda.
+            Tambahkan label bonus fisik seperti "FREE Gaming Mouse" atau "FREE Kaos Eksklusif" langsung di atas gambar banner hero Anda.
           </p>
         </div>
         <Link href="/admin/banner">

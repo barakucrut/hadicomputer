@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { requireAdminSession } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import { ProductForm } from "@/components/admin/product-form";
 
@@ -10,8 +11,10 @@ export default async function AdminEditProductPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const session = await requireAdminSession();
+  if (!session?.tenantId) notFound();
   const product = await prisma.product.findFirst({
-    where: { id, deletedAt: null },
+    where: { id, tenantId: session.tenantId, deletedAt: null },
     include: {
       category: true,
       brand: true,

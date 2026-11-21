@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { MessageCircle } from "lucide-react";
 import { useStoreSettings } from "./store-context";
+import { trackEvent } from "@/components/storefront-analytics";
 
 const DEFAULT_WHATSAPP_PHONE = "+6285769000007";
 
@@ -14,7 +15,7 @@ export interface WhatsAppTrackingData {
 }
 
 export function WhatsAppButton({
-  message = "Halo Hadi Computer, saya ingin konsultasi tentang produk dan layanan.",
+  message = "Halo kak, saya ingin konsultasi tentang produk dan layanan.",
   label = "Konsultasi via WhatsApp",
   className = "",
   phone,
@@ -47,6 +48,15 @@ export function WhatsAppButton({
   }, [message, phoneDigits]);
 
   const handleClick = () => {
+    // Event konversi untuk GA4/GTM (lead WhatsApp)
+    trackEvent("generate_lead", {
+      method: "whatsapp",
+      inquiry_type: trackingData?.inquiryType || "GENERAL",
+      item_id: trackingData?.productId || trackingData?.serviceId,
+      item_variant: trackingData?.variantName,
+      value: trackingData?.priceAtInquiry,
+      currency: "IDR",
+    });
     if (trackingData) {
       try {
         const payload = JSON.stringify(trackingData);

@@ -1,11 +1,29 @@
 import { prisma } from "./db";
 
-/** Format SKU unit: HC-0001, HC-0002, ... (minimal 4 digit, boleh lebih). */
-export const SKU_PREFIX = "HC-";
-const SKU_PATTERN = /^HC-(\d+)$/;
+/** Prefix bawaan dari inisial nama toko: "Hadi Computer" -> "HC", "Plaza Bitcom Jember" -> "PBJ". */
+export function prefixFromName(name: string): string {
+  const initials = name
+    .split(/[^A-Za-z0-9]+/)
+    .filter(Boolean)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 4);
+  return initials.length >= 2 ? initials : (name.replace(/[^A-Za-z]/g, "").slice(0, 3).toUpperCase() || "SKU");
+}
 
-export function formatSku(n: number): string {
-  return `${SKU_PREFIX}${String(n).padStart(4, "0")}`;
+/** Prefix SKU tenant, mis. "HC-" (dari pengaturan toko, atau otomatis dari nama). */
+export async function getSkuPrefix(tenantId: string): Promise<string> {
+  const tenant = await prisma.tenant.findUnique({
+    where: { id: tenantId },
+    select: { name: true, settings: { select: { skuPrefix: true } } },
+  });
+  const raw = tenant?.settings?.skuPrefix?.trim() || prefixFromName(tenant?.name || "");
+  return `${raw.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8) || "SKU"}-`;
+}
+
+export function formatSku(prefix: string, n: number): string {
+  return `${prefix}${String(n).padStart(4, "0")}`;
 }
 
 /** Rapikan input manual: hapus spasi di tepi & jadikan huruf besar. */
@@ -14,27 +32,29 @@ export function normalizeSku(code: unknown): string {
 }
 
 /**
- * SKU berikutnya = angka HC-NNNN terbesar + 1.
- * Menghitung SEMUA produk, termasuk yang sudah di-soft-delete, sehingga
- * nomor yang pernah dipakai tidak akan pernah diterbitkan ulang.
+ * SKU berikutnya untuk satu toko = angka PREFIX-NNNN terbesar + 1.
+ * Menghitung SEMUA produk toko itu, termasuk yang sudah di-soft-delete,
+ * sehingga nomor yang pernah dipakai tidak akan pernah diterbitkan ulang.
  */
-export async function getNextSku(): Promise<string> {
+export async function getNextSku(tenantId: string): Promise<string> {
+  const prefix = await getSkuPrefix(tenantId);
+  const pattern = new RegExp(`^${prefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(\\d+)$`);
   const codes = await prisma.product.findMany({
-    where: { code: { startsWith: SKU_PREFIX } },
+    where: { tenantId, code: { startsWith: prefix } },
     select: { code: true },
   });
   let max = 0;
   for (const { code } of codes) {
-    const m = SKU_PATTERN.exec(code);
+    const m = pattern.exec(code);
     if (m) max = Math.max(max, Number(m[1]));
   }
-  return formatSku(max + 1);
+  return formatSku(prefix, max + 1);
 }
 
-/** Cek SKU sudah dipakai produk lain (termasuk yang sudah dihapus). */
-export async function isSkuTaken(code: string, excludeId?: string): Promise<boolean> {
+/** Cek SKU sudah dipakai produk lain DI TOKO YANG SAMA (termasuk yang sudah dihapus). */
+export async function isSkuTaken(tenantId: string, code: string, excludeId?: string): Promise<boolean> {
   const found = await prisma.product.findFirst({
-    where: { code, ...(excludeId ? { NOT: { id: excludeId } } : {}) },
+    where: { tenantId, code, ...(excludeId ? { NOT: { id: excludeId } } : {}) },
     select: { id: true },
   });
   return Boolean(found);

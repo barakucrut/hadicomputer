@@ -4,11 +4,12 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Lock, Mail, AlertCircle, ArrowRight, Eye, EyeOff } from "lucide-react";
 import "@/app/admin.css";
+import { RigspaceMark } from "@/components/admin/rigspace-mark";
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const [email, setEmail] = React.useState("admin@hadicomputer.com");
-  const [password, setPassword] = React.useState("admin123");
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
   const [showPassword, setShowPassword] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -44,18 +45,18 @@ export default function AdminLoginPage() {
       <div className="admin-login-wrapper">
         {/* Brand Header */}
         <div className="admin-login-header">
-          <div className="admin-login-brand-icon">HC</div>
-          <h1 className="admin-login-title">Hadi Computer CMS</h1>
-          <p className="admin-login-subtitle">
-            Panel pengelolaan katalog perangkat & analitik toko
-          </p>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+            <RigspaceMark size={56} />
+          </div>
+          <h1 className="admin-login-title">Rigspace.id</h1>
+          <p className="admin-login-subtitle">Content Management System</p>
         </div>
 
         {/* Shadcn Card Box */}
         <div className="admin-login-card">
-          <h2 className="admin-login-card-title">Masuk ke Akun Owner</h2>
+          <h2 className="admin-login-card-title">Masuk ke Akun Toko</h2>
           <p className="admin-login-card-desc">
-            Masukkan alamat email dan kata sandi administrator Anda.
+            Masukkan email dan password akun Anda.
           </p>
 
           {error && (
@@ -83,7 +84,7 @@ export default function AdminLoginPage() {
             {/* Email Field */}
             <div className="admin-form-group">
               <label className="shadcn-label" htmlFor="admin-email">
-                Email Administrator
+                Email
               </label>
               <div className="admin-input-wrapper">
                 <span className="admin-input-icon-left">
@@ -95,7 +96,7 @@ export default function AdminLoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@hadicomputer.com"
+                  placeholder="nama@tokoanda.com"
                   className="admin-input-styled has-left-icon"
                   autoComplete="email"
                 />
@@ -105,7 +106,7 @@ export default function AdminLoginPage() {
             {/* Password Field with Eye Toggle */}
             <div className="admin-form-group">
               <label className="shadcn-label" htmlFor="admin-password">
-                Kata Sandi
+                Password
               </label>
               <div className="admin-input-wrapper">
                 <span className="admin-input-icon-left">
@@ -117,7 +118,7 @@ export default function AdminLoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder="Masukkan password"
                   className="admin-input-styled has-left-icon has-right-icon"
                   autoComplete="current-password"
                 />
@@ -147,7 +148,7 @@ export default function AdminLoginPage() {
 
         {/* Footer info */}
         <p className="admin-login-footer-text">
-          &copy; {new Date().getFullYear()} Hadi Computer. Semua data tersimpan aman di server lokal.
+          &copy; {new Date().getFullYear()} Rigspace.id — Platform website toko komputer & elektronik.
         </p>
       </div>
     </div>

@@ -6,11 +6,15 @@ import {
   getLiveCategories,
   getLiveNeeds,
   getLiveServices,
+  getLiveBrands,
+  getLiveServiceCases,
+  getLiveStoreProfile,
 } from "@/lib/live-repository";
 import {
   ClassicRetailHome,
   MinimalistBoutiqueHome,
   GamingArenaHome,
+  PrecisionHome,
 } from "@/components/storefront/templates";
 
 export const dynamic = "force-dynamic";
@@ -23,7 +27,8 @@ export default async function HomePage({
 }) {
   const resolvedParams = searchParams ? await searchParams : {};
   const explicitStore = resolvedParams.store || resolvedParams.preview;
-  const tenant = await resolveStorefrontTenant(explicitStore);
+  // ?store= hanya berlaku untuk tim internal / host dev (dicek di resolver)
+  const tenant = await resolveStorefrontTenant(undefined, { previewSlug: explicitStore });
   const storeSettings = tenant.settings;
   const config = storeSettings.homepageConfig || {};
 
@@ -46,6 +51,15 @@ export default async function HomePage({
     needs: liveNeeds,
     services: liveServices,
   };
+
+  if (templateId === "precision") {
+    const [brands, serviceCases, profile] = await Promise.all([
+      getLiveBrands(tenant.id),
+      getLiveServiceCases(tenant.id, 6),
+      getLiveStoreProfile(tenant.id),
+    ]);
+    return <PrecisionHome {...templateProps} brands={brands} serviceCases={serviceCases} profile={profile} />;
+  }
 
   if (templateId === "gaming-arena") {
     return <GamingArenaHome {...templateProps} />;

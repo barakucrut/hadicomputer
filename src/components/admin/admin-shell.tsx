@@ -9,6 +9,7 @@ import {
   Layers,
   Image as ImageIcon,
   Wrench,
+  Camera,
   MessageSquare,
   Settings,
   Users,
@@ -20,8 +21,11 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   ChevronDown,
+  KeyRound,
 } from "lucide-react";
+import { ChangePasswordDialog } from "@/components/account/change-password-dialog";
 import { ToastProvider } from "@/components/admin/ui/toast";
+import { RigspaceMark } from "@/components/admin/rigspace-mark";
 import {
   PermissionsProvider,
   AccessDenied,
@@ -55,15 +59,16 @@ export function AdminShell({ children, user }: AdminShellProps) {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [isCollapsed, setIsCollapsed] = React.useState(false);
+  const [passwordOpen, setPasswordOpen] = React.useState(false);
 
   // Superadmin Merchant Switcher State
   const [isMerchantDropdownOpen, setIsMerchantDropdownOpen] = React.useState(false);
   const [tenants, setTenants] = React.useState<TenantOption[]>([]);
   const merchantDropdownRef = React.useRef<HTMLDivElement>(null);
 
-  // Fetch tenants if Superadmin
+  // Tim platform (god-mode): daftar toko untuk switcher — API sudah membatasi lingkup peran
   React.useEffect(() => {
-    if (user?.role === "SUPERADMIN") {
+    if (user?.isImpersonating) {
       fetch("/api/god-mode/tenants")
         .then((res) => res.json())
         .then((data) => {
@@ -71,7 +76,7 @@ export function AdminShell({ children, user }: AdminShellProps) {
         })
         .catch(console.error);
     }
-  }, [user?.role]);
+  }, [user?.isImpersonating]);
 
   // Click outside to close dropdown
   React.useEffect(() => {
@@ -144,6 +149,7 @@ export function AdminShell({ children, user }: AdminShellProps) {
     { label: "Kategori & Merek", href: "/admin/kategori", icon: Layers, permission: "categories:manage" },
     { label: "Banner Hero", href: "/admin/banner", icon: ImageIcon, permission: "banners:view" },
     { label: "Layanan & Servis", href: "/admin/layanan", icon: Wrench, permission: "services:view" },
+    { label: "Portofolio Servis", href: "/admin/portofolio", icon: Camera, permission: "services:view" },
     { label: "Inquiry WhatsApp", href: "/admin/inquiry-analytics", icon: MessageSquare, permission: "inquiries:view" },
     { label: "User & Role", href: "/admin/user-role", icon: Users, permission: "users:view" },
     { label: "Pengaturan Toko", href: "/admin/pengaturan", icon: Settings },
@@ -196,14 +202,15 @@ export function AdminShell({ children, user }: AdminShellProps) {
       <aside
         className={`admin-sidebar ${isCollapsed ? "is-collapsed" : ""}`}
         style={{
-          transform: mobileMenuOpen ? "translateX(0)" : undefined,
+          // Di HP sidebar tersembunyi sampai menu dibuka (desktop: transform di-reset oleh admin.css)
+          transform: mobileMenuOpen ? "translateX(0)" : "translateX(-100%)",
         }}
       >
         {/* Brand Header */}
         <div className="admin-sidebar-header">
           <Link
             href="/admin"
-            title="Hadi CMS — Dashboard"
+            title="Rigspace.id — Content Management System"
             style={{
               display: "flex",
               alignItems: "center",
@@ -215,26 +222,12 @@ export function AdminShell({ children, user }: AdminShellProps) {
               minWidth: 0,
             }}
           >
-            <div
-              style={{
-                height: "36px",
-                width: "36px",
-                minWidth: "36px",
-                borderRadius: "10px",
-                backgroundColor: "var(--red)",
-                color: "#ffffff",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontWeight: 900,
-                fontSize: "15px",
-                boxShadow: "0 4px 10px rgba(221, 32, 40, 0.25)",
-              }}
-            >
-              HC
-            </div>
-            <span className="admin-sidebar-brand-text" style={{ whiteSpace: "nowrap" }}>
-              Hadi CMS
+            <RigspaceMark size={36} />
+            <span className="admin-sidebar-brand-text" style={{ display: "flex", flexDirection: "column", lineHeight: 1.15, minWidth: 0 }}>
+              <span style={{ whiteSpace: "nowrap", fontSize: "16px", fontWeight: 800, letterSpacing: "-0.01em" }}>Rigspace.id</span>
+              <span style={{ whiteSpace: "nowrap", fontSize: "11px", fontWeight: 600, color: "var(--muted)" }}>
+                Content Management System
+              </span>
             </span>
           </Link>
 
@@ -319,7 +312,7 @@ export function AdminShell({ children, user }: AdminShellProps) {
             gap: "4px",
           }}
         >
-          {user?.role === "SUPERADMIN" && (
+          {user?.isImpersonating && (
             <Link
               href="/god-mode"
               title="Kembali ke Pusat Kendali God-Mode"
@@ -372,6 +365,39 @@ export function AdminShell({ children, user }: AdminShellProps) {
             </span>
             <ExternalLink size={13} style={{ flexShrink: 0 }} />
           </a>
+          {/* Superadmin god-mode tidak punya akun toko: password diubah di /god-mode */}
+          {user && !user.isImpersonating && (
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                setPasswordOpen(true);
+              }}
+              title="Ubah Password"
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: isCollapsed ? "center" : "flex-start",
+                gap: "8px",
+                padding: "9px 12px",
+                borderRadius: "var(--radius-sm)",
+                fontSize: "12px",
+                fontWeight: 600,
+                color: "var(--muted)",
+                backgroundColor: "transparent",
+                border: "none",
+                cursor: "pointer",
+                textAlign: "left",
+                transition: "background 0.15s ease",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--surface)")}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+            >
+              <KeyRound size={16} style={{ flexShrink: 0 }} />
+              <span>Ubah Password</span>
+            </button>
+          )}
           <button
             onClick={handleLogout}
             title="Keluar Akun"
@@ -400,6 +426,13 @@ export function AdminShell({ children, user }: AdminShellProps) {
           </button>
         </div>
       </aside>
+
+      <ChangePasswordDialog
+        open={passwordOpen}
+        onOpenChange={setPasswordOpen}
+        endpoint="/api/admin/auth/change-password"
+        email={user?.email}
+      />
 
       {/* Main Content Area */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
@@ -451,13 +484,13 @@ export function AdminShell({ children, user }: AdminShellProps) {
               <Menu size={22} />
             </button>
             <span style={{ fontSize: "14px", fontWeight: 700, color: "var(--ink)" }}>
-              Panel Pengelola {user?.tenantName || "Hadi Computer"}
+              Panel Pengelola {user?.tenantName || "Toko"}
             </span>
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
             {/* Superadmin Tenant Switcher Dropdown (Pinned to Topbar) */}
-            {user?.role === "SUPERADMIN" && (
+            {user?.isImpersonating && (
               <div ref={merchantDropdownRef} style={{ position: "relative" }}>
                 <button
                   type="button"
@@ -529,7 +562,7 @@ export function AdminShell({ children, user }: AdminShellProps) {
                         textTransform: "uppercase",
                       }}
                     >
-                      SUPERADMIN CONTROL
+                      {user?.role === "SUPERADMIN" ? "SUPERADMIN CONTROL" : "GOD-MODE · TOKO ANDA"}
                     </div>
 
                     {/* Option 1: Back to God Mode */}
@@ -699,7 +732,7 @@ export function AdminShell({ children, user }: AdminShellProps) {
 
             <div style={{ textAlign: "right" }} className="hidden sm:block">
               <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--ink)", display: "flex", alignItems: "center", gap: "6px", justifyContent: "flex-end" }}>
-                <span>{user?.name || "Owner Hadi Computer"}</span>
+                <span>{user?.name || "Pengguna"}</span>
                 {user?.roleName && (
                   <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#f1f3ed] text-[#525854] border border-[#e2e5dc]">
                     {user.roleName}
@@ -707,7 +740,7 @@ export function AdminShell({ children, user }: AdminShellProps) {
                 )}
               </div>
               <div style={{ fontSize: "11px", color: "var(--muted)" }}>
-                {user?.email || "admin@hadicomputer.com"}
+                {user?.email || ""}
               </div>
             </div>
             <div

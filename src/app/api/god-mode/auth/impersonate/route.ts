@@ -1,34 +1,33 @@
 import { NextResponse } from "next/server";
-import { getGodSession } from "@/lib/god-auth";
+import { authorizePlatform } from "@/lib/god-auth";
 import { prisma } from "@/lib/db";
+import { ALL_PLATFORM_ROLES } from "@/lib/platform-access";
+import { findScopedTenant } from "@/lib/platform-tenant";
+import { IMPERSONATION_COOKIE } from "@/lib/platform-cms";
 
 export async function POST(request: Request) {
   try {
-    const godSession = await getGodSession();
-    if (!godSession) {
-      return NextResponse.json(
-        { error: "Akses ditolak: Hanya Superadmin yang berhak melakukan impersonasi tenant." },
-        { status: 403 }
-      );
-    }
+    // Superadmin: semua toko. CMO/Marketing: hanya toko dalam lingkupnya (lainnya 404).
+    const auth = await authorizePlatform(ALL_PLATFORM_ROLES);
+    if (!auth.ok) return auth.response;
 
-    const { tenantId } = await request.json();
+    const { tenantId } = await request.json().catch(() => ({}));
 
-    if (!tenantId) {
+    if (!tenantId || typeof tenantId !== "string") {
       return NextResponse.json(
         { error: "tenantId wajib diberikan." },
         { status: 400 }
       );
     }
 
-    const tenant = await prisma.tenant.findUnique({
-      where: { id: tenantId },
-      include: { settings: true },
-    });
+    const owned = await findScopedTenant(auth.session, tenantId);
+    const tenant = owned
+      ? await prisma.tenant.findUnique({ where: { id: owned.id }, select: { id: true, name: true, slug: true } })
+      : null;
 
     if (!tenant) {
       return NextResponse.json(
-        { error: "Tenant toko tidak ditemukan di database." },
+        { error: "Toko tidak ditemukan." },
         { status: 404 }
       );
     }
@@ -45,7 +44,7 @@ export async function POST(request: Request) {
 
     // Set impersonation cookie (valid 1 day)
     response.cookies.set({
-      name: "god_impersonated_tenant_id",
+      name: IMPERSONATION_COOKIE,
       value: tenant.id,
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -69,6 +68,6 @@ export async function DELETE() {
     success: true,
     message: "Keluar dari mode impersonasi tenant.",
   });
-  response.cookies.delete("god_impersonated_tenant_id");
+  response.cookies.delete(IMPERSONATION_COOKIE);
   return response;
 }

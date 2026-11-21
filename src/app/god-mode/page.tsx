@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { tenantStorefrontHost } from "@/lib/platform-domain";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -38,6 +39,8 @@ import {
   CardContent,
 } from "@/components/admin/ui/card";
 import { useToast, ToastProvider } from "@/components/admin/ui/toast";
+import { GodRoleBadge, GodSidebar, useGodSession } from "@/components/god-mode/god-shell";
+import { MarketingDashboard } from "@/components/god-mode/marketing-dashboard";
 import "@/app/admin.css";
 
 interface TenantData {
@@ -173,103 +176,7 @@ function GodModeExecutiveSummary() {
   return (
     <div className="admin-shell-root">
       {/* Sidebar for God Mode */}
-      <aside className="admin-sidebar">
-        <div className="admin-sidebar-header">
-          <Link
-            href="/god-mode"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              fontWeight: 800,
-              fontSize: "17px",
-              color: "var(--ink)",
-              textDecoration: "none",
-            }}
-          >
-            <div
-              style={{
-                height: "36px",
-                width: "36px",
-                borderRadius: "10px",
-                backgroundColor: "var(--red)",
-                color: "#ffffff",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontWeight: 900,
-                fontSize: "15px",
-                boxShadow: "0 4px 10px rgba(221, 32, 40, 0.25)",
-              }}
-            >
-              ⚡
-            </div>
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <span style={{ lineHeight: 1.2, fontWeight: 900, fontSize: "16px", letterSpacing: "-0.3px" }}>Rigspace</span>
-              <span style={{ fontSize: "10px", color: "var(--red)", fontWeight: 800 }}>
-                MASTER ENGINE
-              </span>
-            </div>
-          </Link>
-        </div>
-
-        <nav
-          style={{
-            flex: 1,
-            padding: "16px 12px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "4px",
-          }}
-        >
-          <Link href="/god-mode" className="admin-nav-item active">
-            <LayoutDashboard size={19} />
-            <span>Dashboard Summary</span>
-          </Link>
-          <Link href="/god-mode/tenants" className="admin-nav-item">
-            <Store size={19} />
-            <span>Daftar Tenant Toko</span>
-          </Link>
-          <Link href="/god-mode/transactions" className="admin-nav-item">
-            <Receipt size={19} />
-            <span>Transaksi Keuangan</span>
-          </Link>
-          <Link href="/god-mode/styleguide" className="admin-nav-item">
-            <Palette size={19} />
-            <span>Design Guide</span>
-          </Link>
-        </nav>
-
-        <div className="admin-sidebar-footer" style={{ padding: "14px", borderTop: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: "12px" }}>
-          <button
-            type="button"
-            onClick={handleLogout}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "8px 10px",
-              borderRadius: "8px",
-              border: "1px solid var(--border)",
-              backgroundColor: "transparent",
-              color: "var(--red)",
-              fontSize: "12px",
-              fontWeight: 700,
-              cursor: "pointer",
-              transition: "all 0.15s ease",
-            }}
-          >
-            <LogOut size={15} />
-            <span>Keluar God-Mode</span>
-          </button>
-
-          <div style={{ fontSize: "11px", color: "var(--muted)", lineHeight: 1.4 }}>
-            Rigspace.id
-            <br />
-            <strong>The OS for PC Retailers</strong>
-          </div>
-        </div>
-      </aside>
+      <GodSidebar active="/god-mode" />
 
       {/* Main Area */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
@@ -279,9 +186,7 @@ function GodModeExecutiveSummary() {
             <span style={{ fontSize: "14px", fontWeight: 800, color: "var(--ink)" }}>
               Pusat Kendali Eksekutif Platform
             </span>
-            <Badge variant="default" className="text-[11px] bg-red-600">
-              SUPERADMIN
-            </Badge>
+            <GodRoleBadge />
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
@@ -710,7 +615,7 @@ function GodModeExecutiveSummary() {
                               )}
                             </div>
                             <div className="text-[11px] text-[#818779] mt-0.5">
-                              {t.customDomain || `${t.slug}.tokopc.id`}
+                              {t.customDomain || tenantStorefrontHost(t.slug)}
                             </div>
                           </div>
                         </div>
@@ -753,10 +658,19 @@ function GodModeExecutiveSummary() {
   );
 }
 
+/** Superadmin: ringkasan eksekutif platform. Marketing: portofolio tenant miliknya. */
+function DashboardByRole() {
+  const { user, loading } = useGodSession();
+  if (loading || !user) {
+    return <div className="p-10 text-center text-sm text-[#818779]">Memuat data...</div>;
+  }
+  return user.role === "SUPERADMIN" ? <GodModeExecutiveSummary /> : <MarketingDashboard />;
+}
+
 export default function GodModeDashboardPage() {
   return (
     <ToastProvider>
-      <GodModeExecutiveSummary />
+      <DashboardByRole />
     </ToastProvider>
   );
 }

@@ -1,0 +1,1307 @@
+{
+  "version": 1,
+  "generatedFrom": "hadicomputer",
+  "generatedAt": "2026-11-19",
+  "categories": [
+    {
+      "name": "PC Desktop",
+      "slug": "pc",
+      "icon": "pc",
+      "description": "Gaming & produktivitas",
+      "sortOrder": 0
+    },
+    {
+      "name": "Laptop",
+      "slug": "laptop",
+      "icon": "laptop",
+      "description": "Kerja, kuliah & kreasi",
+      "sortOrder": 1
+    },
+    {
+      "name": "Smartphone",
+      "slug": "smartphone",
+      "icon": "smartphone",
+      "description": "Tetap terhubung",
+      "sortOrder": 2
+    },
+    {
+      "name": "Tablet",
+      "slug": "tablet",
+      "icon": "tablet",
+      "description": "Ringkas & serbaguna",
+      "sortOrder": 3
+    },
+    {
+      "name": "Aksesoris",
+      "slug": "aksesori",
+      "icon": "headphones",
+      "description": "Lengkapi perangkatmu",
+      "sortOrder": 4
+    }
+  ],
+  "brands": [
+    {
+      "name": "Asus",
+      "slug": "asus",
+      "logoUrl": null,
+      "sortOrder": 0
+    },
+    {
+      "name": "Axio",
+      "slug": "axio",
+      "logoUrl": null,
+      "sortOrder": 0
+    },
+    {
+      "name": "Apple",
+      "slug": "apple",
+      "logoUrl": null,
+      "sortOrder": 1
+    },
+    {
+      "name": "Dell",
+      "slug": "dell",
+      "logoUrl": null,
+      "sortOrder": 2
+    },
+    {
+      "name": "Huawei",
+      "slug": "huawei",
+      "logoUrl": null,
+      "sortOrder": 3
+    },
+    {
+      "name": "Lenovo",
+      "slug": "lenovo",
+      "logoUrl": null,
+      "sortOrder": 4
+    },
+    {
+      "name": "Samsung",
+      "slug": "samsung",
+      "logoUrl": null,
+      "sortOrder": 5
+    },
+    {
+      "name": "Oppo",
+      "slug": "oppo",
+      "logoUrl": null,
+      "sortOrder": 6
+    },
+    {
+      "name": "Beats",
+      "slug": "beats",
+      "logoUrl": null,
+      "sortOrder": 7
+    },
+    {
+      "name": "MSI",
+      "slug": "msi",
+      "logoUrl": null,
+      "sortOrder": 8
+    }
+  ],
+  "needs": [
+    {
+      "name": "Kerja",
+      "slug": "kerja",
+      "description": "Perangkat andalan untuk hari produktif",
+      "icon": "briefcase",
+      "sortOrder": 1
+    },
+    {
+      "name": "Kuliah",
+      "slug": "kuliah",
+      "description": "Dari tugas pertama sampai ide besar",
+      "icon": "graduation-cap",
+      "sortOrder": 2
+    },
+    {
+      "name": "Kreatif",
+      "slug": "kreatif",
+      "description": "Teman untuk mewujudkan imajinasimu",
+      "icon": "palette",
+      "sortOrder": 3
+    },
+    {
+      "name": "Gaming",
+      "slug": "gaming",
+      "description": "Performa tinggi untuk bermain game",
+      "icon": "gamepad",
+      "sortOrder": 4
+    },
+    {
+      "name": "Harian",
+      "slug": "harian",
+      "description": "Aktivitas ringan & santai setiap hari",
+      "icon": "home",
+      "sortOrder": 5
+    }
+  ],
+  "products": [
+    {
+      "name": "Asus Zenbook Pro Dual Screen Laptop",
+      "slug": "asus-zenbook-pro-dual-screen-laptop",
+      "categorySlug": "laptop",
+      "brandSlug": "asus",
+      "summary": "Intel Core i7 · 16 GB RAM · 1 TB SSD",
+      "description": "Asus Zenbook Pro Dual Screen Laptop menjadi pilihan untuk melengkapi aktivitasmu. Lihat konfigurasi, kondisi, dan ketersediaan di halaman ini, lalu diskusikan kebutuhanmu dengan {store}.",
+      "condition": "BARU",
+      "basePrice": 18999000,
+      "originalPrice": 20999000,
+      "availability": "TERSEDIA",
+      "warranty": "Informasi garansi dikonfirmasi melalui owner",
+      "bonus": "Free Kaos {store} + Mouse Wireless",
+      "isFeatured": true,
+      "isBestSeller": true,
+      "isPromo": true,
+      "isNewArrival": false,
+      "needs": [
+        "kerja",
+        "kuliah",
+        "kreatif"
+      ],
+      "images": [
+        "/images/products/asus-zenbook-pro-dual-screen-laptop-1.webp",
+        "/images/products/asus-zenbook-pro-dual-screen-laptop-2.webp",
+        "/images/products/asus-zenbook-pro-dual-screen-laptop-3.webp"
+      ],
+      "specs": [
+        {
+          "key": "Merek",
+          "value": "Asus"
+        },
+        {
+          "key": "Kategori",
+          "value": "Laptop"
+        },
+        {
+          "key": "Kondisi",
+          "value": "Baru"
+        },
+        {
+          "key": "Konfigurasi",
+          "value": "Intel Core i7 · 16 GB RAM · 1 TB SSD"
+        }
+      ],
+      "variants": [
+        {
+          "name": "16 GB / 1 TB",
+          "price": 18999000,
+          "originalPrice": 21300000,
+          "availability": "TERSEDIA",
+          "isDefault": true
+        },
+        {
+          "name": "32 GB / 1 TB",
+          "price": 21999000,
+          "originalPrice": 24600000,
+          "availability": "PREORDER",
+          "isDefault": false
+        },
+        {
+          "name": "32 GB / 2 TB",
+          "price": null,
+          "originalPrice": null,
+          "availability": "HABIS",
+          "isDefault": false
+        }
+      ]
+    },
+    {
+      "name": "Apple MacBook Pro 14 Inch Space Grey",
+      "slug": "apple-macbook-pro-14-inch-space-grey",
+      "categorySlug": "laptop",
+      "brandSlug": "apple",
+      "summary": "Apple M1 Pro · 16 GB RAM · 512 GB SSD",
+      "description": "Apple MacBook Pro 14 Inch Space Grey menjadi pilihan untuk melengkapi aktivitasmu. Lihat konfigurasi, kondisi, dan ketersediaan di halaman ini, lalu diskusikan kebutuhanmu dengan {store}.",
+      "condition": "BARU",
+      "basePrice": 22499000,
+      "originalPrice": 31499000,
+      "availability": "TERSEDIA",
+      "warranty": "Informasi garansi dikonfirmasi melalui owner",
+      "bonus": "Free Sleeve Case + USB-C Hub",
+      "isFeatured": true,
+      "isBestSeller": false,
+      "isPromo": true,
+      "isNewArrival": true,
+      "needs": [
+        "kerja",
+        "kuliah",
+        "kreatif"
+      ],
+      "images": [
+        "/images/products/apple-macbook-pro-14-inch-space-grey-1.webp",
+        "/images/products/apple-macbook-pro-14-inch-space-grey-2.webp",
+        "/images/products/apple-macbook-pro-14-inch-space-grey-3.webp"
+      ],
+      "specs": [
+        {
+          "key": "Merek",
+          "value": "Apple"
+        },
+        {
+          "key": "Kategori",
+          "value": "Laptop"
+        },
+        {
+          "key": "Kondisi",
+          "value": "Baru"
+        },
+        {
+          "key": "Konfigurasi",
+          "value": "Apple M1 Pro · 16 GB RAM · 512 GB SSD"
+        }
+      ],
+      "variants": []
+    },
+    {
+      "name": "Dell XPS 13 9300 Laptop",
+      "slug": "new-dell-xps-13-9300-laptop-bekas",
+      "categorySlug": "laptop",
+      "brandSlug": "dell",
+      "summary": "Intel Core i7 · 16 GB RAM · 512 GB SSD",
+      "description": "New DELL XPS 13 9300 Laptop menjadi pilihan untuk melengkapi aktivitasmu. Lihat konfigurasi, kondisi, dan ketersediaan di halaman ini, lalu diskusikan kebutuhanmu dengan {store}.",
+      "condition": "BEKAS",
+      "basePrice": 8499000,
+      "originalPrice": 12500000,
+      "availability": "TERSEDIA",
+      "warranty": "Garansi toko 30 hari",
+      "bonus": "Free Mouse + Tas Laptop",
+      "isFeatured": true,
+      "isBestSeller": true,
+      "isPromo": true,
+      "isNewArrival": false,
+      "needs": [
+        "kerja",
+        "kuliah"
+      ],
+      "images": [
+        "/images/products/new-dell-xps-13-9300-laptop-1.webp",
+        "/images/products/new-dell-xps-13-9300-laptop-2.webp",
+        "/images/products/new-dell-xps-13-9300-laptop-3.webp"
+      ],
+      "specs": [
+        {
+          "key": "Merek",
+          "value": "Dell"
+        },
+        {
+          "key": "Kategori",
+          "value": "Laptop"
+        },
+        {
+          "key": "Kondisi",
+          "value": "Bekas"
+        },
+        {
+          "key": "Konfigurasi",
+          "value": "Intel Core i7 · 16 GB RAM · 512 GB SSD"
+        }
+      ],
+      "variants": []
+    },
+    {
+      "name": "iPad Mini 2021 Starlight",
+      "slug": "ipad-mini-2021-starlight",
+      "categorySlug": "tablet",
+      "brandSlug": "apple",
+      "summary": "Layar 8,3 inci · 64 GB · Wi-Fi",
+      "description": "iPad Mini 2021 Starlight menjadi pilihan untuk melengkapi aktivitasmu. Lihat konfigurasi, kondisi, dan ketersediaan di halaman ini, lalu diskusikan kebutuhanmu dengan {store}.",
+      "condition": "BARU",
+      "basePrice": 7499000,
+      "originalPrice": 8499000,
+      "availability": "TERSEDIA",
+      "warranty": "Informasi garansi dikonfirmasi melalui owner",
+      "bonus": "Free Stylus Pen + Tempered Glass",
+      "isFeatured": true,
+      "isBestSeller": false,
+      "isPromo": true,
+      "isNewArrival": true,
+      "needs": [
+        "kerja",
+        "kuliah"
+      ],
+      "images": [
+        "/images/products/ipad-mini-2021-starlight-1.webp",
+        "/images/products/ipad-mini-2021-starlight-2.webp",
+        "/images/products/ipad-mini-2021-starlight-3.webp"
+      ],
+      "specs": [
+        {
+          "key": "Merek",
+          "value": "Apple"
+        },
+        {
+          "key": "Kategori",
+          "value": "Tablet"
+        },
+        {
+          "key": "Kondisi",
+          "value": "Baru"
+        },
+        {
+          "key": "Konfigurasi",
+          "value": "Layar 8,3 inci · 64 GB · Wi-Fi"
+        }
+      ],
+      "variants": [
+        {
+          "name": "64 GB · Wi-Fi",
+          "price": 7499000,
+          "originalPrice": 8400000,
+          "availability": "TERSEDIA",
+          "isDefault": true
+        },
+        {
+          "name": "256 GB · Wi-Fi",
+          "price": 9999000,
+          "originalPrice": 11200000,
+          "availability": "TERSEDIA",
+          "isDefault": false
+        }
+      ]
+    },
+    {
+      "name": "Huawei Matebook X Pro",
+      "slug": "huawei-matebook-x-pro",
+      "categorySlug": "laptop",
+      "brandSlug": "huawei",
+      "summary": "Intel Core i7 · 16 GB RAM · 512 GB SSD",
+      "description": "Huawei Matebook X Pro menjadi pilihan untuk melengkapi aktivitasmu. Lihat konfigurasi, kondisi, dan ketersediaan di halaman ini, lalu diskusikan kebutuhanmu dengan {store}.",
+      "condition": "BARU",
+      "basePrice": 15999000,
+      "originalPrice": 17999000,
+      "availability": "PREORDER",
+      "warranty": "Informasi garansi dikonfirmasi melalui owner",
+      "bonus": "Free Kaos {store} + Backpack",
+      "isFeatured": false,
+      "isBestSeller": false,
+      "isPromo": true,
+      "isNewArrival": true,
+      "needs": [
+        "kerja",
+        "kuliah"
+      ],
+      "images": [
+        "/images/products/huawei-matebook-x-pro-1.webp",
+        "/images/products/huawei-matebook-x-pro-2.webp",
+        "/images/products/huawei-matebook-x-pro-3.webp"
+      ],
+      "specs": [
+        {
+          "key": "Merek",
+          "value": "Huawei"
+        },
+        {
+          "key": "Kategori",
+          "value": "Laptop"
+        },
+        {
+          "key": "Kondisi",
+          "value": "Baru"
+        },
+        {
+          "key": "Konfigurasi",
+          "value": "Intel Core i7 · 16 GB RAM · 512 GB SSD"
+        }
+      ],
+      "variants": []
+    },
+    {
+      "name": "Lenovo Yoga 920",
+      "slug": "lenovo-yoga-920-bekas",
+      "categorySlug": "laptop",
+      "brandSlug": "lenovo",
+      "summary": "Intel Core i7 · 8 GB RAM · 256 GB SSD",
+      "description": "Lenovo Yoga 920 menjadi pilihan untuk melengkapi aktivitasmu. Lihat konfigurasi, kondisi, dan ketersediaan di halaman ini, lalu diskusikan kebutuhanmu dengan {store}.",
+      "condition": "BEKAS",
+      "basePrice": 6299000,
+      "originalPrice": null,
+      "availability": "TERSEDIA",
+      "warranty": "Garansi toko 30 hari",
+      "bonus": null,
+      "isFeatured": false,
+      "isBestSeller": true,
+      "isPromo": false,
+      "isNewArrival": false,
+      "needs": [
+        "kerja",
+        "kuliah"
+      ],
+      "images": [
+        "/images/products/lenovo-yoga-920-1.webp",
+        "/images/products/lenovo-yoga-920-2.webp",
+        "/images/products/lenovo-yoga-920-3.webp"
+      ],
+      "specs": [
+        {
+          "key": "Merek",
+          "value": "Lenovo"
+        },
+        {
+          "key": "Kategori",
+          "value": "Laptop"
+        },
+        {
+          "key": "Kondisi",
+          "value": "Bekas"
+        },
+        {
+          "key": "Konfigurasi",
+          "value": "Intel Core i7 · 8 GB RAM · 256 GB SSD"
+        }
+      ],
+      "variants": []
+    },
+    {
+      "name": "Apple Airpods",
+      "slug": "apple-airpods",
+      "categorySlug": "aksesori",
+      "brandSlug": "apple",
+      "summary": "Wireless · Charging case · White",
+      "description": "Apple Airpods menjadi pilihan untuk melengkapi aktivitasmu. Lihat konfigurasi, kondisi, dan ketersediaan di halaman ini, lalu diskusikan kebutuhanmu dengan {store}.",
+      "condition": "BARU",
+      "basePrice": 1899000,
+      "originalPrice": 2299000,
+      "availability": "TERSEDIA",
+      "warranty": "Informasi garansi dikonfirmasi melalui owner",
+      "bonus": "Free Silicone Case",
+      "isFeatured": true,
+      "isBestSeller": true,
+      "isPromo": true,
+      "isNewArrival": false,
+      "needs": [
+        "harian"
+      ],
+      "images": [
+        "/images/products/apple-airpods-1.webp",
+        "/images/products/apple-airpods-2.webp",
+        "/images/products/apple-airpods-3.webp"
+      ],
+      "specs": [
+        {
+          "key": "Merek",
+          "value": "Apple"
+        },
+        {
+          "key": "Kategori",
+          "value": "Aksesori"
+        },
+        {
+          "key": "Kondisi",
+          "value": "Baru"
+        },
+        {
+          "key": "Konfigurasi",
+          "value": "Wireless · Charging case · White"
+        }
+      ],
+      "variants": []
+    },
+    {
+      "name": "Apple AirPods Max Silver",
+      "slug": "apple-airpods-max-silver",
+      "categorySlug": "aksesori",
+      "brandSlug": "apple",
+      "summary": "Over-ear · Noise cancellation · Silver",
+      "description": "Apple AirPods Max Silver menjadi pilihan untuk melengkapi aktivitasmu. Lihat konfigurasi, kondisi, dan ketersediaan di halaman ini, lalu diskusikan kebutuhanmu dengan {store}.",
+      "condition": "BARU",
+      "basePrice": null,
+      "originalPrice": 9499000,
+      "availability": "TERSEDIA",
+      "warranty": "Informasi garansi dikonfirmasi melalui owner",
+      "bonus": "Free Headphone Stand",
+      "isFeatured": true,
+      "isBestSeller": false,
+      "isPromo": true,
+      "isNewArrival": true,
+      "needs": [
+        "harian"
+      ],
+      "images": [
+        "/images/products/apple-airpods-max-silver-1.webp"
+      ],
+      "specs": [
+        {
+          "key": "Merek",
+          "value": "Apple"
+        },
+        {
+          "key": "Kategori",
+          "value": "Aksesori"
+        },
+        {
+          "key": "Kondisi",
+          "value": "Baru"
+        },
+        {
+          "key": "Konfigurasi",
+          "value": "Over-ear · Noise cancellation · Silver"
+        }
+      ],
+      "variants": []
+    },
+    {
+      "name": "Samsung Galaxy Tab S8 Plus Grey",
+      "slug": "samsung-galaxy-tab-s8-plus-grey",
+      "categorySlug": "tablet",
+      "brandSlug": "samsung",
+      "summary": "Layar 12,4 inci · 128 GB · Wi-Fi",
+      "description": "Samsung Galaxy Tab S8 Plus Grey menjadi pilihan untuk melengkapi aktivitasmu. Lihat konfigurasi, kondisi, dan ketersediaan di halaman ini, lalu diskusikan kebutuhanmu dengan {store}.",
+      "condition": "BARU",
+      "basePrice": 11999000,
+      "originalPrice": 13499000,
+      "availability": "HABIS",
+      "warranty": "Informasi garansi dikonfirmasi melalui owner",
+      "bonus": "Free Book Cover Keyboard",
+      "isFeatured": false,
+      "isBestSeller": false,
+      "isPromo": true,
+      "isNewArrival": false,
+      "needs": [
+        "kerja",
+        "kuliah"
+      ],
+      "images": [
+        "/images/products/samsung-galaxy-tab-s8-plus-grey-1.webp",
+        "/images/products/samsung-galaxy-tab-s8-plus-grey-2.webp",
+        "/images/products/samsung-galaxy-tab-s8-plus-grey-3.webp"
+      ],
+      "specs": [
+        {
+          "key": "Merek",
+          "value": "Samsung"
+        },
+        {
+          "key": "Kategori",
+          "value": "Tablet"
+        },
+        {
+          "key": "Kondisi",
+          "value": "Baru"
+        },
+        {
+          "key": "Konfigurasi",
+          "value": "Layar 12,4 inci · 128 GB · Wi-Fi"
+        }
+      ],
+      "variants": []
+    },
+    {
+      "name": "iPhone 13 Pro",
+      "slug": "iphone-13-pro-bekas",
+      "categorySlug": "smartphone",
+      "brandSlug": "apple",
+      "summary": "128 GB · Graphite · Unit pilihan",
+      "description": "iPhone 13 Pro menjadi pilihan untuk melengkapi aktivitasmu. Lihat konfigurasi, kondisi, dan ketersediaan di halaman ini, lalu diskusikan kebutuhanmu dengan {store}.",
+      "condition": "BEKAS",
+      "basePrice": 9499000,
+      "originalPrice": null,
+      "availability": "TERSEDIA",
+      "warranty": "Garansi toko 30 hari",
+      "bonus": null,
+      "isFeatured": false,
+      "isBestSeller": false,
+      "isPromo": false,
+      "isNewArrival": false,
+      "needs": [
+        "harian"
+      ],
+      "images": [
+        "/images/products/iphone-13-pro-1.webp",
+        "/images/products/iphone-13-pro-2.webp",
+        "/images/products/iphone-13-pro-3.webp"
+      ],
+      "specs": [
+        {
+          "key": "Merek",
+          "value": "Apple"
+        },
+        {
+          "key": "Kategori",
+          "value": "Smartphone"
+        },
+        {
+          "key": "Kondisi",
+          "value": "Bekas"
+        },
+        {
+          "key": "Konfigurasi",
+          "value": "128 GB · Graphite · Unit pilihan"
+        }
+      ],
+      "variants": []
+    },
+    {
+      "name": "Oppo A57",
+      "slug": "oppo-a57",
+      "categorySlug": "smartphone",
+      "brandSlug": "oppo",
+      "summary": "4 GB RAM · 64 GB · Dual SIM",
+      "description": "Oppo A57 menjadi pilihan untuk melengkapi aktivitasmu. Lihat konfigurasi, kondisi, dan ketersediaan di halaman ini, lalu diskusikan kebutuhanmu dengan {store}.",
+      "condition": "BARU",
+      "basePrice": 2199000,
+      "originalPrice": 2499000,
+      "availability": "TERSEDIA",
+      "warranty": "Informasi garansi dikonfirmasi melalui owner",
+      "bonus": "Free Earphone",
+      "isFeatured": true,
+      "isBestSeller": false,
+      "isPromo": true,
+      "isNewArrival": true,
+      "needs": [
+        "harian"
+      ],
+      "images": [
+        "/images/products/oppo-a57-1.webp",
+        "/images/products/oppo-a57-2.webp",
+        "/images/products/oppo-a57-3.webp"
+      ],
+      "specs": [
+        {
+          "key": "Merek",
+          "value": "Oppo"
+        },
+        {
+          "key": "Kategori",
+          "value": "Smartphone"
+        },
+        {
+          "key": "Kondisi",
+          "value": "Baru"
+        },
+        {
+          "key": "Konfigurasi",
+          "value": "4 GB RAM · 64 GB · Dual SIM"
+        }
+      ],
+      "variants": []
+    },
+    {
+      "name": "Beats Flex Wireless Earphones",
+      "slug": "beats-flex-wireless-earphones",
+      "categorySlug": "aksesori",
+      "brandSlug": "beats",
+      "summary": "Wireless audio · USB-C · Black",
+      "description": "Beats Flex Wireless Earphones menjadi pilihan untuk melengkapi aktivitasmu. Lihat konfigurasi, kondisi, dan ketersediaan di halaman ini, lalu diskusikan kebutuhanmu dengan {store}.",
+      "condition": "BARU",
+      "basePrice": 799000,
+      "originalPrice": 1199000,
+      "availability": "HABIS",
+      "warranty": "Informasi garansi dikonfirmasi melalui owner",
+      "bonus": "Free Pouch Earphone",
+      "isFeatured": false,
+      "isBestSeller": false,
+      "isPromo": true,
+      "isNewArrival": false,
+      "needs": [
+        "harian"
+      ],
+      "images": [
+        "/images/products/beats-flex-wireless-earphones-1.webp"
+      ],
+      "specs": [
+        {
+          "key": "Merek",
+          "value": "Beats"
+        },
+        {
+          "key": "Kategori",
+          "value": "Aksesori"
+        },
+        {
+          "key": "Kondisi",
+          "value": "Baru"
+        },
+        {
+          "key": "Konfigurasi",
+          "value": "Wireless audio · USB-C · Black"
+        }
+      ],
+      "variants": []
+    },
+    {
+      "name": "Samsung Galaxy Tab White",
+      "slug": "samsung-galaxy-tab-white-bekas",
+      "categorySlug": "tablet",
+      "brandSlug": "samsung",
+      "summary": "Layar ringkas · Wi-Fi · White",
+      "description": "Samsung Galaxy Tab White menjadi pilihan untuk melengkapi aktivitasmu. Lihat konfigurasi, kondisi, dan ketersediaan di halaman ini, lalu diskusikan kebutuhanmu dengan {store}.",
+      "condition": "BEKAS",
+      "basePrice": 2499000,
+      "originalPrice": null,
+      "availability": "TERSEDIA",
+      "warranty": "Garansi toko 30 hari",
+      "bonus": null,
+      "isFeatured": false,
+      "isBestSeller": false,
+      "isPromo": false,
+      "isNewArrival": false,
+      "needs": [
+        "kerja",
+        "kuliah"
+      ],
+      "images": [
+        "/images/products/samsung-galaxy-tab-white-1.webp",
+        "/images/products/samsung-galaxy-tab-white-2.webp",
+        "/images/products/samsung-galaxy-tab-white-3.webp"
+      ],
+      "specs": [
+        {
+          "key": "Merek",
+          "value": "Samsung"
+        },
+        {
+          "key": "Kategori",
+          "value": "Tablet"
+        },
+        {
+          "key": "Kondisi",
+          "value": "Bekas"
+        },
+        {
+          "key": "Konfigurasi",
+          "value": "Layar ringkas · Wi-Fi · White"
+        }
+      ],
+      "variants": []
+    },
+    {
+      "name": "Apple MagSafe Battery Pack",
+      "slug": "apple-magsafe-battery-pack",
+      "categorySlug": "aksesori",
+      "brandSlug": "apple",
+      "summary": "Magnetic charging · Portable",
+      "description": "Apple MagSafe Battery Pack menjadi pilihan untuk melengkapi aktivitasmu. Lihat konfigurasi, kondisi, dan ketersediaan di halaman ini, lalu diskusikan kebutuhanmu dengan {store}.",
+      "condition": "BARU",
+      "basePrice": 1299000,
+      "originalPrice": null,
+      "availability": "PREORDER",
+      "warranty": "Informasi garansi dikonfirmasi melalui owner",
+      "bonus": null,
+      "isFeatured": false,
+      "isBestSeller": false,
+      "isPromo": false,
+      "isNewArrival": false,
+      "needs": [
+        "harian"
+      ],
+      "images": [
+        "/images/products/apple-magsafe-battery-pack-1.webp",
+        "/images/products/apple-magsafe-battery-pack-2.webp"
+      ],
+      "specs": [
+        {
+          "key": "Merek",
+          "value": "Apple"
+        },
+        {
+          "key": "Kategori",
+          "value": "Aksesori"
+        },
+        {
+          "key": "Kondisi",
+          "value": "Baru"
+        },
+        {
+          "key": "Konfigurasi",
+          "value": "Magnetic charging · Portable"
+        }
+      ],
+      "variants": []
+    },
+    {
+      "name": "Oppo F19 Pro Plus",
+      "slug": "oppo-f19-pro-plus",
+      "categorySlug": "smartphone",
+      "brandSlug": "oppo",
+      "summary": "8 GB RAM · 128 GB · 5G",
+      "description": "Oppo F19 Pro Plus menjadi pilihan untuk melengkapi aktivitasmu. Lihat konfigurasi, kondisi, dan ketersediaan di halaman ini, lalu diskusikan kebutuhanmu dengan {store}.",
+      "condition": "BARU",
+      "basePrice": null,
+      "originalPrice": null,
+      "availability": "PREORDER",
+      "warranty": "Informasi garansi dikonfirmasi melalui owner",
+      "bonus": null,
+      "isFeatured": false,
+      "isBestSeller": false,
+      "isPromo": false,
+      "isNewArrival": false,
+      "needs": [
+        "harian"
+      ],
+      "images": [
+        "/images/products/oppo-f19-pro-plus-1.webp",
+        "/images/products/oppo-f19-pro-plus-2.webp",
+        "/images/products/oppo-f19-pro-plus-3.webp"
+      ],
+      "specs": [
+        {
+          "key": "Merek",
+          "value": "Oppo"
+        },
+        {
+          "key": "Kategori",
+          "value": "Smartphone"
+        },
+        {
+          "key": "Kondisi",
+          "value": "Baru"
+        },
+        {
+          "key": "Konfigurasi",
+          "value": "8 GB RAM · 128 GB · 5G"
+        }
+      ],
+      "variants": []
+    },
+    {
+      "name": "Apple MacBook Pro 14 Inch Space Grey",
+      "slug": "apple-macbook-pro-14-inch-space-grey-bekas",
+      "categorySlug": "laptop",
+      "brandSlug": "apple",
+      "summary": "Apple M1 Pro · 16 GB RAM · 512 GB SSD",
+      "description": "Apple MacBook Pro 14 Inch Space Grey menjadi pilihan untuk melengkapi aktivitasmu. Lihat konfigurasi, kondisi, dan ketersediaan di halaman ini, lalu diskusikan kebutuhanmu dengan {store}.",
+      "condition": "BEKAS",
+      "basePrice": 15499000,
+      "originalPrice": null,
+      "availability": "TERSEDIA",
+      "warranty": "Garansi toko 30 hari",
+      "bonus": null,
+      "isFeatured": false,
+      "isBestSeller": false,
+      "isPromo": false,
+      "isNewArrival": false,
+      "needs": [
+        "kerja",
+        "kuliah"
+      ],
+      "images": [
+        "/images/products/apple-macbook-pro-14-inch-space-grey-1.webp",
+        "/images/products/apple-macbook-pro-14-inch-space-grey-2.webp",
+        "/images/products/apple-macbook-pro-14-inch-space-grey-3.webp"
+      ],
+      "specs": [
+        {
+          "key": "Merek",
+          "value": "Apple"
+        },
+        {
+          "key": "Kategori",
+          "value": "Laptop"
+        },
+        {
+          "key": "Kondisi",
+          "value": "Bekas"
+        },
+        {
+          "key": "Konfigurasi",
+          "value": "Apple M1 Pro · 16 GB RAM · 512 GB SSD"
+        }
+      ],
+      "variants": []
+    },
+    {
+      "name": "MSI MAG Infinite S3 14th",
+      "slug": "msi-mag-infinite-s3-14th",
+      "categorySlug": "pc",
+      "brandSlug": "msi",
+      "summary": "i5-14400F · RTX 4060 8 GB · 16 GB DDR5",
+      "description": "Desktop gaming tower dengan opsi grafis GeForce RTX dan memori DDR5. Cocok sebagai referensi setup bermain sekaligus produktivitas. Referensi spesifikasi diadaptasi dari produsen. Detail unit, konfigurasi RAM/SSD, serta ketersediaan dapat dikonfirmasi langsung. Monitor dan periferal dijual terpisah atau dapat disesuaikan.",
+      "condition": "BARU",
+      "basePrice": 18999000,
+      "originalPrice": null,
+      "availability": "TERSEDIA",
+      "warranty": "Garansi dan kelengkapan dikonfirmasi melalui owner",
+      "bonus": null,
+      "isFeatured": true,
+      "isBestSeller": false,
+      "isPromo": false,
+      "isNewArrival": true,
+      "needs": [
+        "gaming",
+        "kreatif"
+      ],
+      "images": [
+        "/images/products/msi-mag-infinite-s3-14th-2.webp",
+        "/images/products/msi-mag-infinite-s3-14th-1.webp"
+      ],
+      "specs": [
+        {
+          "key": "Prosesor referensi",
+          "value": "Intel Core i5-14400F"
+        },
+        {
+          "key": "Grafis referensi",
+          "value": "GeForce RTX 4060 8 GB"
+        },
+        {
+          "key": "RAM",
+          "value": "16 GB DDR5"
+        },
+        {
+          "key": "Penyimpanan",
+          "value": "1 TB NVMe SSD"
+        },
+        {
+          "key": "Bentuk perangkat",
+          "value": "Desktop gaming"
+        },
+        {
+          "key": "Kelengkapan",
+          "value": "Unit PC; tanpa monitor dan periferal"
+        }
+      ],
+      "variants": []
+    },
+    {
+      "name": "MSI MPG Trident AS 14th",
+      "slug": "msi-mpg-trident-as-14th",
+      "categorySlug": "pc",
+      "brandSlug": "msi",
+      "summary": "i7-14700F · RTX 4070 12 GB · 32 GB DDR5",
+      "description": "Desktop gaming dengan bodi ramping dan chipset B760. Referensi untuk pengguna yang ingin setup bertenaga dengan ruang meja lebih lega. Referensi spesifikasi diadaptasi dari produsen. Detail unit, konfigurasi RAM/SSD, serta ketersediaan dapat dikonfirmasi langsung. Monitor dan periferal dijual terpisah atau dapat disesuaikan.",
+      "condition": "BARU",
+      "basePrice": 23999000,
+      "originalPrice": null,
+      "availability": "TERSEDIA",
+      "warranty": "Garansi dan kelengkapan dikonfirmasi melalui owner",
+      "bonus": null,
+      "isFeatured": true,
+      "isBestSeller": false,
+      "isPromo": false,
+      "isNewArrival": true,
+      "needs": [
+        "gaming",
+        "kreatif"
+      ],
+      "images": [
+        "/images/products/msi-mpg-trident-as-14th-1.webp"
+      ],
+      "specs": [
+        {
+          "key": "Prosesor referensi",
+          "value": "Intel Core i7-14700F"
+        },
+        {
+          "key": "Grafis referensi",
+          "value": "GeForce RTX 4070 12 GB"
+        },
+        {
+          "key": "RAM",
+          "value": "32 GB DDR5"
+        },
+        {
+          "key": "Penyimpanan",
+          "value": "1 TB NVMe PCIe 4.0 SSD"
+        },
+        {
+          "key": "Bentuk perangkat",
+          "value": "Desktop gaming"
+        },
+        {
+          "key": "Kelengkapan",
+          "value": "Unit PC; tanpa monitor dan periferal"
+        }
+      ],
+      "variants": []
+    },
+    {
+      "name": "MSI MEG Trident X2 14th",
+      "slug": "msi-meg-trident-x2-14th",
+      "categorySlug": "pc",
+      "brandSlug": "msi",
+      "summary": "i9-14900KF · RTX 4090 24 GB · 64 GB DDR5",
+      "description": "Tower kelas performa tinggi dengan chipset Z790 dan empat slot memori DDR5. Seri ini menawarkan opsi grafis hingga RTX 4090 untuk kebutuhan gaming dan kreasi. Referensi spesifikasi diadaptasi dari produsen. Detail unit, konfigurasi RAM/SSD, serta ketersediaan dapat dikonfirmasi langsung. Monitor dan periferal dijual terpisah atau dapat disesuaikan.",
+      "condition": "BARU",
+      "basePrice": null,
+      "originalPrice": null,
+      "availability": "PREORDER",
+      "warranty": "Garansi dan kelengkapan dikonfirmasi melalui owner",
+      "bonus": null,
+      "isFeatured": true,
+      "isBestSeller": false,
+      "isPromo": false,
+      "isNewArrival": false,
+      "needs": [
+        "gaming",
+        "kreatif"
+      ],
+      "images": [
+        "/images/products/msi-meg-trident-x2-14th-1.webp"
+      ],
+      "specs": [
+        {
+          "key": "Prosesor referensi",
+          "value": "Intel Core i9-14900KF"
+        },
+        {
+          "key": "Grafis referensi",
+          "value": "GeForce RTX 4090 24 GB"
+        },
+        {
+          "key": "RAM",
+          "value": "64 GB DDR5"
+        },
+        {
+          "key": "Penyimpanan",
+          "value": "2 TB NVMe SSD"
+        },
+        {
+          "key": "Bentuk perangkat",
+          "value": "Desktop gaming"
+        },
+        {
+          "key": "Kelengkapan",
+          "value": "Unit PC; tanpa monitor dan periferal"
+        }
+      ],
+      "variants": []
+    },
+    {
+      "name": "MSI MAG Codex 6 14th",
+      "slug": "msi-mag-codex-6-14th",
+      "categorySlug": "pc",
+      "brandSlug": "msi",
+      "summary": "i5-14400F · RTX 4060 8 GB · 16 GB DDR5",
+      "description": "Desktop gaming dengan prosesor Intel generasi ke-14 dan opsi grafis GeForce. Pilihan referensi untuk bermain, belajar, dan mengerjakan aktivitas harian. Referensi spesifikasi diadaptasi dari produsen. Detail unit, konfigurasi RAM/SSD, serta ketersediaan dapat dikonfirmasi langsung. Monitor dan periferal dijual terpisah atau dapat disesuaikan.",
+      "condition": "BARU",
+      "basePrice": 15499000,
+      "originalPrice": null,
+      "availability": "TERSEDIA",
+      "warranty": "Garansi dan kelengkapan dikonfirmasi melalui owner",
+      "bonus": null,
+      "isFeatured": false,
+      "isBestSeller": false,
+      "isPromo": false,
+      "isNewArrival": true,
+      "needs": [
+        "gaming",
+        "kuliah"
+      ],
+      "images": [
+        "/images/products/msi-mag-codex-6-14th-1.webp"
+      ],
+      "specs": [
+        {
+          "key": "Prosesor referensi",
+          "value": "Intel Core i5-14400F"
+        },
+        {
+          "key": "Grafis referensi",
+          "value": "GeForce RTX 4060 8 GB"
+        },
+        {
+          "key": "RAM",
+          "value": "16 GB DDR5"
+        },
+        {
+          "key": "Penyimpanan",
+          "value": "512 GB NVMe SSD"
+        },
+        {
+          "key": "Bentuk perangkat",
+          "value": "Desktop gaming"
+        },
+        {
+          "key": "Kelengkapan",
+          "value": "Unit PC; tanpa monitor dan periferal"
+        }
+      ],
+      "variants": []
+    },
+    {
+      "name": "MSI Cubi N ADL",
+      "slug": "msi-cubi-n-adl",
+      "categorySlug": "pc",
+      "brandSlug": "msi",
+      "summary": "N100 · Intel UHD Graphics · 4 GB DDR4",
+      "description": "Mini PC berukuran sekitar 0,66 liter untuk meja kerja ringkas. Seri Cubi N ADL menyediakan HDMI, DisplayPort, dan USB-C dengan dukungan keluaran tiga layar. Referensi spesifikasi diadaptasi dari produsen. Detail unit, konfigurasi RAM/SSD, serta ketersediaan dapat dikonfirmasi langsung. Monitor dan periferal dijual terpisah atau dapat disesuaikan.",
+      "condition": "BARU",
+      "basePrice": 4299000,
+      "originalPrice": null,
+      "availability": "TERSEDIA",
+      "warranty": "Garansi dan kelengkapan dikonfirmasi melalui owner",
+      "bonus": null,
+      "isFeatured": true,
+      "isBestSeller": false,
+      "isPromo": false,
+      "isNewArrival": false,
+      "needs": [
+        "kerja",
+        "kuliah",
+        "harian"
+      ],
+      "images": [
+        "/images/products/msi-cubi-n-adl-1.webp",
+        "/images/products/msi-cubi-n-adl-2.webp"
+      ],
+      "specs": [
+        {
+          "key": "Prosesor referensi",
+          "value": "Intel Processor N100"
+        },
+        {
+          "key": "Grafis referensi",
+          "value": "Intel UHD Graphics"
+        },
+        {
+          "key": "RAM",
+          "value": "4 GB DDR4"
+        },
+        {
+          "key": "Penyimpanan",
+          "value": "128 GB M.2 SSD"
+        },
+        {
+          "key": "Bentuk perangkat",
+          "value": "Mini PC"
+        },
+        {
+          "key": "Kelengkapan",
+          "value": "Unit PC; tanpa monitor dan periferal"
+        }
+      ],
+      "variants": []
+    },
+    {
+      "name": "MSI PRO DP21 14M",
+      "slug": "msi-pro-dp21-14m",
+      "categorySlug": "pc",
+      "brandSlug": "msi",
+      "summary": "i7-14700 · Intel UHD Graphics 770 · 16 GB DDR5",
+      "description": "Desktop ringkas berkapasitas sekitar 2,3 liter untuk kebutuhan kantor. Mendukung pemasangan VESA sehingga penempatan perangkat bisa disesuaikan dengan ruang kerja. Referensi spesifikasi diadaptasi dari produsen. Detail unit, konfigurasi RAM/SSD, serta ketersediaan dapat dikonfirmasi langsung. Monitor dan periferal dijual terpisah atau dapat disesuaikan.",
+      "condition": "BARU",
+      "basePrice": 11999000,
+      "originalPrice": null,
+      "availability": "TERSEDIA",
+      "warranty": "Garansi dan kelengkapan dikonfirmasi melalui owner",
+      "bonus": null,
+      "isFeatured": true,
+      "isBestSeller": false,
+      "isPromo": false,
+      "isNewArrival": true,
+      "needs": [
+        "kerja",
+        "harian"
+      ],
+      "images": [
+        "/images/products/msi-pro-dp21-14m-1.webp",
+        "/images/products/msi-pro-dp21-14m-2.webp"
+      ],
+      "specs": [
+        {
+          "key": "Prosesor referensi",
+          "value": "Intel Core i7-14700"
+        },
+        {
+          "key": "Grafis referensi",
+          "value": "Intel UHD Graphics 770"
+        },
+        {
+          "key": "RAM",
+          "value": "16 GB DDR5"
+        },
+        {
+          "key": "Penyimpanan",
+          "value": "1 TB NVMe SSD"
+        },
+        {
+          "key": "Bentuk perangkat",
+          "value": "Mini PC"
+        },
+        {
+          "key": "Kelengkapan",
+          "value": "Unit PC; tanpa monitor dan periferal"
+        }
+      ],
+      "variants": []
+    }
+  ],
+  "banners": [
+    {
+      "title": "Beli Perangkat Idaman.\nBawa Pulang Bonus Lengkap.",
+      "subtitle": "Dapatkan paket bundling Free Kaos eksklusif {store}, Mouse, Keyboard, dan setup siap pakai untuk setiap pembelian laptop atau PC rakitan pilihan pekan ini.",
+      "badgeText": "PROMO SPESIAL MINGGU INI",
+      "ctaLabel": "Lihat Promo Spesial",
+      "ctaUrl": "#promo-minggu-ini",
+      "imageUrl": "/images/banners/promo-bundle.png",
+      "imageAlt": "Beli Perangkat Idaman.\nBawa Pulang Bonus Lengkap.",
+      "bgTheme": "dark",
+      "sortOrder": 0,
+      "hotspots": [
+        {
+          "label": "FREE Gaming",
+          "xPercent": 84,
+          "yPercent": 32
+        },
+        {
+          "label": "FREE Keyboard",
+          "xPercent": 92,
+          "yPercent": 56
+        },
+        {
+          "label": "FREE Kaos {store}",
+          "xPercent": 82,
+          "yPercent": 76
+        },
+        {
+          "label": "Free Keyboard",
+          "xPercent": 57.2,
+          "yPercent": 51
+        }
+      ]
+    },
+    {
+      "title": "Level baru.\nPengalaman baru.",
+      "subtitle": "Mulai dari ide hingga rakitan. Konsultasikan PC yang sesuai dengan game dan kebutuhanmu.",
+      "badgeText": "BUAT SETUP IMPIANMU",
+      "ctaLabel": "Jelajahi jasa rakit PC",
+      "ctaUrl": "/layanan/rakit-pc",
+      "imageUrl": "/images/banners/gaming.png",
+      "imageAlt": "Level baru.\nPengalaman baru.",
+      "bgTheme": "dark",
+      "sortOrder": 1,
+      "hotspots": []
+    },
+    {
+      "title": "Tetap produktif.\nLebih bersahabat.",
+      "subtitle": "Jelajahi pilihan laptop bekas dengan informasi kondisi yang jelas. Pilih yang pas untukmu.",
+      "badgeText": "PILIHAN CERDAS, NILAI LEBIH",
+      "ctaLabel": "Lihat pilihan bekas",
+      "ctaUrl": "/katalog?kondisi=bekas",
+      "imageUrl": "/images/banners/used.png",
+      "imageAlt": "Tetap produktif.\nLebih bersahabat.",
+      "bgTheme": "sage",
+      "sortOrder": 2,
+      "hotspots": []
+    }
+  ],
+  "services": [
+    {
+      "title": "Servis & perawatan",
+      "slug": "servis-perangkat",
+      "summary": "Perangkat mulai lambat atau butuh perhatian? Ceritakan kendalanya, kita cari solusinya.",
+      "description": "Konsultasikan kendala laptop atau komputer sebelum datang ke toko. Pemeriksaan awal membantu menentukan tindakan dan estimasi biaya yang sesuai dengan kebutuhan perangkatmu.",
+      "estimatedTime": "1 - 3 Hari Kerja",
+      "priceInfo": "Konsultasi / Sesuai Kerusakan",
+      "ctaWhatsappText": "Halo {store}, saya ingin konsultasi mengenai layanan Servis & perawatan.",
+      "iconName": null,
+      "imageUrl": "/images/banners/work.png",
+      "sortOrder": 0
+    },
+    {
+      "title": "Rakit PC sesuai kebutuhan",
+      "slug": "rakit-pc",
+      "summary": "Untuk kerja, kreasi, atau gaming. Mulai dari kebutuhan dan budget, bukan sekadar spesifikasi.",
+      "description": "Bangun PC dengan pilihan komponen yang sesuai kebutuhanmu. Diskusikan penggunaan, anggaran, dan preferensi agar owner dapat memberikan rekomendasi serta penawaran. Owner membantu menyusun rekomendasi dan estimasi setelah memahami kebutuhanmu.",
+      "estimatedTime": "1 - 3 Hari Kerja",
+      "priceInfo": "Konsultasi / Sesuai Kerusakan",
+      "ctaWhatsappText": "Halo {store}, saya ingin konsultasi mengenai layanan Rakit PC sesuai kebutuhan.",
+      "iconName": null,
+      "imageUrl": "/images/banners/gaming.png",
+      "sortOrder": 1
+    }
+  ]
+}

@@ -2,9 +2,14 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { authorizeAdmin } from "@/lib/auth";
+import { notFoundResponse, uniqueConflictResponse } from "@/lib/tenant-scope";
 
 export async function GET() {
+  const auth = await authorizeAdmin();
+  if (!auth.ok) return auth.response;
+
   const categories = await prisma.category.findMany({
+    where: { tenantId: auth.tenantId },
     include: { _count: { select: { products: { where: { deletedAt: null } } } } },
     orderBy: { sortOrder: "asc" },
   });
@@ -20,11 +25,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Nama dan slug wajib diisi" }, { status: 400 });
   }
 
-  const category = await prisma.category.create({
-    data: { name, slug, icon, description, sortOrder, isActive },
-  });
-  revalidatePath("/", "layout");
-  return NextResponse.json({ success: true, category });
+  try {
+    const category = await prisma.category.create({
+      data: { tenantId: auth.tenantId, name, slug, icon, description, sortOrder, isActive },
+    });
+    revalidatePath("/", "layout");
+    return NextResponse.json({ success: true, category });
+  } catch (err) {
+    const conflict = uniqueConflictResponse(err, "kategori");
+    if (conflict) return conflict;
+    throw err;
+  }
 }
 
 export async function PUT(request: Request) {
@@ -32,12 +43,21 @@ export async function PUT(request: Request) {
   if (!auth.ok) return auth.response;
 
   const { id, name, slug, icon, description, sortOrder, isActive } = await request.json();
-  const category = await prisma.category.update({
-    where: { id },
-    data: { name, slug, icon, description, sortOrder, isActive },
-  });
-  revalidatePath("/", "layout");
-  return NextResponse.json({ success: true, category });
+  const owned = await prisma.category.findFirst({ where: { id, tenantId: auth.tenantId }, select: { id: true } });
+  if (!owned) return notFoundResponse("Kategori");
+
+  try {
+    const category = await prisma.category.update({
+      where: { id },
+      data: { name, slug, icon, description, sortOrder, isActive },
+    });
+    revalidatePath("/", "layout");
+    return NextResponse.json({ success: true, category });
+  } catch (err) {
+    const conflict = uniqueConflictResponse(err, "kategori");
+    if (conflict) return conflict;
+    throw err;
+  }
 }
 
 export async function DELETE(request: Request) {
@@ -47,6 +67,9 @@ export async function DELETE(request: Request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
   if (!id) return NextResponse.json({ error: "ID missing" }, { status: 400 });
+
+  const owned = await prisma.category.findFirst({ where: { id, tenantId: auth.tenantId }, select: { id: true } });
+  if (!owned) return notFoundResponse("Kategori");
 
   const [activeCount, deletedCount] = await Promise.all([
     prisma.product.count({ where: { categoryId: id, deletedAt: null } }),

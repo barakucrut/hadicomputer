@@ -4,6 +4,9 @@ import { prisma } from "../src/lib/db";
 import productsData from "../src/lib/products.json";
 import { banners, categories, services, store } from "../src/lib/repository";
 import type { Product as JsonProduct } from "../src/lib/types";
+import { HADI_TENANT_ID } from "../src/lib/tenant-service";
+
+const tenantId = HADI_TENANT_ID;
 
 async function main() {
   console.log("🌱 Starting database seeding...");
@@ -18,6 +21,7 @@ async function main() {
       passwordHash,
       name: "Owner Hadi Computer",
       role: "OWNER",
+      tenantId,
     },
   });
   console.log("✅ Admin user ready:", admin.email);
@@ -50,7 +54,7 @@ async function main() {
   for (let i = 0; i < categories.length; i++) {
     const c = categories[i];
     const cat = await prisma.category.upsert({
-      where: { slug: c.value },
+      where: { tenantId_slug: { tenantId, slug: c.value } },
       update: {
         name: c.name,
         icon: c.icon,
@@ -59,6 +63,7 @@ async function main() {
         isActive: true,
       },
       create: {
+        tenantId,
         name: c.name,
         slug: c.value,
         icon: c.icon,
@@ -79,9 +84,9 @@ async function main() {
     const brandName = uniqueBrands[i];
     const slug = brandName.toLowerCase().replace(/[^a-z0-9]+/g, "-");
     const brand = await prisma.brand.upsert({
-      where: { slug },
+      where: { tenantId_slug: { tenantId, slug } },
       update: { name: brandName, sortOrder: i },
-      create: { name: brandName, slug, sortOrder: i },
+      create: { tenantId, name: brandName, slug, sortOrder: i },
     });
     brandMap.set(brandName, brand.id);
   }
@@ -108,7 +113,7 @@ async function main() {
 
     // Upsert Product
     const product = await prisma.product.upsert({
-      where: { slug: p.slug },
+      where: { tenantId_slug: { tenantId, slug: p.slug } },
       update: {
         code: p.code,
         name: p.name,
@@ -130,6 +135,7 @@ async function main() {
         publicationStatus: "PUBLISHED",
       },
       create: {
+        tenantId,
         code: p.code,
         slug: p.slug,
         name: p.name,
@@ -222,6 +228,7 @@ async function main() {
         isActive: true,
       },
       create: {
+        tenantId,
         id: b.id,
         title: b.title,
         subtitle: b.description,
@@ -255,7 +262,7 @@ async function main() {
   for (let i = 0; i < services.length; i++) {
     const s = services[i];
     await prisma.service.upsert({
-      where: { slug: s.slug },
+      where: { tenantId_slug: { tenantId, slug: s.slug } },
       update: {
         title: s.name,
         summary: s.summary,
@@ -268,6 +275,7 @@ async function main() {
         sortOrder: i,
       },
       create: {
+        tenantId,
         title: s.name,
         slug: s.slug,
         summary: s.summary,

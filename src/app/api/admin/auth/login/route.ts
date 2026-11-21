@@ -16,7 +16,7 @@ export async function POST(request: Request) {
 
     const admin = await prisma.adminUser.findUnique({
       where: { email: email.toLowerCase().trim() },
-      include: { roleRef: true },
+      include: { roleRef: true, tenant: { select: { status: true } } },
     });
 
     if (!admin) {
@@ -41,6 +41,13 @@ export async function POST(request: Request) {
       );
     }
 
+    if (admin.tenant?.status === "SUSPENDED") {
+      return NextResponse.json(
+        { error: "Layanan toko Anda sedang ditangguhkan. Hubungi tim RigSpace." },
+        { status: 403 }
+      );
+    }
+
     // Update lastLoginAt
     await prisma.adminUser.update({
       where: { id: admin.id },
@@ -60,6 +67,7 @@ export async function POST(request: Request) {
       role: admin.roleRef?.slug || admin.role,
       roleName: admin.roleRef?.name || admin.role,
       permissions,
+      tenantId: admin.tenantId,
     });
 
     const response = NextResponse.json({

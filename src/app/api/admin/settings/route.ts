@@ -2,18 +2,13 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { authorizeAdmin } from "@/lib/auth";
+import { DEFAULT_PRIMARY, DEFAULT_SECONDARY, safeHex } from "@/lib/brand-color";
 
 export async function GET() {
-  const session = await getAdminSession();
-  let tenantId = session?.tenantId || null;
-
-  if (!tenantId) {
-    const defaultTenant = await prisma.tenant.findFirst({
-      orderBy: { createdAt: "asc" },
-      select: { id: true },
-    });
-    tenantId = defaultTenant?.id || null;
-  }
+  const auth = await authorizeAdmin();
+  if (!auth.ok) return auth.response;
+  // Selalu tenant milik sesi — tidak pernah jatuh ke tenant lain
+  const tenantId: string | null = auth.tenantId;
 
   if (tenantId) {
     let tenant = await prisma.tenant.findUnique({
@@ -72,7 +67,7 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
-  const auth = await authorizeAdmin(["settings:store_info"]);
+  const auth = await authorizeAdmin(["settings:appearance", "settings:store_info", "settings:sections"]);
   if (!auth.ok) return auth.response;
 
   const data = await request.json();
@@ -97,14 +92,7 @@ export async function PUT(request: Request) {
     homepageConfig,
   } = data;
 
-  let tenantId = session.tenantId || null;
-  if (!tenantId) {
-    const defaultTenant = await prisma.tenant.findFirst({
-      orderBy: { createdAt: "asc" },
-      select: { id: true },
-    });
-    tenantId = defaultTenant?.id || null;
-  }
+  const tenantId: string | null = auth.tenantId;
 
   if (tenantId) {
     if (storeName) {
@@ -120,8 +108,8 @@ export async function PUT(request: Request) {
         tagline,
         logoUrl,
         faviconUrl,
-        primaryColor: primaryColor || "#dd2028",
-        secondaryColor: secondaryColor || "#111413",
+        primaryColor: safeHex(primaryColor, DEFAULT_PRIMARY),
+        secondaryColor: safeHex(secondaryColor, DEFAULT_SECONDARY),
         fontFamily: fontFamily || "Plus Jakarta Sans",
         whatsappNumber: whatsappNumber || "6285769000007",
         whatsappDefaultTemplate,
@@ -140,8 +128,8 @@ export async function PUT(request: Request) {
         tagline,
         logoUrl,
         faviconUrl,
-        primaryColor: primaryColor || "#dd2028",
-        secondaryColor: secondaryColor || "#111413",
+        primaryColor: safeHex(primaryColor, DEFAULT_PRIMARY),
+        secondaryColor: safeHex(secondaryColor, DEFAULT_SECONDARY),
         fontFamily: fontFamily || "Plus Jakarta Sans",
         whatsappNumber: whatsappNumber || "6285769000007",
         whatsappDefaultTemplate,

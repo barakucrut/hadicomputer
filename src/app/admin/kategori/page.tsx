@@ -29,6 +29,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CategoryIcon } from "@/components/ui";
 import { IconPicker } from "@/components/admin/ui/icon-picker";
+import { ImageDropzone } from "@/components/admin/ui/image-dropzone";
 import { useCan } from "@/components/admin/permissions";
 import { useToast } from "@/components/admin/ui/toast";
 
@@ -372,7 +373,19 @@ export default function AdminCategoriesBrandsPage() {
                         openEditDialog(b, "brand");
                       }}
                     >
-                      <TableCell className="font-bold text-[#111413]">{b.name}</TableCell>
+                      <TableCell className="font-bold text-[#111413]">
+                        <div className="flex items-center gap-2.5">
+                          <div className="flex h-8 w-12 shrink-0 items-center justify-center rounded-md border border-[#e5e3dd] bg-white">
+                            {b.logoUrl ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={b.logoUrl} alt="" className="max-h-6 max-w-10 object-contain" />
+                            ) : (
+                              <span className="text-[10px] font-bold text-[#818779]">{b.name.slice(0, 3).toUpperCase()}</span>
+                            )}
+                          </div>
+                          <span>{b.name}</span>
+                        </div>
+                      </TableCell>
                       <TableCell className="font-mono text-xs text-[#525854]">{b.slug}</TableCell>
                       <TableCell>
                         <Badge variant="secondary">{b._count?.products || 0} Produk</Badge>
@@ -575,13 +588,14 @@ export default function AdminCategoriesBrandsPage() {
 
           {dialogMode === "brand" && (
             <div>
-              <Label htmlFor="brand-logo">Logo URL (Opsional)</Label>
-              <Input
-                id="brand-logo"
-                type="text"
+              <Label>Logo Merek (Opsional)</Label>
+              <ImageDropzone
                 value={iconOrLogo}
-                onChange={(e) => setIconOrLogo(e.target.value)}
-                placeholder="e.g. /images/brands/asus.png"
+                onChange={(url) => setIconOrLogo(url || "")}
+                folder="brands"
+                label="Tarik & Lepas Logo Merek"
+                hint="Tanpa logo, nama merek tampil sebagai teks. PNG transparan / SVG paling bagus — otomatis dirapikan & dikompres."
+                previewHeight={48}
               />
             </div>
           )}

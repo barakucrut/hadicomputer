@@ -223,7 +223,7 @@ function FilterForm({
           defaultValue={query.koleksi ?? ""}
         >
           <option value="">Semua koleksi</option>
-          {["Promo", "Pilihan Hadi", "Terbaru", "Terlaris"].map((c) => (
+          {["Promo", "Pilihan Toko", "Terbaru", "Terlaris"].map((c) => (
             <option key={c} value={c}>
               {c}
             </option>

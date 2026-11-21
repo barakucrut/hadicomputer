@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getStoreBrand } from "@/lib/store-brand";
 import Link from "next/link";
 import {
   ArrowUpRight,
@@ -17,9 +18,10 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export async function generateMetadata(): Promise<Metadata> {
+  const { brand } = await getStoreBrand();
   const store = await getLiveStoreSettings();
   const phoneText = store.whatsapp ? ` ${store.whatsapp}` : "";
-  const description = `Hubungi Hadi Computer via WhatsApp resmi${phoneText}. Konsultasi pemilihan laptop, rakit PC, servis perangkat, atau cek ketersediaan unit setiap hari.`;
+  const description = `Hubungi ${brand} via WhatsApp resmi${phoneText}. Konsultasi pemilihan laptop, rakit PC, servis perangkat, atau cek ketersediaan unit setiap hari.`;
 
   return {
     title: "Kontak Kami & Konsultasi WhatsApp",
@@ -28,21 +30,21 @@ export async function generateMetadata(): Promise<Metadata> {
       type: "website",
       locale: "id_ID",
       url: "/kontak",
-      siteName: "Hadi Computer",
-      title: "Kontak Kami & Konsultasi WhatsApp | Hadi Computer",
+      siteName: `${brand}`,
+      title: `Kontak Kami & Konsultasi WhatsApp | ${brand}`,
       description,
       images: [
         {
           url: "/images/banners/promo-bundle.png",
           width: 1200,
           height: 630,
-          alt: "Hubungi Hadi Computer",
+          alt: `Hubungi ${brand}`,
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
-      title: "Kontak Kami & Konsultasi WhatsApp | Hadi Computer",
+      title: `Kontak Kami & Konsultasi WhatsApp | ${brand}`,
       description,
       images: ["/images/banners/promo-bundle.png"],
     },
@@ -62,7 +64,7 @@ export default async function ContactPage() {
           <h1>
             Halo, ada yang
             <br />
-            bisa Hadi bantu?
+            bisa {store.name || "kami"} bantu?
           </h1>
           <p>
             Tanya produk, konsultasi perangkat, atau rencanakan kunjungan.
@@ -80,7 +82,7 @@ export default async function ContactPage() {
             <br />
             <strong>tech.</strong>
           </span>
-          <i>HADI COMPUTER</i>
+          <i>{(store.name || "").toUpperCase()}</i>
         </div>
       </div>
       <div className="contact-grid">
@@ -120,7 +122,7 @@ export default async function ContactPage() {
       </div>
       <div className="contact-footnote">
         <div>
-          <h2>Lebih dekat dengan Hadi.</h2>
+          <h2>Lebih dekat dengan {store.name || "kami"}.</h2>
           {store.instagram || store.tiktok || store.facebook ? (
             <>
               <p>

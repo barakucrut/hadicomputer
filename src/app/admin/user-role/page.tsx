@@ -52,6 +52,7 @@ import { useToast } from "@/components/admin/ui/toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
+import { PASSWORD_MIN, passwordPolicyError } from "@/lib/password-policy";
 
 // ==========================================================
 // SMALL LOCAL HELPERS (built on the standard admin components)
@@ -431,8 +432,9 @@ export default function UserRolePage() {
       toast.error("Nama, email, dan role wajib diisi.");
       return;
     }
-    if (!editingUser && (!userForm.password || userForm.password.length < 6)) {
-      toast.error("Password minimal 6 karakter untuk pengguna baru.");
+    const newUserPasswordError = editingUser ? null : passwordPolicyError(userForm.password, { email: userForm.email });
+    if (newUserPasswordError) {
+      toast.error(newUserPasswordError);
       return;
     }
 
@@ -525,8 +527,9 @@ export default function UserRolePage() {
   async function handleExecuteResetPassword(e: React.FormEvent) {
     e.preventDefault();
     if (!resetTargetUser) return;
-    if (!newPassword || newPassword.length < 6) {
-      toast.error("Password baru minimal 6 karakter.");
+    const resetPasswordError = passwordPolicyError(newPassword);
+    if (resetPasswordError) {
+      toast.error(resetPasswordError.replace(/^Password/, "Password baru"));
       return;
     }
 
@@ -1029,7 +1032,7 @@ export default function UserRolePage() {
                 required
                 value={userForm.email}
                 onChange={(e) => setUserForm({ ...userForm, email: e.target.value })}
-                placeholder="nama@hadicomputer.com"
+                placeholder="nama@tokoanda.com"
               />
               <p className="text-xs text-[#525854] mt-1">
                 Email ini dipakai staf untuk login ke CMS.
@@ -1043,7 +1046,7 @@ export default function UserRolePage() {
                   id="user-password"
                   value={userForm.password}
                   onChange={(v) => setUserForm({ ...userForm, password: v })}
-                  placeholder="Minimal 6 karakter"
+                  placeholder={`Minimal ${PASSWORD_MIN} karakter`}
                 />
               </div>
             )}
@@ -1127,7 +1130,7 @@ export default function UserRolePage() {
                 id="reset-password"
                 value={newPassword}
                 onChange={setNewPassword}
-                placeholder="Minimal 6 karakter"
+                placeholder={`Minimal ${PASSWORD_MIN} karakter`}
               />
               <p className="text-xs text-[#525854] mt-1">
                 Staf memakai password ini untuk login berikutnya.

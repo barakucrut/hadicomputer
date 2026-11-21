@@ -34,6 +34,7 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useCan } from "@/components/admin/permissions";
+import { BannerCommerceFields } from "@/components/admin/banner-commerce-fields";
 import { useToast } from "@/components/admin/ui/toast";
 
 export default function AdminBannersPage() {
@@ -85,11 +86,15 @@ export default function AdminBannersPage() {
       badgeText: "PROMO SPESIAL MINGGU INI",
       ctaLabel: "Lihat Promo",
       ctaUrl: "#promo-minggu-ini",
-      imageUrl: "/images/banners/promo-bundle.png",
-      imageAlt: "Promo Hadi Computer",
+      imageUrl: "",
+      imageAlt: "Promo toko",
       bgTheme: "dark",
       isActive: true,
       hotspots: [],
+      placement: "hero",
+      productId: null,
+      price: null,
+      originalPrice: null,
     });
     setViewMode("editor");
   }
@@ -368,7 +373,7 @@ export default function AdminBannersPage() {
                       {/* Theme */}
                       <TableCell>
                         <Badge variant="secondary">
-                          {b.bgTheme === "dark" ? "Dark (Charcoal)" : b.bgTheme === "sage" ? "Sage Green" : "Light"}
+                          {b.bgTheme === "studio" ? "Studio Gelap" : b.bgTheme === "dark" ? "Dark (Charcoal)" : b.bgTheme === "sage" ? "Sage Green" : "Light"}
                         </Badge>
                       </TableCell>
 
@@ -540,7 +545,7 @@ export default function AdminBannersPage() {
                   <Input
                     id="new-hotspot-label"
                     type="text"
-                    placeholder="e.g. 🎁 FREE Gaming Mouse / 🎁 FREE Kaos Hadi..."
+                    placeholder="e.g. 🎁 FREE Gaming Mouse / 🎁 FREE Kaos Eksklusif..."
                     value={newHotspotLabel}
                     onChange={(e) => setNewHotspotLabel(e.target.value)}
                   />
@@ -871,6 +876,7 @@ export default function AdminBannersPage() {
                         setEditingBanner({ ...editingBanner, bgTheme: e.target.value })
                       }
                     >
+                      <option value="studio">Studio Gelap — foto produk di panggung (Precision)</option>
                       <option value="dark">Dark (Charcoal / Gaming Black)</option>
                       <option value="sage">Sage Green (Bekas Pilihan)</option>
                       <option value="light">Terang / Netral</option>
@@ -892,6 +898,13 @@ export default function AdminBannersPage() {
                       <option value="true">Aktif (Tampil di Hero Slider)</option>
                       <option value="false">Nonaktif (Disembunyikan)</option>
                     </Select>
+                  </div>
+
+                  <div className="border-t border-[#f1f3ed] pt-4">
+                    <BannerCommerceFields
+                      value={editingBanner}
+                      onChange={(patch) => setEditingBanner((prev: any) => ({ ...prev, ...patch }))}
+                    />
                   </div>
                 </CardContent>
               </Card>

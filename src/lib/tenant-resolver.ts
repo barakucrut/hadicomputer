@@ -1,6 +1,11 @@
 import { cookies, headers } from "next/headers";
 import { prisma } from "./db";
 import type { StoreSettings, HomepageConfig } from "./types";
+import { jwtVerify } from "jose";
+import { STORE_PREVIEW_HEADER } from "./storefront-template";
+import { classifyHost } from "./platform-domain";
+import { GOD_COOKIE_NAME, verifyGodToken } from "./god-auth";
+import { demoCookieName, isDemoLinkActive, verifyDemoCookie } from "./demo-access";
 
 export interface StorefrontTenant {
   id: string;
@@ -10,6 +15,10 @@ export interface StorefrontTenant {
   status: string;
   features: Record<string, boolean>;
   settings: StoreSettings;
+  /** Bawaan "tenant". Lihat TenantResolution. */
+  resolution?: TenantResolution;
+  /** DEMO = etalase terkunci (Mode Demo), LIVE = publik. */
+  siteStatus?: "DEMO" | "LIVE";
 }
 
 const DEFAULT_HOMEPAGE_CONFIG: HomepageConfig = {
@@ -38,73 +47,149 @@ const DEFAULT_HOMEPAGE_CONFIG: HomepageConfig = {
   },
 };
 
-export async function resolveStorefrontTenant(explicitSlugOrId?: string): Promise<StorefrontTenant> {
+/** Hasil resolusi: toko nyata, halaman platform (rigspace.id), atau toko tidak ditemukan. */
+export type TenantResolution = "tenant" | "platform-root" | "not-found" | "demo-locked";
+
+const ADMIN_JWT_SECRET = new TextEncoder().encode(
+  process.env.ADMIN_JWT_SECRET || "hadi-computer-cms-secret-key-32-chars-long-2026"
+);
+
+async function verifiedAdminTenantId(token: string | undefined): Promise<string | null> {
+  if (!token) return null;
+  try {
+    const { payload } = await jwtVerify(token, ADMIN_JWT_SECRET);
+    return typeof payload?.tenantId === "string" ? payload.tenantId : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Pengunjung = tim internal (god-mode) atau admin toko yang sedang login. */
+async function isTeamViewer(cookieStore: Awaited<ReturnType<typeof cookies>>): Promise<boolean> {
+  const god = cookieStore.get(GOD_COOKIE_NAME)?.value;
+  if (god && (await verifyGodToken(god))) return true;
+  return Boolean(await verifiedAdminTenantId(cookieStore.get("hadi_admin_session")?.value));
+}
+
+/** Toko kosong netral: query apa pun ke tenantId ini tidak mengembalikan data toko mana pun. */
+function emptyStorefront(resolution: Exclude<TenantResolution, "tenant">): StorefrontTenant {
+  return {
+    id: "default",
+    slug: "",
+    name: resolution === "platform-root" ? "Rigspace.id" : "Toko",
+    plan: "STARTER",
+    siteStatus: "LIVE",
+    status: "ACTIVE",
+    features: {},
+    resolution,
+    settings: {
+      id: "default",
+      slug: "",
+      name: resolution === "platform-root" ? "Rigspace.id" : "Toko",
+      tagline: null,
+      logoUrl: null,
+      faviconUrl: null,
+      primaryColor: "#111413",
+      secondaryColor: "#111413",
+      fontFamily: "Plus Jakarta Sans",
+      whatsapp: null,
+      address: null,
+      hours: null,
+      email: null,
+      instagram: null,
+      tiktok: null,
+      facebook: null,
+      mapsUrl: null,
+      homepageConfig: DEFAULT_HOMEPAGE_CONFIG,
+    },
+  };
+}
+
+/**
+ * Toko aktif untuk request ini. Urutan:
+ *  1. `explicitTenantId` — HANYA nilai internal tepercaya (id/slug dari database), bukan input pengunjung.
+ *  2. CMS (`opts.cms`): toko yang sedang dibuka (cookie impersonasi) / toko admin yang login.
+ *  3. Preview `?store=` / cookie preview — hanya untuk tim internal atau host pengembangan.
+ *  4. Host: custom domain, lalu `{slug}.rigspace.id`.
+ *  5. Host pengembangan saja: toko admin yang login, lalu toko pertama (kenyamanan dev).
+ *  6. Selain itu TIDAK ada fallback ke toko lain: rigspace.id = halaman platform, sisanya = tidak ditemukan.
+ */
+export async function resolveStorefrontTenant(
+  explicitTenantId?: string,
+  opts: { cms?: boolean; previewSlug?: string | null } = {}
+): Promise<StorefrontTenant> {
   const cookieStore = await cookies();
   const headerStore = await headers();
+  const hostKind = classifyHost(headerStore.get("x-forwarded-host") || headerStore.get("host"));
+  const isDev = hostKind.kind === "dev";
 
-  let targetSlugOrId = explicitSlugOrId;
+  let targetSlugOrId = explicitTenantId || undefined;
 
-  // 1. Check preview / override from cookie or active admin impersonation
-  if (!targetSlugOrId) {
+  // 2. Area CMS: tema mengikuti toko yang sedang dikelola
+  if (!targetSlugOrId && opts.cms) {
     targetSlugOrId =
+      cookieStore.get("god_impersonated_tenant_id")?.value ||
+      (await verifiedAdminTenantId(cookieStore.get("hadi_admin_session")?.value)) ||
+      undefined;
+  }
+
+  // 3. Preview toko lain (?store= diteruskan middleware lewat header) — tim internal / dev saja
+  if (!targetSlugOrId) {
+    const preview =
+      opts.previewSlug ||
+      headerStore.get(STORE_PREVIEW_HEADER) ||
       cookieStore.get("rigspace_store_slug")?.value ||
       cookieStore.get("preview_tenant_slug")?.value ||
       cookieStore.get("god_impersonated_tenant_id")?.value;
-  }
-
-  // 1.b Check if logged in as a normal tenant admin
-  if (!targetSlugOrId) {
-    const adminToken = cookieStore.get("hadi_admin_session")?.value;
-    if (adminToken) {
-      try {
-        const { jwtVerify } = await import("jose");
-        const ADMIN_JWT_SECRET = new TextEncoder().encode(
-          process.env.ADMIN_JWT_SECRET || "hadi-computer-cms-secret-key-32-chars-long-2026"
-        );
-        const { payload } = await jwtVerify(adminToken, ADMIN_JWT_SECRET);
-        if (payload?.tenantId) {
-          targetSlugOrId = payload.tenantId as string;
-        }
-      } catch {
-        // ignore invalid token
-      }
+    if (preview && /^[a-z0-9-]{1,100}$/i.test(preview) && (isDev || (await isTeamViewer(cookieStore)))) {
+      targetSlugOrId = preview;
     }
   }
 
-  // 2. Check host header if not in override
+  // 4. Host request
   if (!targetSlugOrId) {
-    const host = headerStore.get("host") || "";
-    const cleanHost = host.split(":")[0].toLowerCase();
-
-    // Check subdomain (e.g. plazabitcom.rigspace.id or plazabitcom.localhost)
-    if (cleanHost.includes(".") && !cleanHost.startsWith("www.") && cleanHost !== "localhost") {
-      const parts = cleanHost.split(".");
-      if (parts.length >= 2) {
-        const potentialSubdomain = parts[0];
-        if (potentialSubdomain !== "admin" && potentialSubdomain !== "api" && potentialSubdomain !== "app") {
-          targetSlugOrId = potentialSubdomain;
-        }
-      }
+    if (hostKind.kind === "custom") {
+      const domainTenant = await prisma.tenant.findFirst({
+        where: { customDomain: { in: [hostKind.domain, `www.${hostKind.domain}`] } },
+        select: { id: true },
+      });
+      if (domainTenant) targetSlugOrId = domainTenant.id;
+    } else if (hostKind.kind === "subdomain") {
+      targetSlugOrId = hostKind.slug;
+    } else if (hostKind.kind === "dev" && hostKind.slug) {
+      targetSlugOrId = hostKind.slug;
     }
   }
 
-  // 3. Query tenant from database
+  // 5. Host pengembangan: toko admin yang login
+  if (!targetSlugOrId && isDev) {
+    targetSlugOrId = (await verifiedAdminTenantId(cookieStore.get("hadi_admin_session")?.value)) || undefined;
+  }
+
   let tenant = null;
   if (targetSlugOrId) {
     tenant = await prisma.tenant.findFirst({
       where: {
-        OR: [
-          { slug: targetSlugOrId },
-          { id: targetSlugOrId },
-          { customDomain: targetSlugOrId },
-        ],
+        OR: [{ slug: targetSlugOrId }, { id: targetSlugOrId }, { customDomain: targetSlugOrId }],
       },
       include: { settings: true },
     });
   }
 
-  // 4. Fallback to default tenant (e.g. Hadi Computer or the first registered tenant)
+  // 7. Mode Demo: etalase terkunci kecuali tim internal, admin toko itu, atau pemegang link demo sah
+  if (tenant && tenant.siteStatus === "DEMO" && !opts.cms && !explicitTenantId) {
+    const godToken = cookieStore.get(GOD_COOKIE_NAME)?.value;
+    const allowed =
+      Boolean(godToken && (await verifyGodToken(godToken))) ||
+      (await verifiedAdminTenantId(cookieStore.get("hadi_admin_session")?.value)) === tenant.id ||
+      (isDemoLinkActive(tenant.demoTokenExpiresAt) &&
+        verifyDemoCookie(tenant.id, tenant.demoToken, cookieStore.get(demoCookieName(tenant.id))?.value));
+    if (!allowed) return emptyStorefront("demo-locked");
+  }
+
   if (!tenant) {
+    // 6. Produksi: jangan pernah menampilkan toko lain di alamat yang salah
+    if (!isDev) return emptyStorefront(hostKind.kind === "platform-root" && !targetSlugOrId ? "platform-root" : "not-found");
     tenant = await prisma.tenant.findFirst({
       orderBy: { createdAt: "asc" },
       include: { settings: true },
@@ -116,14 +201,14 @@ export async function resolveStorefrontTenant(explicitSlugOrId?: string): Promis
     return {
       id: "default",
       slug: "hadicomputer",
-      name: "Hadi Computer",
+      name: "Toko",
       plan: "PRO",
       status: "ACTIVE",
       features: { pcBuilder: true, tradeIn: true },
       settings: {
         id: "default",
         slug: "hadicomputer",
-        name: "Hadi Computer",
+        name: "Toko",
         tagline: "Teknologi untuk keseharianmu.",
         logoUrl: "/images/hadi-logo.jpeg",
         faviconUrl: "/favicon.ico",
@@ -193,6 +278,8 @@ export async function resolveStorefrontTenant(explicitSlugOrId?: string): Promis
     name: tenant.name,
     plan: tenant.plan,
     status: tenant.status,
+    resolution: "tenant",
+    siteStatus: tenant.siteStatus,
     features: (tenant.features as Record<string, boolean>) || { pcBuilder: true, tradeIn: true },
     settings: {
       id: tenant.id,

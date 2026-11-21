@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getStoreBrand } from "@/lib/store-brand";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { getProduct, getProducts } from "@/lib/repository";
@@ -20,11 +21,12 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
+  const { brand } = await getStoreBrand();
   const { slug } = await params;
   const p = await getLiveProduct(slug);
   if (!p) {
     return {
-      title: "Produk Tidak Ditemukan | Hadi Computer",
+      title: `Produk Tidak Ditemukan | ${brand}`,
     };
   }
 
@@ -46,7 +48,7 @@ export async function generateMetadata({
   const conditionText = p.condition === "bekas" ? "Bekas Pilihan" : "Baru";
 
   const title = `${p.name} — ${priceLabel(offer.price)}`;
-  const description = `${p.name} (${conditionText}). ${p.summary}. Harga ${priceLabel(offer.price)}${savingsText}${bonusText}. ${p.warranty}. Siap konsultasi & pengiriman via WhatsApp Hadi Computer.`;
+  const description = `${p.name} (${conditionText}). ${p.summary}. Harga ${priceLabel(offer.price)}${savingsText}${bonusText}. ${p.warranty}. Siap konsultasi & pengiriman via WhatsApp ${brand}.`;
 
   // WhatsApp strictly requires JPEG/PNG (does not support .webp in chat previews)
   const primaryWebp = p.images[0] || "/images/banners/promo-bundle.png";
@@ -64,7 +66,7 @@ export async function generateMetadata({
       p.brand,
       p.category,
       conditionText,
-      "Hadi Computer",
+      `${brand}`,
       "jual laptop",
       "beli komputer",
     ],
@@ -72,8 +74,8 @@ export async function generateMetadata({
       type: "website",
       locale: "id_ID",
       url: `${baseUrl}/produk/${p.slug}`,
-      siteName: "Hadi Computer",
-      title: `${title} | Hadi Computer`,
+      siteName: `${brand}`,
+      title: `${title} | ${brand}`,
       description,
       images: [
         {
@@ -82,13 +84,13 @@ export async function generateMetadata({
           width: 1000,
           height: 1000,
           type: "image/jpeg",
-          alt: `${p.name} - Hadi Computer`,
+          alt: `${p.name} - ${brand}`,
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
-      title: `${title} | Hadi Computer`,
+      title: `${title} | ${brand}`,
       description,
       images: [absoluteImageUrl],
     },
@@ -145,7 +147,7 @@ export default async function ProductPage({
             : "https://schema.org/OutOfStock",
       seller: {
         "@type": "Organization",
-        name: "Hadi Computer",
+        name: store.name,
       },
     },
   };

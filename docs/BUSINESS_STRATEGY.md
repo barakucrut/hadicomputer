@@ -63,7 +63,7 @@ Dokumen ini mendokumentasikan visi, analisis bisnis, kalkulasi harga, arsitektur
 | Paket | Target Toko | Fitur Utama | Harga Rekomendasi | Margin Kotor |
 | :--- | :--- | :--- | :--- | :--- |
 | **Starter (Katalog & WA)** | Toko Service & Aksesoris Kecil | Katalog produk baru/second, WA Closer, CMS simpel, Domain `.com` | **Rp 1.490.000 / tahun** *(atau Rp 150rb/bln)* | ~73% (Laba Rp 1,09 jt/thn) |
-| **Pro (Gamer & Specialist)** *(Best Seller)* | Toko Retail Komputer & Rakit PC | Semua fitur Starter + **PC Builder Simulator** + **Kalkulator Trade-In** + SEO Lokal | **Rp 2.790.000 / tahun** *(atau Rp 280rb/bln)* | ~85% (Laba Rp 2,39 jt/thn) |
+| **Pro (Gamer & Specialist)** *(Best Seller)* | Toko Retail Komputer & Rakit PC | Semua fitur Starter + **PC Builder Simulator** + **Kalkulator Trade-In** + SEO Lokal + **Broadcast Promo WhatsApp** *(segera)* | **Rp 2.790.000 / tahun** *(atau Rp 280rb/bln)* | ~85% (Laba Rp 2,39 jt/thn) |
 | **Enterprise (Omnichannel)** | Distributor / Toko Grosir Elektronik | Multi-cabang toko, Instant Checkout (Midtrans/Stripe), POS Sync, API integration | **Rp 4.900.000 / tahun** + Setup | ~90% |
 
 > [!NOTE]
@@ -141,6 +141,12 @@ Mengirim broadcast massal di WhatsApp memiliki risiko tinggi pemblokiran nomor (
 * **Add-On Kuota:** 1.000 pesan broadcast seharga Rp 150.000 / paket.
 * **Fitur Eksklusif Paket PRO & Enterprise:** Menjadi nilai jual utama (*upselling*) agar toko upgrade ke paket langganan tahunan yang lebih tinggi.
 
+### D. Keputusan 20 November 2026
+* **Broadcast Promo WhatsApp masuk paket Pro** (dan Enterprise), ditampilkan di landing page sebagai *segera hadir* sampai fiturnya benar-benar jalan.
+* **Jalur pengiriman: WhatsApp Business Platform resmi (Cloud API)**, bukan otomasi WhatsApp biasa. Artinya: pesan promo memakai *template* yang disetujui Meta, hanya dikirim ke pelanggan yang sudah setuju (opt-in), dan permintaan berhenti dihormati otomatis. Teknik di poin B (jeda acak, spintax agar pesan "tidak terdeteksi") **tidak dipakai** — itu menghindari sistem anti-spam Meta, melanggar ketentuan WhatsApp, dan justru membuat nomor toko klien rawan diblokir permanen. Dengan API resmi nomor toko aman dan kuota naik bertahap sesuai reputasi.
+* Biaya per pesan dari Meta (kategori *marketing*) diteruskan ke toko lewat paket kuota add-on; perlu dihitung ulang terhadap harga Rp 150.000 / 1.000 pesan.
+* Sumber kontak: pelanggan yang pernah chat lewat website (inquiry), pelanggan servis, dan pelanggan yang menekan "Kabari saya saat stok ada" — semuanya dengan persetujuan.
+
 
 ---
 
@@ -177,3 +183,26 @@ Mengirim broadcast massal di WhatsApp memiliki risiko tinggi pemblokiran nomor (
 8. **Engine tim marketing:** pembuat demo otomatis (scrape Maps/IG, ekstraksi warna logo, import katalog, subdomain demo `noindex`).
 9. **Fitur upgrade:** PC Builder, Trade-In, Broadcast WA & CRM, laporan ROI lanjutan, cicilan, cek status servis, notifikasi restock, feed Google Merchant Center, bandingkan produk, inbox lead.
 10. Custom domain + SSL otomatis, pendaftaran mandiri, billing (Midtrans/Xendit).
+
+### 7.4 Status Pembangunan (19 November 2026)
+* **Selesai di branch `feat/foundation-tenant`:**
+  - Isolasi data tenant di seluruh API admin & storefront, RBAC per tenant, soft delete, SKU otomatis per toko (prefix dari inisial nama toko, mis. `HC-`, `PBJ-`).
+  - Engine optimasi gambar: semua upload divalidasi, EXIF/GPS dibuang, maks 1900px, disimpan WebP terkecil; SVG disanitasi.
+  - **Bulk import produk** (Excel/CSV): template berdropdown, pratinjau & validasi per baris, upsert berdasarkan SKU (update harga massal), foto dari URL diunduh & dioptimasi, export katalog dengan format yang sama (round trip).
+  - **Importer WooCommerce** (mesin yang sama): uji coba 250 produk Bitcom Plaza berhasil diimpor dalam ±90 detik (foto ±11MB total).
+  - **Starter Pack** untuk merchant baru: 22 produk + banner + layanan contoh (dinetralkan dari data Hadi Computer, placeholder `{store}`), ditandai `isSample`, toko otomatis `noindex` selama data contoh ada, hapus sekali klik dari dashboard.
+  - Branding per toko: judul/OG/metadata, pesan WhatsApp, label "Pilihan Toko", teks halaman tidak lagi menyebut Hadi Computer.
+  - Pengaturan SEO & Google Analytics/GTM per tenant, stok produk opsional (mode tampil: sembunyi/angka/terbatas).
+  - CMS dibranding "Rigspace.id — Content Management System".
+  - **Template Precision** (default toko baru, 20 Nov 2026): pencarian besar + chip pencarian cepat, hero bento dari banner (bisa ditautkan ke produk, harga coret, posisi hero/tile) atau otomatis dari produk unggulan, indeks kategori, papan harga, dinding logo merek, portofolio servis, lokasi. Template Classic tetap tersedia untuk dijual di kota lain.
+  - CMS baru: logo merek (opsional), **Portofolio Servis** (dokumentasi foto hasil servis), tahun berdiri & chip pencarian cepat, banner bertaut produk. Starter Pack memberi simulasi harga coret (~separuh produk, +8–14%).
+  - **Studio Banner** (20 Nov 2026): hero gelap ala showroom dibuat otomatis dari foto produk (cutout transparan + panggung gelap beraksen warna toko + hotspot spek), plus animasi halus (hover menu/kartu/tile, slide bertahap, scroll reveal). Uji Bitcom: 94 dari 249 foto lolos cutout, 5 banner dibuat ±5 detik.
+  - Header Precision baru: pencarian modern di header (saran produk + foto + harga coret, pintasan ⌘K), mega menu ala Apple (kategori berikon, merek populer, sorotan studio), kartu kategori berikon, strip kepercayaan, harga coret hero lebih menonjol ("Kamu hemat Rp …").
+  - **Tim Platform & peran Marketing** (20 Nov 2026): akun internal god-mode (`platform_users`) dengan peran Superadmin/Marketing. Marketing mendaftarkan toko (otomatis TRIAL atas namanya), hanya melihat tenant bawaannya, dan memantau **checklist onboarding** (katalog, data asli vs contoh, banner, logo, WA & alamat asli, login admin, inquiry) + langkah follow-up berikutnya. Tanpa akses keuangan, paket/status/fitur, hapus tenant, atau masuk CMS toko. Superadmin mengelola akun di menu **Tim Platform** dan menugaskan tenant ke marketing.
+  - **Warna Primer & Sekunder** (20 Nov 2026): primer untuk tombol aksi (CTA, WhatsApp, pencarian), sekunder untuk permukaan (topbar info & footer Precision). Diatur di `/admin/pengaturan` & god-mode; warna teks/ikon tidak dipilih merchant tetapi dihitung otomatis dari kontras supaya kombinasi apa pun tetap terbaca.
+* **Struktur tim penjualan (20 Nov 2026):** peran CMO di atas Marketing. CMO memantau tenant miliknya + tenant semua marketing di timnya; superadmin memindahkan tenant antar marketing/CMO dari Daftar Tenant.
+* **Skema komisi disepakati (belum dibangun):** penjual dapat **20%** (komisi langsung), CMO atasannya **5%** (override); CMO yang menjual sendiri = 20% + 5% = **25%**. Komisi lahir saat pembayaran toko lunas (bukan saat closing), ditahan selama masa garansi uang kembali, lalu dicairkan per batch. Pemasukan toko & pencairan komisi tercatat otomatis di Transaksi Keuangan (kategori baru `KOMISI`). Fase ini tanpa PPN.
+* **Domain (20 Nov 2026):** `rigspace.id` = halaman platform (sementara, landing page menyusul); `{slug}.rigspace.id` = etalase; subdomain tak terdaftar = "Toko tidak ditemukan" (tidak lagi jatuh ke toko lain); `?store=` hanya untuk tim yang login. ✅ Mode Demo: tenant baru terkunci, link demo `/{slug}.rigspace.id/demo/{token}` (30 hari, bisa dibuat ulang), catatan "demo dibuka" di dashboard marketing, tombol Aktifkan Website (superadmin). ✅ Landing page rigspace.id (hero interaktif ketik nama toko + pilih warna, contoh "Rig Computer", harga, FAQ, form Minta Demo → kotak masuk CMO). Berikutnya: + form Minta Demo masuk pipeline → custom domain toko. Infrastruktur: DNS wildcard `*.rigspace.id` di Cloudflare.
+* **Target katalog tampilan (20 Nov 2026):** lebih dari **10 template** etalase (terus bertambah) dan lebih dari **10 font populer**. Konsekuensi teknis: (1) satu *registry* template (id, nama, gaya/tag, thumbnail, komponen header/footer/homepage) supaya menambah template cukup di satu tempat — sekarang masih tersebar di 5 tempat; (2) font dimuat **hanya yang dipakai toko** (bukan semua font di setiap halaman seperti sekarang) agar etalase tetap cepat; (3) landing page menampilkan galeri template dari registry yang sama (filter per gaya, otomatis bertambah).
+* **Roadmap penjualan:** Fase 0 peran CMO & tim ✅ → Fase 1 tahap penjualan (Prospek/Penawaran/Closing/Ditolak) + kontrak & status langganan otomatis → Fase 2 mesin komisi + pencairan → Fase 3 pengingat kontrak habis & penawaran macet.
+* **Berikutnya:** plan gating, secret production wajib dari env, laporan ROI v1, onboarding toko < 30 menit (demo Bitcom), komisi marketing per tenant berbayar (tautkan ke Transaksi).

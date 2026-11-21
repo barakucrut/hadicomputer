@@ -9,7 +9,6 @@ import {
   SlidersHorizontal,
   Wrench,
 } from "lucide-react";
-import { services as staticServices } from "@/lib/repository";
 import { Container, CategoryIcon, SectionHeading } from "@/components/ui";
 import { HeroSlider } from "@/components/hero-slider";
 import { FeaturedProducts } from "@/components/featured-products";
@@ -37,7 +36,7 @@ export function ClassicRetailHome({
   const storeSettings = tenant.settings;
   const config = storeSettings.homepageConfig || {};
   const sections = config.sections || {};
-  const storeName = storeSettings.name || tenant.name || "Hadi Computer";
+  const storeName = storeSettings.name || tenant.name || "Toko";
 
   const mapData = parseGoogleMaps(storeSettings.mapsUrl, storeSettings.address);
 
@@ -79,7 +78,8 @@ export function ClassicRetailHome({
     .slice(0, 2);
   const mobileDesktops = desktops.filter((p) => mobilePcSlugs.has(p.slug));
 
-  const displayServices = services.length > 0 ? services : staticServices;
+  // Tanpa fallback data statis: toko tanpa layanan cukup menyembunyikan section-nya
+  const displayServices = services;
 
   return (
     <div className="home-page">

@@ -24,8 +24,11 @@ export async function GET(
     }
 
     // Prevent directory traversal attacks
-    const safeSegments = segments.map((s) => s.replace(/\.\./g, ""));
-    const filePath = path.join(process.cwd(), "public", "uploads", ...safeSegments);
+    const uploadsRoot = path.resolve(process.cwd(), "public", "uploads");
+    const filePath = path.resolve(uploadsRoot, ...segments);
+    if (!filePath.startsWith(uploadsRoot + path.sep)) {
+      return new NextResponse("Not Found", { status: 404 });
+    }
 
     // Verify file exists and is a file
     const fileStat = await stat(filePath);
@@ -43,6 +46,11 @@ export async function GET(
         "Content-Type": contentType,
         "Content-Length": fileStat.size.toString(),
         "Cache-Control": "public, max-age=31536000, immutable",
+        "X-Content-Type-Options": "nosniff",
+        // SVG dibuka langsung tidak boleh menjalankan script (lapisan kedua setelah sanitasi saat upload)
+        ...(ext === ".svg"
+          ? { "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; img-src data:; sandbox" }
+          : {}),
       },
     });
   } catch {

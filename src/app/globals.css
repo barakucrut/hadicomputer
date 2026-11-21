@@ -4857,3 +4857,161 @@
   font-size: 13px;
   font-weight: 600;
 }
+
+/* Template Precision: font display & mono (font body tetap mengikuti pilihan toko) */
+body[data-template="precision"] {
+  --pc-display: "Inter Tight", var(--font, "Inter"), system-ui, sans-serif;
+  --pc-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* ---------- Precision: animasi halus (semua mati bila prefers-reduced-motion) ---------- */
+@keyframes pc-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes pc-kenburns {
+  from { transform: scale(1.02); }
+  to { transform: scale(1.1); }
+}
+@keyframes pc-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes pc-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes pc-pulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--red) 65%, transparent); }
+  70%, 100% { box-shadow: 0 0 0 9px transparent; }
+}
+@keyframes pc-shine {
+  from { transform: translateX(-130%) skewX(-20deg); }
+  to { transform: translateX(260%) skewX(-20deg); }
+}
+@keyframes pc-glow {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.06); }
+}
+
+/* Teks slide muncul bertahap setiap slide berganti */
+body[data-template="precision"] .pc-rise > * { animation: pc-rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+body[data-template="precision"] .pc-rise > *:nth-child(2) { animation-delay: 0.08s; }
+body[data-template="precision"] .pc-rise > *:nth-child(3) { animation-delay: 0.16s; }
+body[data-template="precision"] .pc-rise > *:nth-child(4) { animation-delay: 0.24s; }
+body[data-template="precision"] .pc-rise > *:nth-child(5) { animation-delay: 0.32s; }
+body[data-template="precision"] .pc-kenburns { animation: pc-kenburns 9s ease-out both; }
+body[data-template="precision"] .pc-float { animation: pc-float 6s ease-in-out infinite; }
+body[data-template="precision"] .pc-glow { animation: pc-glow 6s ease-in-out infinite; }
+body[data-template="precision"] .pc-enter { animation: pc-rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+body[data-template="precision"] .pc-progress { transform-origin: left; animation: pc-progress 6.5s linear both; }
+body[data-template="precision"] .pc-paused .pc-progress { animation-play-state: paused; }
+body[data-template="precision"] .pc-pulse { animation: pc-pulse 2.2s ease-out infinite; }
+
+/* Menu: garis aksen meluncur dari kiri */
+body[data-template="precision"] .pc-nav-link { position: relative; }
+body[data-template="precision"] .pc-nav-link::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 3px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--red);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+body[data-template="precision"] .pc-nav-link:hover::after,
+body[data-template="precision"] .pc-nav-link[aria-current="page"]::after { transform: scaleX(1); }
+
+/* Kartu: terangkat + foto zoom */
+body[data-template="precision"] .pc-lift {
+  position: relative;
+  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.35s ease;
+}
+body[data-template="precision"] .pc-lift:hover {
+  z-index: 2;
+  transform: translateY(-4px);
+  box-shadow: 0 22px 44px -22px rgba(11, 13, 12, 0.38);
+}
+body[data-template="precision"] .pc-zoom { transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1); }
+body[data-template="precision"] .pc-lift:hover .pc-zoom,
+body[data-template="precision"] .pc-shine:hover .pc-zoom { transform: scale(1.06); }
+
+/* Kilau cahaya menyapu saat hover (banner tile, kartu kampanye) */
+body[data-template="precision"] .pc-shine { position: relative; overflow: hidden; isolation: isolate; }
+body[data-template="precision"] .pc-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 42%;
+  z-index: 3;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+  transform: translateX(-130%) skewX(-20deg);
+}
+body[data-template="precision"] .pc-shine:hover::after { animation: pc-shine 0.95s ease; }
+
+/* Panah bergeser saat hover */
+body[data-template="precision"] .pc-arrow { transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1); }
+body[data-template="precision"] a:hover .pc-arrow,
+body[data-template="precision"] button:hover .pc-arrow { transform: translate(3px, -3px); }
+
+/* Section muncul saat di-scroll (hanya aktif bila JS berjalan) */
+body.pc-reveal-ready[data-template="precision"] [data-reveal] {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.8s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+body.pc-reveal-ready[data-template="precision"] [data-reveal].is-visible { opacity: 1; transform: none; }
+
+/* Dropdown pencarian, mega menu ala Apple (panel turun + isi muncul bertahap), latar meredup */
+@keyframes pc-drop {
+  from { opacity: 0; transform: translateY(-6px) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes pc-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes pc-mega {
+  from { clip-path: inset(0 0 100% 0); opacity: 0.4; }
+  to { clip-path: inset(0 0 0 0); opacity: 1; }
+}
+body[data-template="precision"] .pc-drop { transform-origin: top center; animation: pc-drop 0.22s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+body[data-template="precision"] .pc-fade { animation: pc-fade 0.25s ease both; }
+body[data-template="precision"] .pc-mega {
+  animation: pc-mega 0.42s cubic-bezier(0.32, 0.72, 0, 1) both;
+  box-shadow: 0 30px 60px -40px rgba(11, 13, 12, 0.45);
+}
+body[data-template="precision"] .pc-rise-children > * { animation: pc-rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+body[data-template="precision"] .pc-rise-children > *:nth-child(1) { animation-delay: 0.06s; }
+body[data-template="precision"] .pc-rise-children > *:nth-child(2) { animation-delay: 0.12s; }
+body[data-template="precision"] .pc-rise-children > *:nth-child(3) { animation-delay: 0.18s; }
+body[data-template="precision"] .pc-rise-children > *:nth-child(4) { animation-delay: 0.24s; }
+
+/* Strip kepercayaan: garis aksen di atas sel saat hover */
+body[data-template="precision"] .pc-topline { position: relative; }
+body[data-template="precision"] .pc-topline::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  background: var(--red);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+body[data-template="precision"] .pc-topline:hover::before { transform: scaleX(1); }
+
+@media (prefers-reduced-motion: reduce) {
+  body[data-template="precision"] *,
+  body[data-template="precision"] *::before,
+  body[data-template="precision"] *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  body.pc-reveal-ready[data-template="precision"] [data-reveal] { opacity: 1; transform: none; }
+}

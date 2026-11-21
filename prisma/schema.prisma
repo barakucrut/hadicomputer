@@ -21,6 +21,43 @@ enum TenantStatus {
   SUSPENDED
 }
 
+/// Etalase: DEMO = terkunci (hanya lewat link demo berkunci / tim internal), LIVE = publik.
+enum TenantSiteStatus {
+  DEMO
+  LIVE
+}
+
+/// Peran akun internal platform (god-mode). SUPERADMIN = akses penuh, MARKETING = hanya tenant yang dibawanya.
+enum PlatformRole {
+  SUPERADMIN
+  CMO
+  MARKETING
+}
+
+/// Akun tim internal rigspace.id (bukan admin toko).
+model PlatformUser {
+  id              String       @id @default(cuid())
+  email           String       @unique @db.VarChar(191)
+  name            String       @db.VarChar(150)
+  phone           String?      @db.VarChar(30)
+  passwordHash    String       @db.VarChar(255)
+  role            PlatformRole @default(MARKETING)
+  isActive        Boolean      @default(true)
+  lastLoginAt     DateTime?
+  acquiredTenants Tenant[]     @relation("TenantAcquiredBy")
+  /// Atasan (CMO) untuk akun MARKETING — dasar komisi override & lingkup tim CMO
+  managerId       String?      @db.VarChar(191)
+  manager         PlatformUser?  @relation("PlatformTeam", fields: [managerId], references: [id], onDelete: SetNull)
+  reports         PlatformUser[] @relation("PlatformTeam")
+  demoRequests    DemoRequest[]  @relation("DemoRequestAssignee")
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([managerId])
+  @@map("platform_users")
+}
+
 enum TransactionType {
   INCOME
   EXPENSE
@@ -70,7 +107,17 @@ model Tenant {
   plan         TenantPlan     @default(PRO)
   status       TenantStatus   @default(ACTIVE)
   features     Json?          // { "pcBuilder": true, "tradeIn": true, "instantCheckout": false }
-  
+  // Marketing yang membawa tenant ini (null = dikelola langsung superadmin)
+  acquiredById String?        @db.VarChar(191)
+  acquiredBy   PlatformUser?  @relation("TenantAcquiredBy", fields: [acquiredById], references: [id], onDelete: SetNull)
+
+  // Mode Demo: etalase terkunci sampai closing (lihat src/lib/demo-access.ts)
+  siteStatus         TenantSiteStatus @default(LIVE)
+  demoToken          String?          @unique @db.VarChar(64)
+  demoTokenExpiresAt DateTime?
+  liveAt             DateTime?
+  demoViews          DemoView[]
+
   settings     TenantSetting?
   adminUsers   AdminUser[]
   roles        AdminRole[]
@@ -81,11 +128,51 @@ model Tenant {
   services     Service[]
   needs        ProductNeed[]
   inquiryLogs  InquiryLog[]
+  serviceCases ServiceCase[]
 
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
 
+  @@index([acquiredById])
   @@map("tenants")
+}
+
+enum DemoRequestStatus {
+  NEW
+  CONTACTED
+  CONVERTED
+  REJECTED
+}
+
+/// Permintaan demo dari landing page rigspace.id — otomatis ditugaskan ke CMO aktif.
+model DemoRequest {
+  id           String            @id @default(cuid())
+  storeName    String            @db.VarChar(150)
+  city         String            @db.VarChar(100)
+  whatsapp     String            @db.VarChar(20)
+  storeLink    String?           @db.VarChar(300)
+  status       DemoRequestStatus @default(NEW)
+  assignedToId String?           @db.VarChar(191)
+  assignedTo   PlatformUser?     @relation("DemoRequestAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  note         String?           @db.Text
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@index([assignedToId, status])
+  @@index([createdAt])
+  @@map("demo_requests")
+}
+
+/// Catatan link demo dibuka calon klien (sinyal follow-up untuk marketing). Tanpa IP/data pribadi.
+model DemoView {
+  id        String   @id @default(cuid())
+  tenantId  String   @db.VarChar(40)
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  device    String   @default("desktop") @db.VarChar(20)
+  createdAt DateTime @default(now())
+
+  @@index([tenantId, createdAt])
+  @@map("demo_views")
 }
 
 model TenantSetting {
@@ -117,6 +204,31 @@ model TenantSetting {
   socialTiktok            String?  @db.VarChar(100)
   socialFacebook          String?  @db.VarChar(100)
   socialYoutube           String?  @db.VarChar(100)
+
+  // SEO (kosong = otomatis dari nama & tagline toko)
+  seoTitle                String?  @db.VarChar(70)
+  seoDescription          String?  @db.VarChar(170)
+  seoKeywords             String?  @db.VarChar(255)
+  ogImageUrl              String?  @db.VarChar(255)
+  googleSiteVerification  String?  @db.VarChar(120)
+  // false = toko meminta tidak diindeks mesin pencari
+  searchIndexing          Boolean  @default(true)
+
+  // Analitik milik toko (opsional; GA platform RigSpace dipasang terpisah lewat env)
+  gaMeasurementId         String?  @db.VarChar(20)
+  gtmContainerId          String?  @db.VarChar(20)
+
+  // Profil toko untuk storefront
+  foundedYear             Int?
+  // Chip pencarian cepat di bawah bar cari, mis. ["Laptop kuliah 5-8 jt", ...]
+  quickSearches           Json?
+
+  // Tampilan stok di etalase: hidden | exact | limited
+  stockDisplay            String   @default("hidden") @db.VarChar(10)
+  lowStockThreshold       Int      @default(3)
+
+  // Kode SKU produk, mis. "HC" -> HC-0001 (null = otomatis dari nama toko)
+  skuPrefix               String?  @db.VarChar(10)
 
   // Pengumuman
   announcementText        String?  @db.VarChar(255)
@@ -177,7 +289,7 @@ model Category {
   tenantId    String?   @db.VarChar(40)
   tenant      Tenant?   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   name        String    @db.VarChar(100)
-  slug        String    @unique @db.VarChar(100)
+  slug        String    @db.VarChar(100)
   icon        String?   @db.VarChar(50)
   description String?   @db.Text
   sortOrder   Int       @default(0)
@@ -186,6 +298,7 @@ model Category {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
+  @@unique([tenantId, slug])
   @@index([tenantId])
   @@map("categories")
 }
@@ -195,7 +308,7 @@ model Brand {
   tenantId  String?   @db.VarChar(40)
   tenant    Tenant?   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   name      String    @db.VarChar(100)
-  slug      String    @unique @db.VarChar(100)
+  slug      String    @db.VarChar(100)
   logoUrl   String?   @db.VarChar(255)
   sortOrder Int       @default(0)
   isActive  Boolean   @default(true)
@@ -203,6 +316,7 @@ model Brand {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
+  @@unique([tenantId, slug])
   @@index([tenantId])
   @@map("brands")
 }
@@ -212,7 +326,7 @@ model ProductNeed {
   tenantId    String?  @db.VarChar(40)
   tenant      Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   name        String   @db.VarChar(100)
-  slug        String   @unique @db.VarChar(100)
+  slug        String   @db.VarChar(100)
   description String?  @db.Text
   icon        String?  @db.VarChar(50)
   sortOrder   Int      @default(0)
@@ -220,6 +334,7 @@ model ProductNeed {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  @@unique([tenantId, slug])
   @@index([tenantId])
   @@map("product_needs")
 }
@@ -248,8 +363,8 @@ model Product {
   id                String             @id @default(cuid())
   tenantId          String?            @db.VarChar(40)
   tenant            Tenant?            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  code              String             @unique @db.VarChar(50)
-  slug              String             @unique @db.VarChar(150)
+  code              String             @db.VarChar(50)
+  slug              String             @db.VarChar(150)
   name              String             @db.VarChar(200)
   summary           String             @db.VarChar(255)
   description       String             @db.Text
@@ -257,6 +372,8 @@ model Product {
   basePrice         BigInt?            // null = Hubungi Owner untuk Harga
   originalPrice     BigInt?            // Harga coret untuk diskon/hemat
   availability      AvailabilityStatus @default(TERSEDIA)
+  // Jumlah stok (null = stok tidak dilacak). Stok 0 otomatis membuat produk HABIS.
+  stock             Int?
   warranty          String             @default("Garansi Toko 1 Bulan") @db.VarChar(100)
   bonus             String?            @db.VarChar(255)
   
@@ -280,12 +397,17 @@ model Product {
   images            ProductImage[]
   specs             ProductSpec[]
   inquiryLogs       InquiryLog[]
+  banners           Banner[]
 
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   // Soft delete: terisi = produk sudah dihapus (data & SKU tetap tersimpan)
   deletedAt         DateTime?
+  // true = data contoh Starter Pack (bisa dihapus massal oleh toko)
+  isSample  Boolean  @default(false)
 
+  @@unique([tenantId, code])
+  @@unique([tenantId, slug])
   @@index([tenantId])
   @@index([categoryId])
   @@index([brandId])
@@ -350,16 +472,28 @@ model Banner {
   badgeText String?         @db.VarChar(100)
   ctaLabel  String?         @db.VarChar(50)
   ctaUrl    String?         @db.VarChar(255)
-  imageUrl  String          @db.VarChar(255)
+  // Kosong = memakai foto produk yang ditautkan
+  imageUrl  String?         @db.VarChar(255)
   imageAlt  String          @db.VarChar(150)
   bgTheme   String          @default("dark") @db.VarChar(20)
   sortOrder Int             @default(0)
   isActive  Boolean         @default(true)
   hotspots  BannerHotspot[]
+  // Posisi di hero template: "hero" (banner utama, slide) | "tile" (kartu samping)
+  placement String          @default("hero") @db.VarChar(10)
+  // Produk tertaut: harga, harga coret, spek & link otomatis dari produk
+  productId String?
+  product   Product?        @relation(fields: [productId], references: [id], onDelete: SetNull)
+  // Harga manual untuk banner tanpa produk (opsional)
+  price         BigInt?
+  originalPrice BigInt?
+  // true = data contoh Starter Pack (bisa dihapus massal oleh toko)
+  isSample  Boolean  @default(false)
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
 
   @@index([tenantId])
+  @@index([productId])
   @@map("banners")
 }
 
@@ -385,7 +519,7 @@ model Service {
   tenantId           String?      @db.VarChar(40)
   tenant             Tenant?      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   title              String       @db.VarChar(150)
-  slug               String       @unique @db.VarChar(150)
+  slug               String       @db.VarChar(150)
   summary            String       @db.VarChar(255)
   description        String       @db.Text
   estimatedTime      String       @db.VarChar(100)
@@ -396,9 +530,13 @@ model Service {
   isActive           Boolean      @default(true)
   sortOrder          Int          @default(0)
   inquiryLogs        InquiryLog[]
+  cases              ServiceCase[]
+  // true = data contoh Starter Pack (bisa dihapus massal oleh toko)
+  isSample  Boolean  @default(false)
   createdAt          DateTime     @default(now())
   updatedAt          DateTime     @updatedAt
 
+  @@unique([tenantId, slug])
   @@index([tenantId])
   @@map("services")
 }
@@ -432,6 +570,31 @@ enum InquiryType {
   PRODUCT
   SERVICE
   GENERAL
+}
+
+// Portofolio servis: dokumentasi pekerjaan servis yang sudah selesai
+model ServiceCase {
+  id           String    @id @default(cuid())
+  tenantId     String    @db.VarChar(40)
+  tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  serviceId    String?
+  service      Service?  @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  title        String    @db.VarChar(150)
+  device       String?   @db.VarChar(150)
+  summary      String    @db.Text
+  durationText String?   @db.VarChar(60)
+  completedAt  DateTime?
+  // Array URL foto: urutan pertama = foto utama (mis. sebelum), berikutnya sesudah/proses
+  images       Json
+  isPublished  Boolean   @default(true)
+  isSample     Boolean   @default(false)
+  sortOrder    Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([tenantId])
+  @@index([serviceId])
+  @@map("service_cases")
 }
 
 model InquiryLog {

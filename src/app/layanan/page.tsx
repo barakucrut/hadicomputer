@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getStoreBrand } from "@/lib/store-brand";
 import { CheckCheck, MessageCircle, Wrench } from "lucide-react";
 import { Container, Breadcrumbs, SectionHeading } from "@/components/ui";
 import { ServiceCard } from "@/components/service-card";
@@ -9,16 +10,18 @@ import { WhatsAppButton } from "@/components/whatsapp-button";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export const metadata: Metadata = {
+export async function generateMetadata(): Promise<Metadata> {
+  const { brand, store } = await getStoreBrand();
+  return {
   title: "Layanan Servis Laptop & Jasa Rakit PC",
   description:
-    "Konsultasikan kendala laptop, pembersihan, upgrade komponen, atau rakit PC impian sesuai anggaranmu. Pengerjaan rapi dan transparan di Hadi Computer.",
+    `Konsultasikan kendala laptop, pembersihan, upgrade komponen, atau rakit PC impian sesuai anggaranmu. Pengerjaan rapi dan transparan di ${brand}.`,
   openGraph: {
     type: "website",
     locale: "id_ID",
     url: "/layanan",
-    siteName: "Hadi Computer",
-    title: "Layanan Servis Laptop & Jasa Rakit PC | Hadi Computer",
+    siteName: `${brand}`,
+    title: `Layanan Servis Laptop & Jasa Rakit PC | ${brand}`,
     description:
       "Konsultasikan kendala laptop, pembersihan, upgrade komponen, atau rakit PC impian sesuai anggaranmu. Pengerjaan rapi dan transparan.",
     images: [
@@ -26,13 +29,13 @@ export const metadata: Metadata = {
         url: "/images/banners/gaming.png",
         width: 1200,
         height: 630,
-        alt: "Layanan Servis & Rakit PC Hadi Computer",
+        alt: `Layanan Servis & Rakit PC ${brand}`,
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Layanan Servis Laptop & Jasa Rakit PC | Hadi Computer",
+    title: `Layanan Servis Laptop & Jasa Rakit PC | ${brand}`,
     description:
       "Konsultasikan kendala laptop, pembersihan, upgrade komponen, atau rakit PC impian sesuai anggaranmu.",
     images: ["/images/banners/gaming.png"],
@@ -41,6 +44,7 @@ export const metadata: Metadata = {
     canonical: "/layanan",
   },
 };
+}
 export default async function ServicesPage() {
   const [serviceList, store] = await Promise.all([
     getLiveServices(),
@@ -50,7 +54,7 @@ export default async function ServicesPage() {
     <Container className="page-container">
       <Breadcrumbs items={[{ label: "Layanan" }]} />
       <div className="editorial-hero">
-        <span className="eyebrow">ADA HADI YANG BANTU</span>
+        <span className="eyebrow">{`ADA ${(store.name || "KAMI").toUpperCase()} YANG BANTU`}</span>
         <h1>
           Solusi yang dimulai
           <br />

@@ -533,6 +533,7 @@ function ArenaProductCard({ product }: { product: Product }) {
           <span className={s.stock}>
             <span className={`${s.stockDot} ${stockClass}`} />
             {stockLabel}
+            {product.stockLabel ? ` · ${product.stockLabel}` : ""}
           </span>
         </div>
       </div>
