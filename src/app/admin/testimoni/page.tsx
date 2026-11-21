@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Plus, Star, ExternalLink } from "lucide-react";
+import { Plus, Quote, Star, ExternalLink } from "lucide-react";
 import { Button } from "@/components/admin/ui/button";
 import { Card } from "@/components/admin/ui/card";
 import { Badge } from "@/components/admin/ui/badge";
@@ -338,7 +338,10 @@ export default function AdminTestimonialsPage() {
             ) : items.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={colCount} className="text-center py-8 text-[#525854]">
-                  Belum ada testimoni. Section testimoni di beranda otomatis tersembunyi sampai ada testimoni aktif.
+                  <div className="flex flex-col items-center justify-center gap-2 text-center">
+                    <Quote size={28} className="text-[#818779]" />
+                    <span>Belum ada testimoni. Section testimoni di etalase otomatis tersembunyi sampai ada testimoni aktif.</span>
+                  </div>
                 </TableCell>
               </TableRow>
             ) : (

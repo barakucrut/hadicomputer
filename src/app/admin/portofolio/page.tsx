@@ -199,9 +199,11 @@ export default function AdminServicePortfolioPage() {
               </TableRow>
             ) : cases.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-10 text-[#525854]">
-                  <Camera size={28} className="mx-auto mb-2 text-[#818779]" />
-                  Belum ada dokumentasi. Foto hasil servis yang rapi adalah bukti terbaik untuk calon pelanggan.
+                <TableCell colSpan={7} className="py-10 text-[#525854]">
+                  <div className="flex flex-col items-center justify-center gap-2 text-center">
+                    <Camera size={28} className="text-[#818779]" />
+                    <span>Belum ada dokumentasi. Foto hasil servis yang rapi adalah bukti terbaik untuk calon pelanggan.</span>
+                  </div>
                 </TableCell>
               </TableRow>
             ) : (
