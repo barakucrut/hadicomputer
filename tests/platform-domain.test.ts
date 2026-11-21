@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { classifyHost, tenantSlugError, tenantStorefrontHost, cleanHostname } from "../src/lib/platform-domain";
+import { classifyHost, tenantSlugError, tenantStorefrontHost, cleanHostname, pickPreviewSlug } from "../src/lib/platform-domain";
 
 const R = "rigspace.id";
 
@@ -45,4 +45,17 @@ test("link demo: subdomain toko di produksi, origin request di dev", async () =>
   assert.equal(demoLinkUrl("bitcom", "TOKEN123", "bitcom.localhost:3000", R), "http://bitcom.localhost:3000/demo/TOKEN123");
   assert.equal(demoLinkUrl("bitcom", "TOKEN123", "192.168.1.6:3000", R), "http://192.168.1.6:3000/demo/TOKEN123");
   assert.equal(demoLinkUrl("bitcom", "TOKEN123", "abc.trycloudflare.com", R), "https://abc.trycloudflare.com/demo/TOKEN123");
+});
+
+test("pickPreviewSlug: cookie preview/impersonasi hanya di host dev", () => {
+  const cookies = ["bitcom", null, "expocomp"];
+  // produksi: cookie diabaikan -> rigspace.id tetap landing / subdomain tetap tokonya
+  assert.equal(pickPreviewSlug({ isDev: false, cookies }), null);
+  // produksi: ?store= eksplisit tetap boleh (izin tim dicek di resolver)
+  assert.equal(pickPreviewSlug({ isDev: false, explicit: "rigcomputer", cookies }), "rigcomputer");
+  // dev: cookie pertama yang valid
+  assert.equal(pickPreviewSlug({ isDev: true, cookies }), "bitcom");
+  assert.equal(pickPreviewSlug({ isDev: true, cookies: [undefined, "bad slug!", "ok-1"] }), "ok-1");
+  // slug tidak valid ditolak
+  assert.equal(pickPreviewSlug({ isDev: false, explicit: "../x" }), null);
 });

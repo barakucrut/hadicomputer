@@ -3,7 +3,7 @@ import { prisma } from "./db";
 import type { StoreSettings, HomepageConfig } from "./types";
 import { jwtVerify } from "jose";
 import { STORE_PREVIEW_HEADER } from "./storefront-template";
-import { classifyHost } from "./platform-domain";
+import { classifyHost, pickPreviewSlug } from "./platform-domain";
 import { GOD_COOKIE_NAME, verifyGodToken } from "./god-auth";
 import { demoCookieName, isDemoLinkActive, verifyDemoCookie } from "./demo-access";
 
@@ -134,15 +134,20 @@ export async function resolveStorefrontTenant(
       undefined;
   }
 
-  // 3. Preview toko lain (?store= diteruskan middleware lewat header) — tim internal / dev saja
+  // 3. Preview toko lain (?store= diteruskan middleware lewat header) — tim internal / dev saja.
+  //    Cookie preview/impersonasi hanya berlaku di host dev; di produksi host (rigspace.id,
+  //    subdomain, custom domain) selalu menang, kecuali ada ?store= eksplisit dari tim.
   if (!targetSlugOrId) {
-    const preview =
-      opts.previewSlug ||
-      headerStore.get(STORE_PREVIEW_HEADER) ||
-      cookieStore.get("rigspace_store_slug")?.value ||
-      cookieStore.get("preview_tenant_slug")?.value ||
-      cookieStore.get("god_impersonated_tenant_id")?.value;
-    if (preview && /^[a-z0-9-]{1,100}$/i.test(preview) && (isDev || (await isTeamViewer(cookieStore)))) {
+    const preview = pickPreviewSlug({
+      isDev,
+      explicit: opts.previewSlug || headerStore.get(STORE_PREVIEW_HEADER),
+      cookies: [
+        cookieStore.get("rigspace_store_slug")?.value,
+        cookieStore.get("preview_tenant_slug")?.value,
+        cookieStore.get("god_impersonated_tenant_id")?.value,
+      ],
+    });
+    if (preview && (isDev || (await isTeamViewer(cookieStore)))) {
       targetSlugOrId = preview;
     }
   }

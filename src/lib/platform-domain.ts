@@ -120,3 +120,19 @@ export function demoLinkUrl(slug: string, token: string, requestHost: string | n
   }
   return `https://${tenantStorefrontHost(slug, root)}/demo/${token}`;
 }
+
+/**
+ * Slug/ID toko pratinjau yang boleh dipakai. Parameter eksplisit (?store=) selalu dipertimbangkan;
+ * cookie (pratinjau dev, link demo dev, impersonasi CMS) hanya di host dev — di produksi cookie
+ * itu tidak boleh menimpa host, kalau tidak rigspace.id menampilkan toko yang sedang dikelola.
+ */
+export function pickPreviewSlug(input: {
+  isDev: boolean;
+  explicit?: string | null;
+  cookies?: Array<string | null | undefined>;
+}): string | null {
+  const valid = (v: string | null | undefined): v is string => Boolean(v && /^[a-z0-9-]{1,100}$/i.test(v));
+  if (valid(input.explicit)) return input.explicit;
+  if (!input.isDev) return null;
+  return (input.cookies || []).find(valid) ?? null;
+}
