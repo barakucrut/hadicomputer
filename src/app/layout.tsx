@@ -175,8 +175,8 @@ export default async function RootLayout({
   const store = { ...tenant.settings, stockDisplay: seo.stock.display, lowStockThreshold: seo.stock.lowThreshold };
   const liveCategories = await getLiveCategories(tenant.id);
   const templateId = resolveTemplateId(store.homepageConfig, headerStore.get(TEMPLATE_PREVIEW_HEADER));
-  // Mega menu & dropdown pencarian template Precision
-  const menuData = templateId === "precision" ? await getLiveMenuData(tenant.id) : undefined;
+  // Mega menu (Precision & Classic) & dropdown pencarian Precision
+  const menuData = templateId === "precision" || templateId === "classic-retail" ? await getLiveMenuData(tenant.id) : undefined;
 
   const fontFamily = store.fontFamily || "Plus Jakarta Sans";
 
@@ -231,7 +231,7 @@ export default async function RootLayout({
           ) : templateId === "minimalist-boutique" ? (
             <BoutiqueHeader store={store} categories={liveCategories} />
           ) : (
-            <Header store={store} categories={liveCategories} />
+            <Header store={store} categories={liveCategories} menu={menuData} />
           )}
           <main id="main">{children}</main>
           {templateId === "precision" ? (

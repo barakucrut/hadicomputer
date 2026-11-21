@@ -38,7 +38,6 @@ export function PrecisionHome({
   services,
   testimonials = [],
   brands = [],
-  serviceCases = [],
   profile = { foundedYear: null, quickSearches: [] },
 }: StorefrontTemplateProps) {
   const store = tenant.settings;
@@ -295,54 +294,6 @@ export function PrecisionHome({
           </section>
         )}
 
-        {/* PORTOFOLIO SERVIS */}
-        {sections.services !== false && serviceCases.length > 0 && (
-          <section data-reveal className="mt-12 border-t border-[#e6e6e3] pt-12">
-            <SectionHead
-              index={next()}
-              eyebrow="PORTOFOLIO SERVIS"
-              title="Hasil kerja bengkel kami"
-              action={
-                <Link href="/layanan" className="border-b border-[#0b0d0c] pb-0.5 text-[13px] font-semibold text-[#0b0d0c] no-underline">
-                  Lihat layanan
-                </Link>
-              }
-            />
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-              {serviceCases.slice(0, 6).map((c) => (
-                <article key={c.id} className="pc-lift group flex flex-col overflow-hidden rounded-md border border-[#e6e6e3] bg-white">
-                  <div className="relative bg-[#f6f6f4] p-4">
-                    <div className="flex aspect-[16/10] items-center justify-center overflow-hidden rounded bg-white">
-                      {c.images[0] && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={c.images[0]} alt={c.title} loading="lazy" className="pc-zoom max-h-full max-w-full object-contain" />
-                      )}
-                    </div>
-                    {c.durationText && (
-                      <span className={`${MONO} absolute left-6 top-6 rounded-[3px] bg-[#0b0d0c] px-2 py-1 text-[10.5px] text-[#f6e3a1]`}>
-                        SELESAI {c.durationText.toUpperCase()}
-                      </span>
-                    )}
-                    {c.images.length > 1 && (
-                      <span className={`${MONO} absolute bottom-6 right-6 rounded-[3px] border border-[#e6e6e3] bg-white px-2 py-1 text-[10px]`}>
-                        {c.images.length} FOTO
-                      </span>
-                    )}
-                  </div>
-                  <div className="border-t border-[#e6e6e3] px-5 pb-5 pt-4">
-                    <span className={`${MONO} text-[11px] uppercase tracking-[0.06em] text-[#6b6f6c]`}>
-                      {[c.serviceName, c.completedAt && new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric" }).format(new Date(c.completedAt))]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </span>
-                    <h3 className={`${DISPLAY} mb-1.5 mt-2 text-[17px] font-bold leading-snug`}>{c.title}</h3>
-                    <p className="m-0 line-clamp-3 text-[13px] leading-relaxed text-[#6b6f6c]">{c.summary}</p>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </section>
-        )}
 
         {/* TESTIMONI */}
         {sections.testimonials !== false && testimonials.length > 0 && (

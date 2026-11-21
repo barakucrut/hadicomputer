@@ -3,7 +3,8 @@ import { getStoreBrand } from "@/lib/store-brand";
 import { notFound } from "next/navigation";
 import { Check, ArrowRight } from "lucide-react";
 import { getService, services } from "@/lib/repository";
-import { getLiveService, getLiveStoreSettings } from "@/lib/live-repository";
+import { getLiveService, getLiveServiceCases, getLiveStoreSettings } from "@/lib/live-repository";
+import { ServiceCasesSection } from "@/components/service-cases-section";
 import { Container, Breadcrumbs, SectionHeading } from "@/components/ui";
 import { SafeImage } from "@/components/safe-image";
 import { WhatsAppButton } from "@/components/whatsapp-button";
@@ -65,9 +66,10 @@ export default async function ServiceDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const [service, store] = await Promise.all([
+  const [service, store, cases] = await Promise.all([
     getLiveService(slug),
     getLiveStoreSettings(),
+    getLiveServiceCases(undefined, 9, { serviceSlug: slug }),
   ]);
   if (!service) notFound();
   const message = `Halo ${store.name || "kak"}, saya ingin konsultasi layanan ${service.name}.\n\nTautan: {origin}/layanan/${service.slug}\n\nKebutuhan atau kendala saya: `;
@@ -102,6 +104,7 @@ export default async function ServiceDetailPage({
           />
         </div>
       </div>
+      <ServiceCasesSection cases={cases} storeName={store.name || "kami"} />
       <div className="service-description">
         <h2>Kenali layanannya.</h2>
         <p>{service.description}</p>

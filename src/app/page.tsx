@@ -7,7 +7,6 @@ import {
   getLiveNeeds,
   getLiveServices,
   getLiveBrands,
-  getLiveServiceCases,
   getLiveStoreProfile,
   getLiveTestimonials,
 } from "@/lib/live-repository";
@@ -56,12 +55,8 @@ export default async function HomePage({
   };
 
   if (templateId === "precision") {
-    const [brands, serviceCases, profile] = await Promise.all([
-      getLiveBrands(tenant.id),
-      getLiveServiceCases(tenant.id, 6),
-      getLiveStoreProfile(tenant.id),
-    ]);
-    return <PrecisionHome {...templateProps} brands={brands} serviceCases={serviceCases} profile={profile} />;
+    const [brands, profile] = await Promise.all([getLiveBrands(tenant.id), getLiveStoreProfile(tenant.id)]);
+    return <PrecisionHome {...templateProps} brands={brands} profile={profile} />;
   }
 
   if (templateId === "gaming-arena") {

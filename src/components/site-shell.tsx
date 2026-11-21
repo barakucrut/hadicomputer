@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   ArrowUpRight,
   ChevronDown,
@@ -19,6 +19,8 @@ import { WhatsAppButton } from "./whatsapp-button";
 import { HeaderSearch } from "./header-search";
 import { SocialLinks } from "./social-links";
 import { NavLinks } from "./nav-links";
+import type { StorefrontMenuData } from "@/lib/live-repository";
+import { CLASSIC_MEGA_BY_HREF, ClassicMegaPanel, classicMegaAvailable, type ClassicMegaKey } from "./classic-mega-menu";
 
 export function Logo({ store }: { store?: StoreSettings }) {
   if (store?.logoUrl) {
@@ -64,14 +66,44 @@ export function Logo({ store }: { store?: StoreSettings }) {
 export function Header({
   store,
   categories: categoriesProp,
+  menu,
 }: {
   store?: StoreSettings;
   categories?: Array<{ name: string; value: string }>;
+  /** Data mega menu Katalog/Layanan (desktop) */
+  menu?: StorefrontMenuData;
 }) {
   const categoryList = categoriesProp && categoriesProp.length > 0 ? categoriesProp : categories;
   const [menuOpen, setMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const path = usePathname();
+  const [mega, setMega] = useState<ClassicMegaKey | null>(null);
+  const openTimer = useRef<number | undefined>(undefined);
+  const closeTimer = useRef<number | undefined>(undefined);
+  const megaHrefs = Object.keys(CLASSIC_MEGA_BY_HREF).filter((href) => classicMegaAvailable(menu, CLASSIC_MEGA_BY_HREF[href]));
+
+  // Hover intent: buka setelah jeda singkat, tutup sedikit lebih lambat (tidak berkedip saat kursor lewat)
+  const hoverOpen = (key: ClassicMegaKey | null) => {
+    window.clearTimeout(closeTimer.current);
+    window.clearTimeout(openTimer.current);
+    openTimer.current = window.setTimeout(() => setMega(key), mega ? 0 : 110);
+  };
+  const hoverClose = () => {
+    window.clearTimeout(openTimer.current);
+    closeTimer.current = window.setTimeout(() => setMega(null), 180);
+  };
+  const closeMega = () => setMega(null);
+
+  useEffect(() => {
+    setMega(null);
+  }, [path]);
+
+  useEffect(() => {
+    if (!mega) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMega(null);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [mega]);
 
   // Sticky header on scroll
   useEffect(() => {
@@ -123,9 +155,11 @@ export function Header({
           </span>
         </div>
       </div>
+      {mega && <div className="cl-mega-backdrop" aria-hidden onClick={closeMega} />}
       <header
-        className={`site-header ${isScrolled ? "is-sticky" : ""}`}
+        className={`site-header ${isScrolled ? "is-sticky" : ""} ${mega ? "is-mega-open" : ""}`}
         data-home={path === "/"}
+        onMouseLeave={hoverClose}
       >
         <div className="container header-main">
           <Logo store={store} />
@@ -171,7 +205,14 @@ export function Header({
                 ))}
               </div>
             </details>
-            <NavLinks />
+            <NavLinks
+              megaHrefs={megaHrefs}
+              openHref={Object.keys(CLASSIC_MEGA_BY_HREF).find((href) => CLASSIC_MEGA_BY_HREF[href] === mega) ?? null}
+              onItemEnter={(href) => {
+                const key = CLASSIC_MEGA_BY_HREF[href];
+                hoverOpen(key && megaHrefs.includes(href) ? key : null);
+              }}
+            />
             <Link className="location-nav" href="/lokasi">
               <MapPin size={16} />
               Lokasi toko
@@ -179,6 +220,7 @@ export function Header({
             </Link>
           </nav>
         </div>
+        <ClassicMegaPanel open={mega} menu={menu} store={store} onEnter={() => hoverOpen(mega)} close={closeMega} />
         {menuOpen && (
           <div
             id="mobile-navigation"

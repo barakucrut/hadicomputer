@@ -293,11 +293,21 @@ export async function getLiveBrands(
 }
 
 /** Portofolio servis yang dipublikasikan toko (terbaru dulu). */
-export async function getLiveServiceCases(tenantId?: string, limit = 6): Promise<ServiceCaseItem[]> {
+/** Portofolio servis yang dipublikasikan; `serviceSlug` = hanya yang tertaut ke layanan itu. */
+export async function getLiveServiceCases(
+  tenantId?: string,
+  limit = 6,
+  opts: { serviceSlug?: string } = {}
+): Promise<ServiceCaseItem[]> {
   try {
+    const resolvedTenantId = await activeTenantId(tenantId);
     const rows = await withTimeout(
       prisma.serviceCase.findMany({
-        where: { tenantId: await activeTenantId(tenantId), isPublished: true },
+        where: {
+          tenantId: resolvedTenantId,
+          isPublished: true,
+          ...(opts.serviceSlug ? { service: { tenantId: resolvedTenantId, slug: opts.serviceSlug } } : {}),
+        },
         include: { service: { select: { title: true, slug: true } } },
         orderBy: [{ completedAt: "desc" }, { createdAt: "desc" }],
         take: limit,

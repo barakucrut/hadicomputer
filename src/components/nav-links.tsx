@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ChevronDown } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/", label: "Beranda" },
@@ -11,7 +12,18 @@ const NAV_ITEMS = [
   { href: "/kontak", label: "Kontak Kami" },
 ];
 
-export function NavLinks() {
+export function NavLinks({
+  onItemEnter,
+  openHref,
+  megaHrefs = [],
+}: {
+  /** Dipanggil saat kursor/fokus masuk ke menu (header membuka mega menu). */
+  onItemEnter?: (href: string) => void;
+  /** Menu yang mega menu-nya sedang terbuka (tetap bergaris bawah). */
+  openHref?: string | null;
+  /** Menu yang punya mega menu (diberi ikon panah). */
+  megaHrefs?: string[];
+} = {}) {
   const pathname = usePathname() || "/";
   const navRef = useRef<HTMLDivElement>(null);
   const linkRefs = useRef<(HTMLAnchorElement | null)[]>([]);
@@ -30,7 +42,8 @@ export function NavLinks() {
   };
 
   const activeIndex = getActiveIndex();
-  const targetIndex = hoveredIndex !== null ? hoveredIndex : activeIndex;
+  const openIndex = openHref ? NAV_ITEMS.findIndex((n) => n.href === openHref) : -1;
+  const targetIndex = hoveredIndex !== null ? hoveredIndex : openIndex >= 0 ? openIndex : activeIndex;
 
   useEffect(() => {
     const updatePosition = () => {
@@ -73,13 +86,21 @@ export function NavLinks() {
               linkRefs.current[index] = el;
             }}
             aria-current={isActive ? "page" : undefined}
-            onMouseEnter={() => setHoveredIndex(index)}
+            onMouseEnter={() => {
+              setHoveredIndex(index);
+              onItemEnter?.(item.href);
+            }}
+            onFocus={() => onItemEnter?.(item.href)}
+            aria-expanded={megaHrefs.includes(item.href) ? openHref === item.href : undefined}
             className={`nav-link-item ${isActive ? "active" : ""}`}
             style={{
               fontWeight: isActive ? 600 : 500,
             }}
           >
             {item.label}
+            {megaHrefs.includes(item.href) && (
+              <ChevronDown size={13} className={`nav-mega-chevron ${openHref === item.href ? "is-open" : ""}`} aria-hidden />
+            )}
           </Link>
         );
       })}
