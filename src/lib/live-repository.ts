@@ -1,5 +1,6 @@
 import { prisma } from "./db";
-import type { Banner, Product, Service, StoreSettings } from "./types";
+import type { Banner, Product, Service, StoreSettings, Testimonial } from "./types";
+import { selectHomeTestimonials } from "./testimonials";
 import {
   banners,
   categories,
@@ -184,6 +185,7 @@ export async function getLiveStoreSettings(): Promise<StoreSettings> {
         tiktok: s.socialTiktok,
         facebook: s.socialFacebook,
         mapsUrl: s.mapsEmbedUrl,
+        googleReviewUrl: s.googleReviewUrl,
       };
     }
   } catch {
@@ -290,4 +292,31 @@ export async function getLiveNeeds(): Promise<Array<{ id: string; name: string; 
     // Fallback
   }
   return DEFAULT_NEEDS;
+}
+
+/**
+ * Testimoni aktif. Default: batas beranda (6). `limit: null` = semua (halaman /testimoni).
+ * Tidak ada data contoh di kode: kosong berarti section disembunyikan.
+ */
+export async function getLiveTestimonials({ limit }: { limit?: number | null } = {}): Promise<Testimonial[]> {
+  try {
+    const rows = await withTimeout(
+      prisma.testimonial.findMany({
+        where: { isActive: true },
+        orderBy: [{ isFeatured: "desc" }, { sortOrder: "asc" }, { createdAt: "desc" }],
+      })
+    );
+    return selectHomeTestimonials(rows, limit === null ? Infinity : limit).map((t) => ({
+      id: t.id,
+      name: t.name,
+      descriptor: t.descriptor,
+      quote: t.quote,
+      rating: t.rating,
+      label: t.label,
+      photoUrl: t.photoUrl,
+      source: t.source,
+    }));
+  } catch {
+    return [];
+  }
 }

@@ -38,6 +38,7 @@ export async function PUT(request: Request) {
     whatsappDefaultTemplate,
     address,
     mapsEmbedUrl,
+    googleReviewUrl: rawGoogleReviewUrl,
     openHours,
     socialInstagram,
     socialTiktok,
@@ -45,6 +46,13 @@ export async function PUT(request: Request) {
     announcementText,
     isAnnouncementActive,
   } = data;
+
+  // Only accept a plain https link (or empty) for the Google reviews button.
+  const reviewUrlText = typeof rawGoogleReviewUrl === "string" ? rawGoogleReviewUrl.trim() : "";
+  if (reviewUrlText && (!/^https:\/\//i.test(reviewUrlText) || reviewUrlText.length > 500)) {
+    return NextResponse.json({ error: "Link ulasan Google harus diawali https:// (maks 500 karakter)." }, { status: 400 });
+  }
+  const googleReviewUrl = reviewUrlText || null;
 
   const settings = await prisma.storeSetting.upsert({
     where: { id: "default" },
@@ -55,6 +63,7 @@ export async function PUT(request: Request) {
       whatsappDefaultTemplate,
       address,
       mapsEmbedUrl,
+      googleReviewUrl,
       openHours,
       socialInstagram,
       socialTiktok,
@@ -70,6 +79,7 @@ export async function PUT(request: Request) {
       whatsappDefaultTemplate: whatsappDefaultTemplate || "",
       address: address || "",
       mapsEmbedUrl,
+      googleReviewUrl,
       openHours: openHours || "",
       socialInstagram,
       socialTiktok,

@@ -234,6 +234,35 @@ model BannerHotspot {
 }
 
 // ----------------------------------------------------
+// 4b. TESTIMONI PELANGGAN (diinput manual oleh admin)
+// ----------------------------------------------------
+enum TestimonialSource {
+  GOOGLE
+  WHATSAPP
+  DIRECT
+}
+
+model Testimonial {
+  id         String            @id @default(cuid())
+  name       String            @db.VarChar(100)
+  descriptor String?           @db.VarChar(120)
+  quote      String            @db.VarChar(300)
+  rating     Int?              @db.TinyInt
+  label      String?           @db.VarChar(80)
+  photoUrl   String?           @db.VarChar(255)
+  source     TestimonialSource @default(DIRECT)
+  sourceUrl  String?           @db.VarChar(500)
+  isActive   Boolean           @default(true)
+  isFeatured Boolean           @default(false)
+  sortOrder  Int               @default(0)
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+
+  @@index([isActive, isFeatured, sortOrder])
+  @@map("testimonials")
+}
+
+// ----------------------------------------------------
 // 5. LAYANAN & SERVIS
 // ----------------------------------------------------
 model Service {
@@ -267,6 +296,7 @@ model StoreSetting {
   whatsappDefaultTemplate    String   @db.Text
   address                    String   @db.Text
   mapsEmbedUrl               String?  @db.Text
+  googleReviewUrl            String?  @db.VarChar(500)
   openHours                  String   @default("Senin - Sabtu: 09.00 - 20.00 WIB") @db.VarChar(200)
   socialInstagram            String?  @db.VarChar(100)
   socialTiktok               String?  @db.VarChar(100)

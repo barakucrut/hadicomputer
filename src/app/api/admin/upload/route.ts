@@ -4,7 +4,7 @@ import path from "path";
 import { authorizeAdmin } from "@/lib/auth";
 
 export async function POST(request: Request) {
-  const auth = await authorizeAdmin(["products:create", "products:edit", "banners:manage", "brands:manage", "categories:manage", "settings:appearance"]);
+  const auth = await authorizeAdmin(["products:create", "products:edit", "banners:manage", "testimonials:manage", "brands:manage", "categories:manage", "settings:appearance"]);
   if (!auth.ok) return auth.response;
 
   try {

@@ -36,6 +36,7 @@ export default function AdminSettingsPage() {
     address: "Jl. Ahmad Yani No. 45, Lantai 1",
     openHours: "Buka setiap hari: 08.00 – 22.00 WIB",
     mapsEmbedUrl: "",
+    googleReviewUrl: "",
     socialInstagram: "",
     socialTiktok: "",
     socialFacebook: "",
@@ -77,7 +78,8 @@ export default function AdminSettingsPage() {
       if (res.ok) {
         toast.success("Pengaturan toko berhasil diperbarui!");
       } else {
-        toast.error("Gagal menyimpan pengaturan toko.");
+        const data = await res.json().catch(() => ({}));
+        toast.error(data.error || "Gagal menyimpan pengaturan toko.");
       }
     } catch (err) {
       toast.error("Terjadi kesalahan saat menyimpan pengaturan toko.");
@@ -251,6 +253,20 @@ export default function AdminSettingsPage() {
               <p className="text-xs text-[#525854] mt-1.5">
                 Bisa diisi <strong>koordinat GPS</strong> (misal: <code>-8.2934, 113.7123</code>), <strong>link Google Maps</strong>, atau <strong>kode embed iframe</strong>. Peta Google Maps interaktif akan langsung tampil di halaman Lokasi Toko.
               </p>
+            </div>
+
+            <div>
+              <Label htmlFor="set-review-url">Link Ulasan Google</Label>
+              <Input
+                id="set-review-url"
+                type="url"
+                placeholder="https://g.page/r/.../review atau link Google Maps toko"
+                value={settings.googleReviewUrl || ""}
+                onChange={(e) => setSettings({ ...settings, googleReviewUrl: e.target.value })}
+              />
+              <span className="admin-form-hint">
+                Opsional. Jika diisi, tombol &ldquo;Lihat semua ulasan di Google&rdquo; muncul di bawah section testimoni beranda.
+              </span>
             </div>
           </CardContent>
         </Card>

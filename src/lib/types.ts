@@ -69,4 +69,16 @@ export type StoreSettings = {
   tiktok: string | null;
   facebook: string | null;
   mapsUrl: string | null;
+  googleReviewUrl?: string | null;
+};
+
+export type Testimonial = {
+  id: string;
+  name: string;
+  descriptor: string | null;
+  quote: string;
+  rating: number | null;
+  label: string | null;
+  photoUrl: string | null;
+  source: "GOOGLE" | "WHATSAPP" | "DIRECT";
 };

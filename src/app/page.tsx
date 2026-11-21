@@ -24,6 +24,7 @@ import {
   getLiveCategories,
   getLiveStoreSettings,
   getLiveNeeds,
+  getLiveTestimonials,
 } from "@/lib/live-repository";
 import { Container, CategoryIcon, SectionHeading } from "@/components/ui";
 import { HeroSlider } from "@/components/hero-slider";
@@ -32,6 +33,7 @@ import { ProductGrid } from "@/components/product-card";
 import { ServiceCard } from "@/components/service-card";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 import { parseGoogleMaps } from "@/components/location-panel";
+import { TestimonialsSection } from "@/components/testimonials-section";
 
 const mobilePcSlugs = new Set([
   "msi-mag-infinite-s3-14th",
@@ -44,12 +46,13 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function HomePage() {
-  const [products, liveBanners, liveCategories, storeSettings, liveNeeds] = await Promise.all([
+  const [products, liveBanners, liveCategories, storeSettings, liveNeeds, testimonials] = await Promise.all([
     getLiveProducts(),
     getLiveBanners(),
     getLiveCategories(),
     getLiveStoreSettings(),
     getLiveNeeds(),
+    getLiveTestimonials(),
   ]);
 
   const mapData = parseGoogleMaps(storeSettings.mapsUrl, storeSettings.address);
@@ -275,6 +278,10 @@ export default async function HomePage() {
           </div>
         </Container>
       </section>
+      <TestimonialsSection
+        testimonials={testimonials}
+        googleReviewUrl={storeSettings.googleReviewUrl}
+      />
       <section className="section store-section">
         <Container>
           <div className="store-banner">
