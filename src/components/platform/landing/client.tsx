@@ -95,6 +95,38 @@ export function RevealOnScroll() {
   return null;
 }
 
+/** Nav: garis emas yang berpindah ke menu yang sedang di-hover. */
+export function NavHoverLine() {
+  React.useEffect(() => {
+    const nav = document.querySelector<HTMLElement>(".rsl .nav-links");
+    if (!nav) return;
+    const links = Array.from(nav.querySelectorAll<HTMLAnchorElement>("a"));
+    const show = (a: HTMLAnchorElement) => {
+      nav.style.setProperty("--rsl-line-x", `${a.offsetLeft}px`);
+      nav.style.setProperty("--rsl-line-w", `${a.offsetWidth}px`);
+      nav.classList.add("is-hovering");
+    };
+    const hide = () => nav.classList.remove("is-hovering");
+    const handlers = links.map((a) => {
+      const h = () => show(a);
+      a.addEventListener("mouseenter", h);
+      a.addEventListener("focus", h);
+      a.addEventListener("blur", hide);
+      return [a, h] as const;
+    });
+    nav.addEventListener("mouseleave", hide);
+    return () => {
+      for (const [a, h] of handlers) {
+        a.removeEventListener("mouseenter", h);
+        a.removeEventListener("focus", h);
+        a.removeEventListener("blur", hide);
+      }
+      nav.removeEventListener("mouseleave", hide);
+    };
+  }, []);
+  return null;
+}
+
 function scrollToForm() {
   document.getElementById("minta-demo")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }

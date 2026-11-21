@@ -1,7 +1,7 @@
 import { MessageCircle } from "lucide-react";
 import { salesWhatsappUrl } from "@/lib/demo-request";
 import { AUDIENCE, BRAND_LINE, FAQS, PLANS, PROBLEMS, STEPS, TEMPLATES } from "./content";
-import { DemoForm, HeroPreview, LandingTracker, RevealOnScroll } from "./client";
+import { DemoForm, HeroPreview, LandingTracker, NavHoverLine, RevealOnScroll } from "./client";
 import { LANDING_EVENTS as E, track } from "./tracking";
 import "./landing.css";
 
@@ -45,6 +45,7 @@ export function LandingPage({ salesPhone }: { salesPhone: string | null }) {
     <div className="rsl">
       <RevealOnScroll />
       <LandingTracker />
+      <NavHoverLine />
 
       <header className="nav">
         <div className="wrap">
