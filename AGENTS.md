@@ -161,7 +161,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 ## 8. Gambar, Import & Data Contoh
 
 - Folder upload resmi: `products`, `banners`, `services`, `brands`, `logos`, `favicons` (`UPLOAD_FOLDERS`). Folder lain jatuh ke `products`.
-- `public/uploads` = **data milik toko, bukan kode**: tidak di-commit, dipindah ke server dengan `rsync` + manifest checksum, dan di server berada di folder persisten (`shared/uploads`) yang ikut backup bersama database. Lihat `docs/DEPLOYMENT.md`.
+- `public/uploads` = **data milik toko, bukan kode**. Hanya ikut git untuk **deploy pertama**; sesudahnya dikeluarkan dari git (`.gitignore`) dan di server berada di folder persisten (`shared/uploads`, symlink) yang ikut backup bersama database. Mengeluarkannya dari git wajib mengikuti urutan `docs/DEPLOYMENT.md` Bagian 6.1 — `git pull` biasa akan menghapus foto di server.
 - File lama di server bisa dioptimasi ulang: `npm run optimize:uploads` (dry run) / `-- --apply` (backup ke `.upload-backups/`).
 - Foto katalog berbingkai poster (bingkai warna + logo/nama toko) dirapikan dengan `npx tsx scripts/clean-product-photos.ts <slug>` (pratinjau) / `--apply` (foto baru, foto lama tidak dihapus; rollback `--revert .upload-backups/clean-photos-*.json`). Logika di `src/lib/product-photo-clean.ts`: produk tunggal dipusatkan di kanvas putih & logo toko dibuang; poster brand hanya dibuang bingkainya.
 - Import katalog: tambah kolom baru cukup di `src/lib/catalog-import/columns.ts` + `types.ts` + `normalizeRecord`/`sanitizeRow` + engine + export.
@@ -249,7 +249,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 ## 11. Deploy & Produksi
 
 - Panduan lengkap (ukuran data, env, DNS wildcard, langkah pertama & berikutnya, verifikasi): **`docs/DEPLOYMENT.md`**.
-- Deploy pertama = kode (git) + dump database + `rsync` `public/uploads` → hasil persis lokal, dibuktikan dengan `sha256sum -c` manifest foto.
+- Deploy pertama = `git clone` lewat **deploy key read-only** (kode + foto `public/uploads` ikut git sekali) + dump database (tidak lewat git) → hasil persis lokal, dibuktikan dengan `sha256sum -c` manifest foto.
 - Setelah live: **jangan menimpa database/foto server dengan data lokal** — hanya kode + SQL schema yang sudah dibaca (`migrate diff` terhadap DB server), selalu didahului backup.
 - `node_modules` & `.next` tidak pernah dikirim; `npm ci` + `npm run build` di server (`sharp`/Prisma butuh binary Linux). `NEXT_PUBLIC_*` ditanam saat build.
 - Reverse proxy wajib meneruskan `Host`/`X-Forwarded-Host`/`X-Forwarded-Proto` (resolver toko & URL SEO membaca header ini) dan mengizinkan body upload ≥ 16 MB.

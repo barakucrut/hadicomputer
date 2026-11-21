@@ -13,7 +13,7 @@
 | └ `public/images` | logo & foto bawaan prototype | 10 MB | ikut git |
 | └ `public/platform` | gambar landing page rigspace.id | 272 KB | ikut git |
 | └ `docs/` | dokumen, aset brand, screenshot | 11 MB | ikut git (tidak dipakai saat runtime) |
-| **Foto upload** `public/uploads` | **521 file** | **23 MB** | **rsync** (bukan git) |
+| **Foto upload** `public/uploads` | **521 file** | **23 MB** | **ikut git khusus deploy pertama**, lalu dikeluarkan (Bagian 2) |
 | └ `products/` | 502 file (hampir semua WebP) | 22 MB | |
 | └ `logos/` | 14 file | 1,1 MB | |
 | └ `banners/` | 5 file | 152 KB | |
@@ -21,7 +21,7 @@
 | `.upload-backups/` | foto asli sebelum dioptimasi / dibersihkan (untuk rollback) | 3,3 MB | opsional |
 | `node_modules` / `.next` | dibuat ulang di server | 837 MB / 580 MB | **jangan dikirim** |
 
-**Total yang benar-benar dikirim: ±50 MB** (kode 25 MB + foto 23 MB + dump DB ±2 MB).
+**Total yang benar-benar dikirim: ±50 MB** (repo ±48 MB termasuk foto + dump DB ±2 MB).
 
 ### Isi database saat ini
 
@@ -46,17 +46,25 @@ Tabel terbesar: `products` 272 baris (1,8 MB), `product_images` 406, `product_sp
 
 ---
 
-## 2. Kenapa Foto Tidak Lewat Git
+## 2. Foto: Ikut Git Sekali, Lalu Dikeluarkan
 
-`public/uploads` adalah **data milik toko** (hasil upload CMS), bukan kode. Isinya berubah setiap kali
-merchant mengunggah, jadi:
+`public/uploads` adalah **data milik toko** (hasil upload CMS), bukan kode. Untuk deploy pertama foto
+sengaja **ikut git** agar server cukup `git clone` dan hasilnya persis lokal. Setelah itu foto harus
+keluar dari git, karena merchant mulai mengunggah langsung di server.
 
-- Dikirim dengan `rsync` dan disimpan di folder **persisten** di server (tidak boleh tertimpa/terhapus
-  saat deploy kode baru).
-- Wajib ikut backup harian bersama database — foto & database adalah satu paket.
-- Catatan: 12 file lama di `public/uploads` masih ter-track git dari commit awal. Versi yang benar adalah
-  yang di disk (dikirim via rsync). Disarankan dikeluarkan dari git (`git rm -r --cached public/uploads`
-  + tambah `public/uploads/` ke `.gitignore`) supaya `git pull` di server tidak bentrok dengan foto.
+> ⚠️ **Bahaya utama:** commit yang mengeluarkan `public/uploads` dari git, bila di-`git pull` begitu saja di
+> server, akan **menghapus semua foto dari disk server**. Wajib ikuti urutan di Bagian 6.1.
+
+Alur lengkap:
+
+1. Deploy pertama: commit seluruh `public/uploads` → push → clone di server (Bagian 5).
+2. Di server: salin foto ke folder persisten `/srv/rigspace/shared/uploads`.
+3. Di laptop: `git rm -r --cached public/uploads` + `public/uploads/` di `.gitignore` → commit → push.
+4. Di server: `git pull`, lalu `public/uploads` diganti symlink ke folder persisten. Sejak itu foto aman
+   dari deploy apa pun dan ikut backup harian bersama database.
+
+Sebelum commit foto: pastikan pekerjaan merapikan foto (mis. Bitcom) sudah selesai, dan dump database
+diambil **sesudah** commit foto, supaya isi database cocok dengan foto yang dikirim.
 
 ---
 
@@ -66,6 +74,7 @@ merchant mengunggah, jadi:
 - MySQL 8+/9 atau MariaDB 10.6+ (lokal: MySQL 9.2).
 - Linux x64/arm64. `sharp` memakai binary native → **wajib `npm ci` di server**, jangan menyalin
   `node_modules` dari Mac.
+- Akses baca ke repo GitHub `barakucrut/hadicomputer` (private) lewat **deploy key** (Bagian 4.1).
 - Reverse proxy (Nginx/Caddy) yang meneruskan header `Host`, `X-Forwarded-Host`, `X-Forwarded-Proto`
   (resolver toko membaca host dari header ini).
 - Batas upload proxy **≥ 16 MB** (`MAX_INPUT_BYTES` = 15 MB), contoh Nginx `client_max_body_size 20m;`.
@@ -102,6 +111,33 @@ Buat `.env` di server (tidak pernah di-commit). Daftar lengkap ada di [`.env.exa
 > kalau tidak siapa pun yang membaca repo bisa memalsukan sesi login.
 > `NEXT_PUBLIC_*` ditanam saat `npm run build` — ubah nilainya = build ulang.
 
+### 4.1 Deploy Key GitHub (akses clone dari server)
+
+Deploy key = SSH key milik **server**, hanya untuk **satu repo**, **read-only**. Lebih aman daripada
+memakai akun/token pribadi: bila server bermasalah, cukup hapus key-nya di GitHub.
+
+```bash
+# Di server (sebagai user yang menjalankan aplikasi)
+ssh-keygen -t ed25519 -C "rigspace-server-deploy" -f ~/.ssh/rigspace_deploy -N ""
+cat ~/.ssh/rigspace_deploy.pub        # salin isinya
+
+cat >> ~/.ssh/config <<'CFG'
+Host github-rigspace
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/rigspace_deploy
+  IdentitiesOnly yes
+CFG
+
+ssh -T github-rigspace                # balasan "successfully authenticated" = berhasil
+```
+
+Di GitHub: repo → **Settings → Deploy keys → Add deploy key** → tempel isi `.pub`, beri judul
+"rigspace server", **jangan centang "Allow write access"**. Private key (`rigspace_deploy` tanpa `.pub`)
+tidak pernah keluar dari server.
+
+Clone memakai alias host di atas: `git clone git@github-rigspace:barakucrut/hadicomputer.git app`.
+
 ---
 
 ## 5. Langkah Deploy Pertama (data persis seperti lokal)
@@ -109,10 +145,11 @@ Buat `.env` di server (tidak pernah di-commit). Daftar lengkap ada di [`.env.exa
 ### 5.1 Di laptop (sumber)
 
 ```bash
-# a. Pastikan semua kode sudah di-commit & di-push
-git status && git push origin <branch>
+# a. Commit kode + seluruh foto, lalu push branch yang akan di-deploy
+git add -A && git commit -m "chore(deploy): snapshot foto upload untuk deploy pertama"
+git push -u origin <branch>
 
-# b. Dump database lengkap (struktur + data)
+# b. Dump database lengkap (struktur + data) — diambil SESUDAH commit foto
 mysqldump --single-transaction --routines --triggers --no-tablespaces \
   --default-character-set=utf8mb4 -u <user> -p hadicomputer > rigspace-db.sql
 
@@ -121,25 +158,19 @@ find public/uploads -type f ! -name .DS_Store -print0 | sort -z | xargs -0 shasu
 wc -l uploads.sha256   # harus 521 (per 21 Nov 2026)
 ```
 
-### 5.2 Kirim ke server
+### 5.2 Kirim dump DB ke server
+
+Dump database **tidak** masuk git (berisi data akun & hash password).
 
 ```bash
-# Foto (persis, termasuk hapus file yang sudah tidak ada di lokal)
-rsync -avz --checksum --exclude '.DS_Store' public/uploads/ user@server:/srv/rigspace/shared/uploads/
-
-# Dump DB & manifest
-rsync -avz rigspace-db.sql uploads.sha256 user@server:/srv/rigspace/shared/
+scp rigspace-db.sql uploads.sha256 user@server:/srv/rigspace/shared/
 ```
 
 ### 5.3 Di server
 
 ```bash
-cd /srv/rigspace
-git clone <repo> app && cd app && git checkout <branch>
-
-# Folder foto persisten → dihubungkan ke lokasi yang dibaca aplikasi
-# (hapus dulu salinan dari git agar symlink tidak terbuat DI DALAM folder lama)
-rm -rf public/uploads && ln -s /srv/rigspace/shared/uploads public/uploads
+mkdir -p /srv/rigspace/shared && cd /srv/rigspace
+git clone git@github-rigspace:barakucrut/hadicomputer.git app && cd app && git checkout <branch>
 
 # .env produksi (lihat Bagian 4)
 nano .env
@@ -180,6 +211,31 @@ Lalu buka di browser:
 ---
 
 ## 6. Deploy Berikutnya (server sudah berisi data nyata)
+
+### 6.1 Sekali saja: mengeluarkan foto dari git (urutan wajib)
+
+```bash
+# 1) SERVER — amankan foto ke folder persisten SEBELUM pull apa pun
+cd /srv/rigspace/app
+cp -a public/uploads /srv/rigspace/shared/uploads
+find /srv/rigspace/shared/uploads -type f | wc -l     # >= 521
+
+# 2) LAPTOP — keluarkan dari git (file di laptop TIDAK terhapus)
+git rm -r --cached public/uploads
+echo "public/uploads/" >> .gitignore
+git commit -m "chore(deploy): keluarkan public/uploads dari git" && git push
+
+# 3) SERVER — pull (foto di public/uploads ikut terhapus oleh git), lalu pasang symlink
+git pull
+rm -rf public/uploads && ln -s /srv/rigspace/shared/uploads public/uploads
+pm2 restart rigspace
+sha256sum -c /srv/rigspace/shared/uploads.sha256 | grep -v ': OK$' || echo "SEMUA FOTO IDENTIK"
+```
+
+Foto yang sempat diunggah merchant di antara langkah 1 dan 3 ikut tersalin bila langkah 1 diulang
+tepat sebelum `git pull` (gunakan `rsync -a public/uploads/ /srv/rigspace/shared/uploads/`).
+
+### 6.2 Deploy kode rutin
 
 Setelah live, **jangan menimpa database & foto server dengan data lokal** — data merchant di server
 lebih baru. Yang dikirim hanya kode + perubahan schema:
