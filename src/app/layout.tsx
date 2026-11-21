@@ -22,12 +22,25 @@ import { StorefrontAnalytics } from "@/components/storefront-analytics";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+/** Favicon bawaan platform: dipakai landing, halaman "tidak ditemukan"/demo, dan toko tanpa favicon sendiri. */
+const RIGSPACE_ICONS: Metadata["icons"] = {
+  icon: [{ url: "/rigspace-icon.svg", type: "image/svg+xml" }],
+  apple: [{ url: "/rigspace-apple-icon.png", sizes: "180x180" }],
+};
+
+/** Favicon toko dari CMS (Pengaturan Toko), atau favicon Rigspace bila kosong. */
+function storeIcons(faviconUrl?: string | null): Metadata["icons"] {
+  if (!faviconUrl) return RIGSPACE_ICONS;
+  return { icon: [{ url: faviconUrl }], apple: [{ url: faviconUrl }] };
+}
+
 export async function generateMetadata(): Promise<Metadata> {
   // Halaman CMS (/admin, /god-mode): tanpa metadata storefront toko mana pun
   if ((await headers()).get(CMS_AREA_HEADER) === "cms") {
     return {
       title: { absolute: "Rigspace.id — Content Management System" },
       robots: { index: false, follow: false },
+      icons: RIGSPACE_ICONS,
     };
   }
 
@@ -43,6 +56,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       alternates: { canonical: "/" },
       robots: { index: true, follow: true },
+      icons: RIGSPACE_ICONS,
       openGraph: {
         type: "website",
         locale: "id_ID",
@@ -61,6 +75,7 @@ export async function generateMetadata(): Promise<Metadata> {
         absolute: seo.tenant.resolution === "demo-locked" ? "Segera hadir" : "Toko tidak ditemukan — Rigspace.id",
       },
       robots: { index: false, follow: false },
+      icons: RIGSPACE_ICONS,
     };
   }
   const ogImage = seo.ogImage.startsWith("http") ? seo.ogImage : `${seo.origin}${seo.ogImage}`;
@@ -89,7 +104,7 @@ export async function generateMetadata(): Promise<Metadata> {
       },
     },
     verification: seo.googleSiteVerification ? { google: seo.googleSiteVerification } : undefined,
-    icons: seo.tenant.settings.faviconUrl ? { icon: seo.tenant.settings.faviconUrl } : undefined,
+    icons: storeIcons(seo.tenant.settings.faviconUrl),
     openGraph: {
       type: "website",
       locale: "id_ID",

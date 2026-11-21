@@ -93,6 +93,11 @@ export async function PUT(request: Request) {
     homepageConfig,
   } = data;
 
+  // Favicon masuk ke <head>: hanya file hasil upload CMS (atau kosong = ikon Rigspace).
+  if (typeof faviconUrl === "string" && faviconUrl.trim() && (!faviconUrl.startsWith("/uploads/") || faviconUrl.includes(".."))) {
+    return NextResponse.json({ error: "Favicon harus diunggah lewat CMS." }, { status: 400 });
+  }
+
   // Link ulasan Google: hanya https (atau kosong). Tidak dikirim = tidak diubah.
   let googleReviewUrl: string | null | undefined = undefined;
   if (data.googleReviewUrl !== undefined) {

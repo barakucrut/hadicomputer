@@ -35,6 +35,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/admin/ui/toast";
 import { SeoAnalyticsPanel, CatalogStockPanel } from "@/components/admin/settings/advanced-settings-panels";
+import { ImageDropzone } from "@/components/admin/ui/image-dropzone";
 import { SecondaryColorField } from "@/components/admin/settings/secondary-color-field";
 import { ChangePasswordForm } from "@/components/account/change-password-dialog";
 
@@ -859,6 +860,39 @@ export default function AdminSettingsPage() {
                     </p>
                   </div>
                 )}
+              </div>
+
+              {/* Favicon: ikon di tab browser & bookmark */}
+              <div className="space-y-3 pt-2">
+                <div>
+                  <Label className="text-xs font-bold text-[#111413]">Favicon (Ikon Tab Browser)</Label>
+                  <span className="admin-form-hint">
+                    Gambar persegi, minimal 64×64 px (disarankan 512×512, PNG transparan / SVG). Kosong = memakai ikon Rigspace.
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4 items-start">
+                  <ImageDropzone
+                    value={settings.faviconUrl || null}
+                    onChange={(url) => setSettings((prev: any) => ({ ...prev, faviconUrl: url || "" }))}
+                    folder="favicons"
+                    label="Unggah Favicon"
+                    hint="PNG / SVG / WebP — otomatis dikompres."
+                    previewHeight={72}
+                  />
+                  {/* Pratinjau tab browser */}
+                  <div className="rounded-xl border border-[#e5e3dd] bg-[#f4f4f1] p-3 w-full md:w-64">
+                    <p className="text-[11px] font-bold text-[#525854] mb-2">Pratinjau tab</p>
+                    <div className="flex items-center gap-2 rounded-t-lg bg-white px-3 py-2 shadow-xs">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={settings.faviconUrl || "/rigspace-icon.svg"}
+                        alt=""
+                        className="h-4 w-4 shrink-0 rounded-[3px] object-contain"
+                      />
+                      <span className="truncate text-xs text-[#111413]">{settings.storeName || "Nama Toko"}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
