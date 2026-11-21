@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { MessageCircle } from "lucide-react";
+import { BatteryFull, MessageCircle, Signal, Wifi } from "lucide-react";
 import { trackEvent } from "@/components/storefront-analytics";
 import { BRAND_COLORS, HERO, previewSlug } from "./content";
 import { LANDING_EVENTS, readTrack } from "./tracking";
@@ -216,10 +216,24 @@ export function HeroPreview({ desktopSrc, mobileSrc }: { desktopSrc: string; mob
         </div>
         <div className="phone anim-phone">
           <div className="screen">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={mobileSrc} alt={`Contoh tampilan website toko ${name || "Anda"} di HP`} width={620} height={1342} />
-            {logo}
+            <div className="rsl-statusbar" aria-hidden>
+              <span className="rsl-sb-time">9:41</span>
+              <span className="rsl-sb-icons">
+                <Signal className="rsl-sb-icon" strokeWidth={2.6} />
+                <Wifi className="rsl-sb-icon" strokeWidth={2.6} />
+                <BatteryFull className="rsl-sb-icon rsl-sb-battery" strokeWidth={2.2} />
+              </span>
+            </div>
+            <div className="rsl-viewport">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={mobileSrc} alt={`Contoh tampilan website toko ${name || "Anda"} di HP`} width={620} height={1342} />
+              {logo}
+            </div>
+            <span className="rsl-home-indicator" aria-hidden />
           </div>
+          {/* Bingkai HP (PNG transparan): rangka, bezel & Dynamic Island di atas layar */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="rsl-phone-frame" src="/platform/landing/phone-frame.webp" alt="" aria-hidden width={520} height={1048} />
         </div>
         <div className="toast anim-toast">
           <div className="av">

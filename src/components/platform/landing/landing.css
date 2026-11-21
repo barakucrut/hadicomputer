@@ -27,6 +27,8 @@
 
 .rsl .rsl-eyebrow { font-size: 12px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold3); }
 .rsl .gold { background: linear-gradient(120deg, var(--gold2), var(--gold3)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+/* background-clip:text hanya melukis di dalam kotak elemen; beri ruang untuk ekor huruf (g) & titik akhir. */
+.rsl .rsl-hero h1 .gold { padding: 0 0.06em 0.14em 0; margin-bottom: -0.14em; }
 .rsl .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 50px; padding: 0 22px; border-radius: 12px; font-weight: 700; font-size: 15px; border: 1px solid transparent; cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease; font-family: inherit; }
 .rsl .btn:hover { transform: translateY(-2px); }
 .rsl .btn-dark { background: var(--ink); color: #fff; box-shadow: 0 10px 24px -10px rgba(17, 20, 19, 0.45); }
@@ -92,13 +94,23 @@
 .rsl .desk .logo-cover { left: 5.1%; top: 5.4%; width: 11%; height: 5.4%; }
 .rsl .desk .logo-cover b { font-size: 2.15cqw; }
 .rsl .desk .logo-cover small { font-size: 0.82cqw; }
-.rsl .phone { position: absolute; right: -6px; bottom: 0; width: 34%; max-width: 220px; border-radius: 30px; background: #0b0d0c; padding: 8px; box-shadow: 0 50px 90px -30px rgba(17, 20, 19, 0.6); }
-.rsl .phone .screen { position: relative; border-radius: 23px; overflow: hidden; background: #fff; aspect-ratio: 390 / 760; container-type: inline-size; }
-.rsl .phone .screen img { width: 100%; }
-.rsl .phone .logo-cover { left: 4.5%; top: 1.6%; width: 30%; height: 4%; }
+/* Mockup HP: bingkai gambar transparan (public/platform/landing/phone-frame.webp) di atas layar.
+   Posisi layar = lubang layar pada gambar bingkai (diukur dari file aslinya). */
+.rsl .phone { position: absolute; right: -6px; bottom: 0; width: 31%; max-width: 206px; aspect-ratio: 853 / 1719; filter: drop-shadow(0 40px 45px rgba(17, 20, 19, 0.35)); }
+.rsl .phone .screen { position: absolute; left: 5.74%; top: 2.39%; width: 88.51%; height: 95.23%; display: flex; flex-direction: column; border-radius: 12.5% / 5.8%; overflow: hidden; background: #fff; container-type: inline-size; }
+.rsl .rsl-phone-frame { position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; pointer-events: none; user-select: none; }
+.rsl .phone .rsl-statusbar { position: relative; flex: 0 0 auto; height: 13cqw; display: flex; align-items: center; justify-content: space-between; padding: 0.6cqw 8cqw 0 10cqw; background: #fff; color: #0b0c0d; font-family: -apple-system, "SF Pro Text", "Plus Jakarta Sans", system-ui, sans-serif; }
+.rsl .phone .rsl-sb-time { font-size: 4.3cqw; font-weight: 700; letter-spacing: -0.01em; }
+.rsl .phone .rsl-sb-icons { display: inline-flex; align-items: center; gap: 1.2cqw; }
+.rsl .phone .rsl-sb-icon { width: 4.2cqw; height: 4.2cqw; }
+.rsl .phone .rsl-sb-battery { width: 6cqw; height: 6cqw; }
+.rsl .phone .rsl-viewport { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; }
+.rsl .phone .rsl-viewport img { width: 100%; display: block; }
+.rsl .phone .rsl-home-indicator { position: absolute; left: 50%; bottom: 2cqw; transform: translateX(-50%); width: 34cqw; height: 1.3cqw; border-radius: 99px; background: rgba(11, 12, 13, 0.82); }
+.rsl .phone .logo-cover { left: 4.5%; top: 1.5%; width: 30%; height: 3.8%; }
 .rsl .phone .logo-cover b { font-size: 7.2cqw; }
 .rsl .phone .logo-cover small { font-size: 2.6cqw; }
-@media (max-width: 639px) { .rsl .phone { width: 38%; right: -4px; border-radius: 22px; padding: 6px; } .rsl .phone .screen { border-radius: 17px; } }
+@media (max-width: 639px) { .rsl .phone { width: 34%; right: -4px; } }
 .rsl .toast { position: absolute; left: -8px; bottom: 6%; display: flex; gap: 10px; align-items: center; background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 10px 14px 10px 10px; box-shadow: 0 24px 50px -20px rgba(17, 20, 19, 0.4); max-width: 300px; }
 .rsl .toast .av { width: 38px; height: 38px; border-radius: 12px; background: #25d366; display: grid; place-items: center; color: #fff; flex: none; }
 .rsl .toast b { font-size: 13px; display: block; }
