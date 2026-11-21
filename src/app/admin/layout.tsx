@@ -4,6 +4,8 @@ import { requireAdminSession } from "@/lib/auth";
 import { getPlatformSession } from "@/lib/god-auth";
 import { IMPERSONATION_COOKIE } from "@/lib/platform-cms";
 import { CMS_PATH_HEADER } from "@/lib/storefront-template";
+import { storePublicUrl } from "@/lib/platform-domain";
+import { prisma } from "@/lib/db";
 import { AdminShell } from "@/components/admin/admin-shell";
 import "@/app/admin.css";
 
@@ -33,6 +35,14 @@ export default async function AdminLayout({
     }
   }
 
+  // Link "Buka Toko Publik": subdomain toko yang sedang dikelola (bukan "/" — di produksi itu landing platform)
+  let storeUrl = "/";
+  if (user?.tenantId) {
+    const tenant = await prisma.tenant.findFirst({ where: { id: user.tenantId }, select: { slug: true } });
+    const headerStore = await headers();
+    storeUrl = storePublicUrl(tenant?.slug, headerStore.get("x-forwarded-host") || headerStore.get("host"));
+  }
+
   // If user is null and path is not /admin/login, client will redirect or middleware will handle.
-  return <AdminShell user={user}>{children}</AdminShell>;
+  return <AdminShell user={user} storeUrl={storeUrl}>{children}</AdminShell>;
 }

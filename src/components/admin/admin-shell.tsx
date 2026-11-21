@@ -36,6 +36,8 @@ import "@/app/admin.css";
 
 interface AdminShellProps {
   children: React.ReactNode;
+  /** URL etalase toko yang sedang dikelola (dihitung server dari slug & host). */
+  storeUrl?: string;
   user?: {
     name: string;
     email: string;
@@ -55,7 +57,7 @@ interface TenantOption {
   settings?: { primaryColor?: string } | null;
 }
 
-export function AdminShell({ children, user }: AdminShellProps) {
+export function AdminShell({ children, user, storeUrl = "/" }: AdminShellProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
@@ -342,7 +344,7 @@ export function AdminShell({ children, user }: AdminShellProps) {
           )}
 
           <a
-            href="/"
+            href={storeUrl}
             target="_blank"
             rel="noopener noreferrer"
             title="Buka Toko Publik"

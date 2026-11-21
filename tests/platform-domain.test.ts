@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { classifyHost, tenantSlugError, tenantStorefrontHost, cleanHostname, pickPreviewSlug } from "../src/lib/platform-domain";
+import { classifyHost, tenantSlugError, tenantStorefrontHost, cleanHostname, pickPreviewSlug, storePublicUrl } from "../src/lib/platform-domain";
 
 const R = "rigspace.id";
 
@@ -58,4 +58,12 @@ test("pickPreviewSlug: cookie preview/impersonasi hanya di host dev", () => {
   assert.equal(pickPreviewSlug({ isDev: true, cookies: [undefined, "bad slug!", "ok-1"] }), "ok-1");
   // slug tidak valid ditolak
   assert.equal(pickPreviewSlug({ isDev: false, explicit: "../x" }), null);
+});
+
+test("storePublicUrl: produksi ke subdomain toko, dev ke origin yang sama", () => {
+  assert.equal(storePublicUrl("bitcom", "rigspace.id", "rigspace.id"), "https://bitcom.rigspace.id");
+  assert.equal(storePublicUrl("bitcom", "www.rigspace.id", "rigspace.id"), "https://bitcom.rigspace.id");
+  assert.equal(storePublicUrl("bitcom", "tokoku.com", "rigspace.id"), "https://bitcom.rigspace.id");
+  assert.equal(storePublicUrl("bitcom", "localhost:3000", "rigspace.id"), "/?store=bitcom");
+  assert.equal(storePublicUrl(null, "rigspace.id", "rigspace.id"), "/");
 });

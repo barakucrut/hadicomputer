@@ -107,6 +107,17 @@ export function tenantStorefrontHost(slug: string, root: string = platformRootDo
 }
 
 /**
+ * Link "Buka Toko Publik" di CMS. Produksi: selalu subdomain toko (rigspace.id sendiri = landing
+ * platform). Host pengembangan: origin yang sama dengan ?store= agar bisa dites tanpa DNS.
+ */
+export function storePublicUrl(slug: string | null | undefined, requestHost: string | null | undefined, root: string = platformRootDomain()): string {
+  if (!slug) return "/";
+  const kind = classifyHost(requestHost, root);
+  if (kind.kind === "dev") return `/?store=${encodeURIComponent(slug)}`;
+  return `https://${tenantStorefrontHost(slug, root)}`;
+}
+
+/**
  * Link demo untuk dibagikan. Produksi: selalu di subdomain toko. Host pengembangan
  * (localhost/tunnel): di origin request itu sendiri supaya bisa dites tanpa DNS.
  */
