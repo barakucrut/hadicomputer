@@ -1,47 +1,40 @@
-# Hadi Computer
+# Rigspace.id
 
-Prototype frontend katalog untuk approval client, dibuat dengan Next.js App Router, TypeScript, dan Plus Jakarta Sans. Seluruh produk dan harga adalah data contoh. CMS, login, MySQL, dan laporan belum diimplementasikan.
+Platform SaaS multi-tenant website khusus toko komputer: landing page `rigspace.id`, etalase per toko di
+`{slug}.rigspace.id` (template Precision, Classic, Editorial Gallery, Gaming Arena), CMS toko `/admin`,
+dan panel tim platform `/god-mode` (superadmin, CMO, marketing).
+
+Stack: Next.js 16 (App Router), React 19, Prisma 7 + MySQL/MariaDB, Tailwind v4, `sharp`, `exceljs`.
 
 ## Menjalankan lokal
 
-Node.js 20.9+ (disarankan Node 22/24).
+Node.js 22/24, MySQL 8+ atau MariaDB 10.6+, package manager **npm**.
 
 ```sh
+cp .env.example .env      # isi DATABASE_URL & secret
 npm install
-npm run dev
+npm run dev               # http://localhost:3000
 ```
 
-Buka http://localhost:3000. Jika port digunakan, lihat URL yang tercetak di terminal.
+- Landing platform: http://rigspace.localhost:3000
+- Etalase toko: http://localhost:3000 (dev memakai toko admin / toko pertama)
+- CMS toko: http://localhost:3000/admin · Panel platform: http://localhost:3000/god-mode
 
 ```sh
 npm run typecheck
 npm test
-npm run build
-npm start
+npm run build && npm start
 ```
 
-Tidak membutuhkan `.env` atau database untuk prototype.
+## Dokumen
 
-## Struktur
+| Dokumen | Isi |
+|---|---|
+| [`AGENTS.md`](AGENTS.md) | **Aturan pengembangan (SSOT)**: multi-tenant, keamanan, API, database, storefront, design system, Definition of Done |
+| [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Deploy ke server: ukuran data, env, DNS, langkah & verifikasi foto/banner |
+| [`docs/BUSINESS_STRATEGY.md`](docs/BUSINESS_STRATEGY.md) | Visi bisnis, harga, komisi, roadmap & status |
+| [`docs/brand/README.md`](docs/brand/README.md) | Logo, avatar, dan aset brand Rigspace |
+| [`docs/PRD.md`](docs/PRD.md), [`docs/CMS_PRD.md`](docs/CMS_PRD.md) | PRD awal prototype & CMS (historis) |
+| [`docs/ASSETS.md`](docs/ASSETS.md), [`docs/QA.md`](docs/QA.md) | Sumber aset & QA prototype (historis) |
 
-- `src/app`: halaman publik dan metadata. Katalog menerima filter pada query URL.
-- `src/components`: komponen presentasi dan interaksi reusable.
-- `src/styles-tokens.css`: warna, font, border, radius, dan shadow bersama.
-- `src/lib/types.ts`: kontrak data frontend.
-- `src/lib/repository.ts` dan `products.json`: adapter/data dummy yang dapat diganti Prisma.
-- `src/lib/catalog.ts`: pencarian, filter, sorting, pagination, harga, dan pesan WhatsApp.
-- `public/images`: logo asli, foto produk lokal, dan tiga visual kampanye hasil imagegen.
-- [PRD v2](docs/PRD.md): keputusan desain, cakupan prototype, dan kebutuhan produksi.
-- [Aset visual](docs/ASSETS.md): sumber foto dan prompt banner.
-- [Pemeriksaan](docs/QA.md): hasil verifikasi prototype.
-
-## Catatan demo
-
-- WhatsApp membuka pratinjau pesan dan tombol salin; nomor owner belum tersedia.
-- Alamat, jam, media sosial, dan peta aktual belum diisi. Ilustrasi peta tidak menunjukkan lokasi toko.
-- `robots.txt` dan metadata melarang indexing prototype. Ubah kebijakan ini setelah data produksi terverifikasi.
-- Jangan memakai data demo sebagai harga, stok, spesifikasi, atau klaim toko yang nyata.
-
-## Tahap setelah approval
-
-Sambungkan adapter data ke Prisma/MySQL, bangun CMS `/admin` beserta autentikasi, penyimpanan unggahan persisten, dan pencatatan klik WhatsApp. Pilih hosting serta backup sesuai PRD. Tidak ada integrasi checkout atau pembayaran.
+Branch `main` = SaaS rigspace.id; branch `hadicomputer` = build single-client (lihat AGENTS.md Bagian 0).

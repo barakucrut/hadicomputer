@@ -1,5 +1,7 @@
 # Aset visual prototype
 
+> Dokumen historis prototype awal (`public/images`). Foto & banner toko saat ini ada di `public/uploads` (hasil upload CMS) dan dipindah ke server sesuai [`DEPLOYMENT.md`](DEPLOYMENT.md).
+
 ## Logo
 
 `public/images/hadi-logo.jpeg`: logo asli yang diberikan pengguna, disalin tanpa perubahan dari lampiran WhatsApp. Whitespace dibatasi lewat container CSS; identitas logo tidak digambar ulang.

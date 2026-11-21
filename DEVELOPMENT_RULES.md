@@ -5,4 +5,5 @@ design system CMS, dan Definition of Done) kini disatukan di **[`AGENTS.md`](AGE
 satu sumber aturan yang selalu up to date.
 
 - Showcase UI interaktif: `/god-mode/styleguide` (`src/app/god-mode/styleguide/page.tsx`)
+- Panduan deploy produksi: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)
 - Visi bisnis & roadmap: [`docs/BUSINESS_STRATEGY.md`](docs/BUSINESS_STRATEGY.md)

@@ -11,7 +11,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 # RIGSPACE — PANDUAN PENGEMBANGAN (WAJIB DIBACA SEBELUM MENULIS KODE)
 
 > Dokumen ini adalah **satu-satunya sumber aturan** (SSOT) untuk developer & AI coding agent.
-> Visi bisnis & roadmap ada di `docs/BUSINESS_STRATEGY.md`. Showcase UI interaktif ada di `/god-mode/styleguide`.
+> Visi bisnis & roadmap ada di `docs/BUSINESS_STRATEGY.md`. Panduan deploy produksi ada di `docs/DEPLOYMENT.md`. Showcase UI interaktif ada di `/god-mode/styleguide`.
 
 ---
 
@@ -112,7 +112,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - **Upload file**: selalu `storeImage()` (validasi isi file, buang EXIF/GPS, resize ≤1900px, WebP; SVG disanitasi). Dilarang `writeFile` langsung dari input user.
 - **Fetch URL dari input user** (foto import, katalog website): selalu `fetchPublic()` — memblokir localhost, IP privat, metadata cloud, redirect berbahaya, file raksasa.
 - **Data milik tenant yang masuk `<script>`/`<head>`**: JSON-LD wajib di-escape (`JSON.stringify(x).replace(/</g, "\\u003c")`); ID analitik/verifikasi wajib lolos regex ketat (`src/lib/store-seo.ts`). Dilarang `dangerouslySetInnerHTML` berisi teks bebas dari tenant.
-- Secret production (`ADMIN_JWT_SECRET`, `GOD_MODE_*`) wajib dari env.
+- Secret production (`ADMIN_JWT_SECRET`, `GOD_MODE_JWT_SECRET`, `DEMO_LINK_SECRET`, `GOD_MODE_USER`/`GOD_MODE_PASSWORD`) wajib dari env — kode punya nilai cadangan khusus development yang tidak boleh dipakai di server. Variabel env baru wajib ditambahkan ke `.env.example` (tanpa nilai rahasia) dan tabel env di `docs/DEPLOYMENT.md`.
 - Jangan pernah `alert()`/`confirm()` browser (lihat 9.C).
 
 ---
@@ -131,7 +131,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 3. **SKU**: gunakan `getNextSku(tenantId)` / `isSkuTaken(tenantId, code)`; tangani `isUniqueViolation(err, "code")` dengan retry.
 4. **Stok** (`Product.stock`, `null` = tidak dilacak): selalu lewat `applyStockRule()` — stok 0 = HABIS, restock dari HABIS = TERSEDIA.
 5. **Data contoh** (`isSample = true`) hanya dari Starter Pack; toko dengan data contoh otomatis `noindex`.
-6. Production butuh perubahan schema yang sama (SQL di atas) sebelum deploy kode baru.
+6. Production butuh perubahan schema yang sama (SQL di atas) sebelum deploy kode baru. Simpan SQL-nya di `docs/deploy/sql/YYYY-MM-DD-NN-nama.sql` (jangan hanya di folder sementara), lalu ikuti `docs/DEPLOYMENT.md` Bagian 6.
 
 ---
 
@@ -161,6 +161,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 ## 8. Gambar, Import & Data Contoh
 
 - Folder upload resmi: `products`, `banners`, `services`, `brands`, `logos`, `favicons` (`UPLOAD_FOLDERS`). Folder lain jatuh ke `products`.
+- `public/uploads` = **data milik toko, bukan kode**: tidak di-commit, dipindah ke server dengan `rsync` + manifest checksum, dan di server berada di folder persisten (`shared/uploads`) yang ikut backup bersama database. Lihat `docs/DEPLOYMENT.md`.
 - File lama di server bisa dioptimasi ulang: `npm run optimize:uploads` (dry run) / `-- --apply` (backup ke `.upload-backups/`).
 - Foto katalog berbingkai poster (bingkai warna + logo/nama toko) dirapikan dengan `npx tsx scripts/clean-product-photos.ts <slug>` (pratinjau) / `--apply` (foto baru, foto lama tidak dihapus; rollback `--revert .upload-backups/clean-photos-*.json`). Logika di `src/lib/product-photo-clean.ts`: produk tunggal dipusatkan di kanvas putih & logo toko dibuang; poster brand hanya dibuang bingkainya.
 - Import katalog: tambah kolom baru cukup di `src/lib/catalog-import/columns.ts` + `types.ts` + `normalizeRecord`/`sanitizeRow` + engine + export.
@@ -235,9 +236,20 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - [ ] **Izin**: API `authorizeAdmin([...])`, UI `useCan()`, halaman `ROUTE_PERMISSIONS`, izin baru terdaftar di `PERMISSION_GROUPS`.
 - [ ] **Keamanan**: input divalidasi; upload via `storeImage()`; URL eksternal via `fetchPublic()`; tidak ada teks tenant tanpa escape di `<script>`.
 - [ ] **UI**: komponen standar Bagian 9; empty/loading/error state; dicek di lebar 375px & 1440px tanpa overflow horizontal.
-- [ ] **Storefront**: tanpa nama toko hardcode; aman untuk data kosong di ketiga template.
+- [ ] **Storefront**: tanpa nama toko hardcode; aman untuk data kosong di semua template (Precision, Classic, Editorial Gallery, Gaming Arena).
 - [ ] **Database**: perubahan schema via diff SQL yang dibaca dulu; `prisma generate`; dev server di-restart.
 - [ ] **Tes**: unit test untuk logika murni di `tests/*.test.ts` (runner `node:test` via `tsx`).
 - [ ] **Verifikasi**: `npm run typecheck` dan `npm test` lolos; fitur dicoba nyata di browser/API.
 - [ ] **Dokumentasi**: aturan baru → dokumen ini; progres fitur → `docs/BUSINESS_STRATEGY.md`.
+- [ ] **Deploy**: SQL schema tersimpan di `docs/deploy/sql/`; env baru tercatat di `.env.example` & `docs/DEPLOYMENT.md`.
 - [ ] **Commit semantik**: `feat(...)`, `fix(...)`, `style(...)`, `docs(...)`, `refactor(...)`, `chore(...)`.
+
+---
+
+## 11. Deploy & Produksi
+
+- Panduan lengkap (ukuran data, env, DNS wildcard, langkah pertama & berikutnya, verifikasi): **`docs/DEPLOYMENT.md`**.
+- Deploy pertama = kode (git) + dump database + `rsync` `public/uploads` → hasil persis lokal, dibuktikan dengan `sha256sum -c` manifest foto.
+- Setelah live: **jangan menimpa database/foto server dengan data lokal** — hanya kode + SQL schema yang sudah dibaca (`migrate diff` terhadap DB server), selalu didahului backup.
+- `node_modules` & `.next` tidak pernah dikirim; `npm ci` + `npm run build` di server (`sharp`/Prisma butuh binary Linux). `NEXT_PUBLIC_*` ditanam saat build.
+- Reverse proxy wajib meneruskan `Host`/`X-Forwarded-Host`/`X-Forwarded-Proto` (resolver toko & URL SEO membaca header ini) dan mengizinkan body upload ≥ 16 MB.
