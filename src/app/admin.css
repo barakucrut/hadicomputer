@@ -1418,6 +1418,7 @@
   justify-content: center;
   padding: 16px;
   box-sizing: border-box;
+  overflow-y: auto;
 }
 
 .admin-dialog-backdrop {
@@ -1434,7 +1435,10 @@
   position: relative;
   z-index: 72;
   width: 100%;
-  max-width: 480px;
+  max-width: 520px;
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
   border-radius: 14px;
   background-color: #ffffff;
   padding: 24px;
@@ -1442,7 +1446,33 @@
   border: 1px solid var(--border);
   box-sizing: border-box;
   animation: dialogScaleIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  margin: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db transparent;
 }
+.admin-dialog-card::-webkit-scrollbar {
+  width: 6px;
+}
+.admin-dialog-card::-webkit-scrollbar-track {
+  background: transparent;
+}
+.admin-dialog-card::-webkit-scrollbar-thumb {
+  background-color: #d1d5db;
+  border-radius: 999px;
+}
+.admin-dialog-card::-webkit-scrollbar-thumb:hover {
+  background-color: #9ca3af;
+}
+
+/* Modal width modifier variants */
+.admin-dialog-card.max-w-sm { max-width: 384px !important; }
+.admin-dialog-card.max-w-md { max-width: 448px !important; }
+.admin-dialog-card.max-w-lg { max-width: 512px !important; }
+.admin-dialog-card.max-w-xl { max-width: 576px !important; }
+.admin-dialog-card.max-w-2xl { max-width: 672px !important; }
+.admin-dialog-card.max-w-3xl { max-width: 768px !important; }
+.admin-dialog-card.max-w-4xl { max-width: 896px !important; }
+
 @keyframes dialogScaleIn {
   from {
     opacity: 0;

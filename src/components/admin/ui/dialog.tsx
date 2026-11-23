@@ -37,6 +37,19 @@ export function Dialog({
 
   if (!open) return null;
 
+  // Auto-detect max-w-* classes from children (e.g. DialogContent) if not directly provided on Dialog
+  let cardClass = className;
+  if (!className) {
+    React.Children.forEach(children, (child) => {
+      if (React.isValidElement(child) && (child.props as any)?.className) {
+        const matches = String((child.props as any).className).match(/\bmax-w-[^\s]+/g);
+        if (matches) {
+          cardClass = `${cardClass} ${matches.join(" ")}`.trim();
+        }
+      }
+    });
+  }
+
   return (
     <div className="admin-dialog-root" role="dialog" aria-modal="true">
       {/* Backdrop with 8px blur */}
@@ -45,7 +58,7 @@ export function Dialog({
         onClick={() => dismissible && onOpenChange(false)}
       />
       {/* Modal Dialog Card */}
-      <div className={`admin-dialog-card ${className}`.trim()} style={style}>
+      <div className={`admin-dialog-card ${cardClass}`.trim()} style={style}>
         <button
           type="button"
           onClick={() => dismissible && onOpenChange(false)}
@@ -67,7 +80,7 @@ export function DialogContent({
   children: React.ReactNode;
   className?: string;
 }) {
-  return <div className={className}>{children}</div>;
+  return <div className={`w-full ${className}`.trim()}>{children}</div>;
 }
 
 export function DialogHeader({

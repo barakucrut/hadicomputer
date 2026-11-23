@@ -953,8 +953,8 @@ function TenantsManagementContent() {
       </div>
 
       {/* Modal Tambah Toko Baru */}
-      <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-        <DialogContent className="max-w-lg">
+      <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen} className="max-w-xl">
+        <DialogContent className="max-w-xl">
           <DialogHeader>
             <DialogTitle>Tambah Tenant Toko Baru</DialogTitle>
             <DialogDescription>
@@ -1111,8 +1111,8 @@ function TenantsManagementContent() {
       </Dialog>
 
       {/* Edit Tenant Modal */}
-      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen} className="max-w-xl">
+        <DialogContent className="max-w-xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Store size={18} className="text-red-600" />
