@@ -28,6 +28,8 @@ export const LANDING_EVENTS = {
   faqOpen: "faq_open",
   /** Section terlihat di layar (sekali per section per kunjungan). */
   sectionView: "section_view",
+  /** Pengunjung mengganti bahasa landing page (id / en). */
+  langSwitch: "lang_switch",
 } as const;
 
 export type LandingEvent = (typeof LANDING_EVENTS)[keyof typeof LANDING_EVENTS];

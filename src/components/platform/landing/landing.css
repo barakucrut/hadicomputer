@@ -53,8 +53,12 @@
 .rsl .nav-links.is-hovering::after { opacity: 1; }
 @media (min-width: 1024px) { .rsl .nav-links { display: flex; } }
 @media (prefers-reduced-motion: reduce) { .rsl .nav-links::after { transition: opacity 0.2s ease; } }
-.rsl .nav-cta { display: flex; gap: 8px; }
+.rsl .nav-cta { display: flex; align-items: center; gap: 8px; }
 .rsl .nav-cta .btn { min-height: 40px; padding: 0 16px; font-size: 14px; border-radius: 10px; }
+.rsl .rsl-lang { display: inline-flex; align-items: center; padding: 3px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); gap: 2px; }
+.rsl .rsl-lang button { border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 12px; font-weight: 800; letter-spacing: 0.04em; padding: 6px 9px; border-radius: 7px; cursor: pointer; transition: background 0.15s ease, color 0.15s ease; line-height: 1; }
+.rsl .rsl-lang button:hover { color: var(--ink); }
+.rsl .rsl-lang button[aria-pressed="true"] { background: var(--ink); color: #fff; }
 @media (max-width: 479px) { .rsl .nav-cta .btn-ghost { display: none; } }
 
 /* HERO */

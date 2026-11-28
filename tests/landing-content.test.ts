@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { previewSlug, PLANS } from "../src/components/platform/landing/content";
+import { getLandingContent, previewSlug, PLANS } from "../src/components/platform/landing/content";
 import { parseDemoRequest, salesWhatsappUrl } from "../src/lib/demo-request";
 
 test("landing: slug pratinjau dari nama toko", () => {
@@ -38,4 +38,28 @@ test("landing: fitur paket yang belum dibangun wajib berlabel segera", () => {
   const enterprise = PLANS.find((p) => p.id === "enterprise")!;
   assert.ok(enterprise.features.some((f) => /keranjang/i.test(f)));
   assert.ok(enterprise.features.some((f) => /payment gateway/i.test(f)));
+});
+
+test("landing EN: konten lengkap, harga USD, fitur belum jadi tetap berlabel segera", () => {
+  const en = getLandingContent("en");
+  assert.equal(en.locale, "en");
+  assert.equal(en.soonLabel, "SOON");
+  assert.equal(en.pricing.plans.length, 3);
+  for (const plan of en.pricing.plans) {
+    assert.match(plan.price, /^\$/);
+  }
+  const all = en.pricing.plans.flatMap((p) => p.features);
+  const notShipped = [/pc builder/i, /trade-in/i, /broadcast/i, /shopping cart/i, /payment gateway/i];
+  for (const rule of notShipped) {
+    const hits = all.filter((f) => rule.test(f));
+    assert.ok(hits.length > 0, `fitur EN ${rule} harus tercantum`);
+    for (const f of hits) assert.match(f, /\|segera$/, `"${f}" belum ada di produk -> wajib "|segera"`);
+  }
+});
+
+test("form minta demo EN: validasi & pesan WhatsApp berbahasa Inggris", () => {
+  const err = parseDemoRequest({ storeName: "R", city: "Singapore", whatsapp: "6591234567" }, "en");
+  assert.ok(!err.ok && /Store name/i.test(err.error));
+  const wa = salesWhatsappUrl("6281234567890", "Rig Computer", "en");
+  assert.match(wa, /^https:\/\/wa\.me\/6281234567890\?text=Hi%20Rigspace/);
 });

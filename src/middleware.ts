@@ -4,6 +4,7 @@ import { jwtVerify } from "jose";
 import { canAccessGodPath, isPlatformRole } from "@/lib/platform-access";
 import { IMPERSONATION_COOKIE } from "@/lib/platform-cms";
 import { STORE_PREVIEW_HEADER, TEMPLATE_PREVIEW_HEADER, isTemplateId, CMS_AREA_HEADER, CMS_PATH_HEADER } from "@/lib/storefront-template";
+import { LOCALE_COOKIE, LOCALE_HEADER, parseLocale } from "@/lib/i18n";
 
 const ADMIN_JWT_SECRET = new TextEncoder().encode(
   process.env.ADMIN_JWT_SECRET || "hadi-computer-cms-secret-key-32-chars-long-2026"
@@ -44,7 +45,20 @@ export async function middleware(request: NextRequest) {
     if (storePreview && /^[a-z0-9-]{1,100}$/i.test(storePreview)) {
       requestHeaders.set(STORE_PREVIEW_HEADER, storePreview);
     }
-    return NextResponse.next({ request: { headers: requestHeaders } });
+    const langParam = parseLocale(request.nextUrl.searchParams.get("lang"));
+    requestHeaders.delete(LOCALE_HEADER);
+    if (langParam) {
+      requestHeaders.set(LOCALE_HEADER, langParam);
+    }
+    const response = NextResponse.next({ request: { headers: requestHeaders } });
+    if (langParam) {
+      response.cookies.set(LOCALE_COOKIE, langParam, {
+        path: "/",
+        maxAge: 60 * 60 * 24 * 365,
+        sameSite: "lax",
+      });
+    }
+    return response;
   }
 
   // Favicon CMS (src/app/{admin,god-mode}/icon.svg & apple-icon.png) publik: dibutuhkan halaman login

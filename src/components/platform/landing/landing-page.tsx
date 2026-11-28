@@ -1,7 +1,8 @@
 import { MessageCircle } from "lucide-react";
 import { salesWhatsappUrl } from "@/lib/demo-request";
-import { AUDIENCE, BRAND_LINE, FAQS, PLANS, PROBLEMS, STEPS, TEMPLATES } from "./content";
-import { DemoForm, HeroPreview, LandingTracker, NavHoverLine, RevealOnScroll } from "./client";
+import type { Locale } from "@/lib/i18n";
+import { BRAND_LINE, getLandingContent } from "./content";
+import { DemoForm, HeroPreview, LandingTracker, LanguageSwitcher, NavHoverLine, RevealOnScroll } from "./client";
 import { LANDING_EVENTS as E, track } from "./tracking";
 import "./landing.css";
 
@@ -25,20 +26,13 @@ function Mark({ size = 36 }: { size?: number }) {
   );
 }
 
-const NAV = [
-  { href: "#fitur", label: "Fitur" },
-  { href: "#cara-kerja", label: "Cara Kerja" },
-  { href: "#contoh", label: "Contoh" },
-  { href: "#harga", label: "Harga" },
-  { href: "#faq", label: "FAQ" },
-];
-
 /**
- * Landing page platform rigspace.id (server component).
+ * Landing page platform rigspace.id (server component, bilingual ID / EN).
  * `salesPhone` = nomor WA CMO aktif (null -> tombol WhatsApp disembunyikan, form tetap jalan).
  */
-export function LandingPage({ salesPhone }: { salesPhone: string | null }) {
-  const waUrl = salesPhone ? salesWhatsappUrl(salesPhone) : null;
+export function LandingPage({ salesPhone, locale = "id" }: { salesPhone: string | null; locale?: Locale }) {
+  const copy = getLandingContent(locale);
+  const waUrl = salesPhone ? salesWhatsappUrl(salesPhone, undefined, locale) : null;
   const year = new Date().getFullYear();
 
   return (
@@ -56,35 +50,40 @@ export function LandingPage({ salesPhone }: { salesPhone: string | null }) {
               <small>{BRAND_LINE}</small>
             </span>
           </a>
-          <nav className="nav-links" aria-label="Navigasi">
-            {NAV.map((n) => (
+          <nav className="nav-links" aria-label={copy.nav.ariaLabel}>
+            {copy.nav.items.map((n) => (
               <a key={n.href} href={n.href} {...track(E.navClick, { target: n.href.slice(1), location: "nav" })}>
                 {n.label}
               </a>
             ))}
           </nav>
           <div className="nav-cta">
+            <LanguageSwitcher locale={locale} ariaLabel={copy.nav.langAriaLabel} />
             <a href="/admin/login" className="btn btn-ghost" {...track(E.loginClick, { location: "nav" })}>
-              Masuk
+              {copy.nav.login}
             </a>
             <a href="#minta-demo" className="btn btn-dark" {...track(E.ctaClick, { location: "nav" })}>
-              Minta Demo
+              {copy.nav.cta}
             </a>
           </div>
         </div>
       </header>
 
       <main id="main">
-        <section className="rsl-hero" aria-label="Pengantar">
+        <section className="rsl-hero" aria-label={copy.hero.ariaLabel}>
           <div className="wrap">
-            <HeroPreview desktopSrc="/platform/landing/hero-desktop.webp" mobileSrc="/platform/landing/hero-mobile.webp" />
+            <HeroPreview
+              desktopSrc="/platform/landing/hero-desktop.webp"
+              mobileSrc="/platform/landing/hero-mobile.webp"
+              locale={locale}
+            />
           </div>
         </section>
 
-        <div className="marquee" aria-label="Dibuat untuk">
+        <div className="marquee" aria-label={copy.marquee.ariaLabel}>
           <div className="marquee-track">
-            {[...AUDIENCE, ...AUDIENCE].map((a, i) => (
-              <span key={i} aria-hidden={i >= AUDIENCE.length}>
+            {[...copy.marquee.items, ...copy.marquee.items].map((a, i) => (
+              <span key={i} aria-hidden={i >= copy.marquee.items.length}>
                 {a}
               </span>
             ))}
@@ -94,11 +93,11 @@ export function LandingPage({ salesPhone }: { salesPhone: string | null }) {
         <section className="soft-bg" aria-labelledby="masalah">
           <div className="wrap">
             <div className="head" data-reveal>
-              <div className="rsl-eyebrow">Masalahnya</div>
-              <h2 id="masalah">Jualan online seharusnya tidak semahal ini.</h2>
+              <div className="rsl-eyebrow">{copy.problems.eyebrow}</div>
+              <h2 id="masalah">{copy.problems.heading}</h2>
             </div>
             <div className="grid3">
-              {PROBLEMS.map((p, i) => (
+              {copy.problems.items.map((p, i) => (
                 <article key={p.title} className="card" data-reveal style={{ ["--d" as string]: `${i * 90}ms` }}>
                   <div className="num">0{i + 1}</div>
                   <h3>{p.title}</h3>
@@ -112,53 +111,48 @@ export function LandingPage({ salesPhone }: { salesPhone: string | null }) {
         <section id="fitur" aria-labelledby="fitur-h">
           <div className="wrap">
             <div className="head" data-reveal>
-              <div className="rsl-eyebrow">Fitur</div>
-              <h2 id="fitur-h">Semua yang dibutuhkan toko komputer. Tidak lebih, tidak kurang.</h2>
+              <div className="rsl-eyebrow">{copy.features.eyebrow}</div>
+              <h2 id="fitur-h">{copy.features.heading}</h2>
             </div>
             <div className="bento">
               <article className="b b-big" data-reveal>
-                <span className="tag">INTI</span>
-                <h3>Katalog dengan spesifikasi</h3>
-                <p>Filter prosesor, RAM, VGA, baru atau bekas. Pembeli langsung paham, tidak perlu tanya satu per satu.</p>
+                <span className="tag">{copy.features.coreTag}</span>
+                <h3>{copy.features.catalogTitle}</h3>
+                <p>{copy.features.catalogBody}</p>
                 <div className="specs">
-                  <div className="spec">
-                    Prosesor <b>Intel Core i7 · Ryzen 7</b>
-                  </div>
-                  <div className="spec">
-                    RAM <b>16 GB</b>
-                  </div>
-                  <div className="spec">
-                    VGA <b>RTX 4060</b>
-                  </div>
-                  <div className="spec">
-                    Kondisi <b>Baru · Bekas</b>
-                  </div>
+                  {copy.features.specs.map((s) => (
+                    <div key={s.label} className="spec">
+                      {s.label} <b>{s.value}</b>
+                    </div>
+                  ))}
                 </div>
               </article>
               <article className="b b-wide" data-reveal style={{ ["--d" as string]: "80ms" }}>
-                <h3>Tombol WhatsApp di setiap produk</h3>
-                <p>Pertanyaan masuk lengkap dengan nama produk dan harga — dan tercatat di laporan Anda.</p>
+                <h3>{copy.features.waTitle}</h3>
+                <p>{copy.features.waBody}</p>
                 <div className="wa-msg">
-                  <b>WhatsApp · baru saja</b>
-                  Halo, saya mau tanya stok <strong>Asus Zenbook Pro Dual Screen</strong> masih ada?
+                  <b>{copy.features.waTimestamp}</b>
+                  {copy.features.waPrefix}
+                  <strong>{copy.features.waProduct}</strong>
+                  {copy.features.waSuffix}
                 </div>
               </article>
               <article className="b" data-reveal style={{ ["--d" as string]: "120ms" }}>
-                <h3>Studio Banner</h3>
-                <p>Foto produk diubah jadi banner promo yang rapi, tanpa desainer.</p>
+                <h3>{copy.features.studioTitle}</h3>
+                <p>{copy.features.studioBody}</p>
               </article>
               <article className="b" data-reveal style={{ ["--d" as string]: "160ms" }}>
-                <h3>Pindah tanpa ketik ulang</h3>
-                <p>Katalog diimpor dari Excel atau website lama Anda.</p>
+                <h3>{copy.features.migrateTitle}</h3>
+                <p>{copy.features.migrateBody}</p>
               </article>
               <article className="b b-wide" data-reveal style={{ ["--d" as string]: "200ms" }}>
-                <span className="tag">PRO</span> <span className="soon">SEGERA</span>
-                <h3>PC Builder & Trade-In</h3>
-                <p>Pembeli merakit PC sendiri atau menaksir tukar tambah laptop lamanya — fitur yang tidak dimiliki website biasa.</p>
+                <span className="tag">{copy.features.proTag}</span> <span className="soon">{copy.soonLabel}</span>
+                <h3>{copy.features.pcBuilderTitle}</h3>
+                <p>{copy.features.pcBuilderBody}</p>
               </article>
               <article className="b" data-reveal style={{ ["--d" as string]: "240ms" }}>
-                <h3>Domain sendiri & muncul di Google</h3>
-                <p>SEO lokal per toko, tampil saat orang mencari toko komputer di kotanya.</p>
+                <h3>{copy.features.domainTitle}</h3>
+                <p>{copy.features.domainBody}</p>
               </article>
             </div>
           </div>
@@ -167,11 +161,11 @@ export function LandingPage({ salesPhone }: { salesPhone: string | null }) {
         <section id="cara-kerja" className="soft-bg" aria-labelledby="cara-h">
           <div className="wrap">
             <div className="head" data-reveal>
-              <div className="rsl-eyebrow">Cara kerja</div>
-              <h2 id="cara-h">Lihat dulu, baru putuskan.</h2>
+              <div className="rsl-eyebrow">{copy.steps.eyebrow}</div>
+              <h2 id="cara-h">{copy.steps.heading}</h2>
             </div>
             <ol className="steps" data-reveal>
-              {STEPS.map((s, i) => (
+              {copy.steps.items.map((s, i) => (
                 <li key={s.title} className="step">
                   <div className="dot">{i + 1}</div>
                   <h3>{s.title}</h3>
@@ -185,12 +179,12 @@ export function LandingPage({ salesPhone }: { salesPhone: string | null }) {
         <section id="contoh" aria-labelledby="contoh-h">
           <div className="wrap">
             <div className="head" data-reveal>
-              <div className="rsl-eyebrow">Contoh website</div>
-              <h2 id="contoh-h">Satu toko, banyak gaya.</h2>
-              <p>Contoh tampilan untuk toko fiktif &quot;Rig Computer&quot;. Warna, logo, dan font mengikuti brand toko Anda.</p>
+              <div className="rsl-eyebrow">{copy.templates.eyebrow}</div>
+              <h2 id="contoh-h">{copy.templates.heading}</h2>
+              <p>{copy.templates.lead}</p>
             </div>
             <div className="gallery">
-              {TEMPLATES.map((t, i) => (
+              {copy.templates.items.map((t, i) => (
                 <figure key={t.id} className="tpl" data-reveal style={{ ["--d" as string]: `${i * 80}ms`, margin: 0 }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={t.image} alt={`Template ${t.name}`} width={1200} height={750} loading="lazy" />
@@ -201,7 +195,7 @@ export function LandingPage({ salesPhone }: { salesPhone: string | null }) {
               ))}
             </div>
             <p className="more" data-reveal>
-              Pilihan template & font terus bertambah.
+              {copy.templates.more}
             </p>
           </div>
         </section>
@@ -209,42 +203,31 @@ export function LandingPage({ salesPhone }: { salesPhone: string | null }) {
         <section className="soft-bg" aria-labelledby="laporan-h">
           <div className="wrap insight">
             <div data-reveal>
-              <div className="rsl-eyebrow">Laporan</div>
-              <h2 id="laporan-h">Tahu produk mana yang paling ditanyakan.</h2>
-              <p>Bukan sekadar jumlah pengunjung — Anda melihat pertanyaan yang benar-benar masuk, produk apa, dan dari halaman mana.</p>
+              <div className="rsl-eyebrow">{copy.report.eyebrow}</div>
+              <h2 id="laporan-h">{copy.report.heading}</h2>
+              <p>{copy.report.lead}</p>
               <ul className="checks">
-                <li>Klik WhatsApp per produk</li>
-                <li>Produk paling banyak ditanyakan</li>
-                <li>
-                  Stok habis yang masih banyak ditanya <span className="soon">SEGERA</span>
-                </li>
+                {copy.report.checks.map((c) => (
+                  <li key={c.label}>
+                    {c.label} {c.soon && <span className="soon">{copy.soonLabel}</span>}
+                  </li>
+                ))}
               </ul>
             </div>
             <div className="dash" data-reveal style={{ ["--d" as string]: "120ms" }}>
               <div className="dash-top">
-                Inquiry WhatsApp <span>30 hari terakhir</span>
+                {copy.report.dashTitle} <span>{copy.report.dashPeriod}</span>
               </div>
               <div className="kpis">
-                <div className="kpi">
-                  <small>Chat masuk</small>
-                  <div>128</div>
-                </div>
-                <div className="kpi">
-                  <small>Produk ditanya</small>
-                  <div>46</div>
-                </div>
-                <div className="kpi">
-                  <small>Dari Google</small>
-                  <div>38%</div>
-                </div>
+                {copy.report.kpis.map((k) => (
+                  <div key={k.label} className="kpi">
+                    <small>{k.label}</small>
+                    <div>{k.value}</div>
+                  </div>
+                ))}
               </div>
-              {[
-                ["Asus Zenbook Pro Dual", 92, 24],
-                ["MSI Pro DP21 14M", 70, 18],
-                ["Rakit PC Gaming 12jt", 55, 14],
-                ["Printer Epson L3250", 38, 10],
-              ].map(([label, w, n]) => (
-                <div key={label as string} className="barrow">
+              {copy.report.bars.map(([label, w, n]) => (
+                <div key={label} className="barrow">
                   <span>{label}</span>
                   <div className="track">
                     <i style={{ width: `${w}%` }} />
@@ -252,7 +235,7 @@ export function LandingPage({ salesPhone }: { salesPhone: string | null }) {
                   <span>{n}</span>
                 </div>
               ))}
-              <p className="note">Ilustrasi tampilan laporan, bukan data toko sungguhan.</p>
+              <p className="note">{copy.report.note}</p>
             </div>
           </div>
         </section>
@@ -260,17 +243,17 @@ export function LandingPage({ salesPhone }: { salesPhone: string | null }) {
         <section id="harga" aria-labelledby="harga-h">
           <div className="wrap">
             <div className="head" data-reveal>
-              <div className="rsl-eyebrow">Harga</div>
-              <h2 id="harga-h">Harga jelas, tanpa potongan per transaksi.</h2>
+              <div className="rsl-eyebrow">{copy.pricing.eyebrow}</div>
+              <h2 id="harga-h">{copy.pricing.heading}</h2>
             </div>
             <div className="plans">
-              {PLANS.map((p, i) => (
+              {copy.pricing.plans.map((p, i) => (
                 <article key={p.id} className={`plan${p.highlight ? " plan-pro" : ""}`} data-reveal style={{ ["--d" as string]: `${i * 90}ms` }}>
-                  {p.highlight && <span className="plan-badge">Paling dipilih</span>}
+                  {p.highlight && <span className="plan-badge">{copy.pricing.popularBadge}</span>}
                   <h3>{p.name}</h3>
                   <div className="for">{p.for}</div>
                   <div className="price">
-                    {p.price} <small>/ tahun</small>
+                    {p.price} <small>{p.period}</small>
                   </div>
                   <div className="alt">{p.alt}</div>
                   <ul>
@@ -279,7 +262,7 @@ export function LandingPage({ salesPhone }: { salesPhone: string | null }) {
                       return (
                         <li key={f}>
                           {label}
-                          {flag === "segera" && <span className="soon">SEGERA</span>}
+                          {flag === "segera" && <span className="soon">{copy.soonLabel}</span>}
                         </li>
                       );
                     })}
@@ -295,7 +278,7 @@ export function LandingPage({ salesPhone }: { salesPhone: string | null }) {
               ))}
             </div>
             <p className="foot-note" data-reveal>
-              Semua paket diawali demo gratis dengan produk toko Anda sendiri.
+              {copy.pricing.footNote}
             </p>
           </div>
         </section>
@@ -303,11 +286,11 @@ export function LandingPage({ salesPhone }: { salesPhone: string | null }) {
         <section id="faq" className="soft-bg" aria-labelledby="faq-h">
           <div className="wrap">
             <div className="head" data-reveal>
-              <div className="rsl-eyebrow">FAQ</div>
-              <h2 id="faq-h">Pertanyaan yang sering muncul.</h2>
+              <div className="rsl-eyebrow">{copy.faq.eyebrow}</div>
+              <h2 id="faq-h">{copy.faq.heading}</h2>
             </div>
             <div className="faqs">
-              {FAQS.map((f, i) => (
+              {copy.faq.items.map((f, i) => (
                 <details key={f.q} className="faq" data-reveal style={{ ["--d" as string]: `${(i % 2) * 80}ms` }}>
                   <summary>{f.q}</summary>
                   <p>{f.a}</p>
@@ -322,10 +305,10 @@ export function LandingPage({ salesPhone }: { salesPhone: string | null }) {
             <div className="final-box" data-reveal>
               <div style={{ position: "relative", zIndex: 1 }}>
                 <div className="rsl-eyebrow" style={{ color: "var(--gold1)" }}>
-                  Mulai sekarang
+                  {copy.final.eyebrow}
                 </div>
-                <h2 id="demo-h">Website toko Anda bisa jadi minggu ini.</h2>
-                <p>Kirim nama toko Anda. Tim kami siapkan demonya dengan produk Anda sendiri, gratis dan tanpa komitmen.</p>
+                <h2 id="demo-h">{copy.final.heading}</h2>
+                <p>{copy.final.lead}</p>
                 {waUrl && (
                   <a
                     href={waUrl}
@@ -334,11 +317,11 @@ export function LandingPage({ salesPhone }: { salesPhone: string | null }) {
                     className="btn btn-wa"
                     {...track(E.generateLead, { method: "whatsapp", location: "final" })}
                   >
-                    <MessageCircle size={18} /> Chat Tim Sales di WhatsApp
+                    <MessageCircle size={18} /> {copy.final.waCta}
                   </a>
                 )}
               </div>
-              <DemoForm waUrl={waUrl} />
+              <DemoForm waUrl={waUrl} locale={locale} />
             </div>
           </div>
         </section>
@@ -355,16 +338,16 @@ export function LandingPage({ salesPhone }: { salesPhone: string | null }) {
           </a>
           <nav aria-label="Footer">
             <a href="#fitur" {...track(E.navClick, { target: "fitur", location: "footer" })}>
-              Fitur
+              {copy.footer.features}
             </a>
             <a href="#harga" {...track(E.navClick, { target: "harga", location: "footer" })}>
-              Harga
+              {copy.footer.pricing}
             </a>
             <a href="/admin/login" {...track(E.loginClick, { location: "footer" })}>
-              Masuk CMS
+              {copy.footer.loginCms}
             </a>
             <a href="#minta-demo" {...track(E.ctaClick, { location: "footer" })}>
-              Kontak
+              {copy.footer.contact}
             </a>
           </nav>
           <div>© {year} Rigspace.id</div>

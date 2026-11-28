@@ -1,15 +1,43 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { BatteryFull, MessageCircle, Signal, Wifi } from "lucide-react";
 import { trackEvent } from "@/components/storefront-analytics";
-import { BRAND_COLORS, HERO, previewSlug } from "./content";
+import { LOCALE_COOKIE, type Locale } from "@/lib/i18n";
+import { BRAND_COLORS, getLandingContent, previewSlug } from "./content";
 import { LANDING_EVENTS, readTrack } from "./tracking";
 
 const STORE_EVENT = "rsl-store-name";
 let lastStoreName = "";
 /** Paket terakhir yang diklik di bagian Harga, ikut dikirim saat lead masuk. */
 let lastPlan = "";
+
+/** Switcher bahasa ID | EN di navbar landing page. */
+export function LanguageSwitcher({ locale, ariaLabel }: { locale: Locale; ariaLabel: string }) {
+  const router = useRouter();
+
+  const select = (next: Locale) => {
+    if (next === locale) return;
+    document.cookie = `${LOCALE_COOKIE}=${next}; path=/; max-age=31536000; SameSite=Lax`;
+    trackEvent(LANDING_EVENTS.langSwitch, { locale: next });
+    const url = new URL(window.location.href);
+    url.searchParams.set("lang", next);
+    window.history.replaceState(null, "", url.pathname + url.search + url.hash);
+    router.refresh();
+  };
+
+  return (
+    <div className="rsl-lang" role="group" aria-label={ariaLabel}>
+      <button type="button" aria-pressed={locale === "id"} onClick={() => select("id")}>
+        ID
+      </button>
+      <button type="button" aria-pressed={locale === "en"} onClick={() => select("en")}>
+        EN
+      </button>
+    </div>
+  );
+}
 
 /**
  * Pelacak event landing: klik elemen [data-track] (delegasi), buka FAQ, dan section terlihat.
@@ -135,14 +163,23 @@ function scrollToForm() {
  * Hero interaktif: pengunjung mengetik nama toko & memilih warna -> alamat, logo di desktop & HP berubah.
  * Gambar website = tampilan asli template (nama contoh "Rig Computer"), logo ditimpa nama ketikan.
  */
-export function HeroPreview({ desktopSrc, mobileSrc }: { desktopSrc: string; mobileSrc: string }) {
+export function HeroPreview({
+  desktopSrc,
+  mobileSrc,
+  locale = "id",
+}: {
+  desktopSrc: string;
+  mobileSrc: string;
+  locale?: Locale;
+}) {
+  const hero = getLandingContent(locale).hero;
   const [name, setName] = React.useState("Rig Computer");
   const [color, setColor] = React.useState(BRAND_COLORS[0]);
   const [pulse, setPulse] = React.useState(0);
   const typedRef = React.useRef(false);
-  const slug = previewSlug(name);
+  const slug = previewSlug(name, locale === "en" ? "yourstore" : "namatoko");
   const words = name.trim().split(/\s+/).filter(Boolean);
-  const first = (words[0] || "Toko").slice(0, 14);
+  const first = (words[0] || hero.fallbackStoreWord).slice(0, 14);
   const rest = words.slice(1).join(" ").slice(0, 22);
 
   React.useEffect(() => {
@@ -163,17 +200,17 @@ export function HeroPreview({ desktopSrc, mobileSrc }: { desktopSrc: string; mob
     <div className="hero-grid" style={{ ["--accent" as string]: color }}>
       <div>
         <span className="pill">
-          <i /> {HERO.eyebrow}
+          <i /> {hero.eyebrow}
         </span>
         <h1>
-          <span>{HERO.lines[0]}</span>
-          <span>{HERO.lines[1]}</span>
-          <span className="gold">{HERO.lines[2]}</span>
+          <span>{hero.lines[0]}</span>
+          <span>{hero.lines[1]}</span>
+          <span className="gold">{hero.lines[2]}</span>
         </h1>
-        <p className="lead">{HERO.lead}</p>
+        <p className="lead">{hero.lead}</p>
 
         <div className="try">
-          <label htmlFor="rsl-store">{HERO.tryLabel}</label>
+          <label htmlFor="rsl-store">{hero.tryLabel}</label>
           <div className="try-input">
             <input
               id="rsl-store"
@@ -187,19 +224,19 @@ export function HeroPreview({ desktopSrc, mobileSrc }: { desktopSrc: string; mob
                   trackEvent(LANDING_EVENTS.tryStoreName);
                 }
               }}
-              placeholder="Nama toko Anda"
+              placeholder={hero.storePlaceholder}
             />
             <span>.rigspace.id</span>
           </div>
-          <div className="colors" role="group" aria-label="Warna brand">
-            Warna brand:
+          <div className="colors" role="group" aria-label={hero.brandColorLabel}>
+            {hero.brandColorLabel}
             {BRAND_COLORS.map((c) => (
               <button
                 key={c}
                 type="button"
                 className="swatch"
                 style={{ background: c }}
-                aria-label={`Warna ${c}`}
+                aria-label={`${hero.colorAriaPrefix} ${c}`}
                 aria-pressed={c === color}
                 onClick={() => {
                   setColor(c);
@@ -219,17 +256,17 @@ export function HeroPreview({ desktopSrc, mobileSrc }: { desktopSrc: string; mob
               scrollToForm();
             }}
           >
-            {HERO.cta} →
+            {hero.cta} →
           </button>
         </div>
         <p className="hint">
-          <b>Gratis</b> · {HERO.hint}
+          <b>{hero.freeLabel}</b> · {hero.hint}
         </p>
       </div>
 
       <div className="stage">
         <div className="live-badge anim-badge">
-          <i /> Pratinjau langsung, tanpa daftar
+          <i /> {hero.liveBadge}
         </div>
         <div className="desk anim-desk">
           <div className="bar">
@@ -242,7 +279,13 @@ export function HeroPreview({ desktopSrc, mobileSrc }: { desktopSrc: string; mob
           </div>
           <div className="shot">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={desktopSrc} alt={`Contoh tampilan website toko ${name || "Anda"} di desktop`} width={1600} height={1000} fetchPriority="high" />
+            <img
+              src={desktopSrc}
+              alt={`${hero.desktopAltPrefix} ${name || hero.desktopAltFallback}`}
+              width={1600}
+              height={1000}
+              fetchPriority="high"
+            />
             {logo}
           </div>
         </div>
@@ -258,7 +301,12 @@ export function HeroPreview({ desktopSrc, mobileSrc }: { desktopSrc: string; mob
             </div>
             <div className="rsl-viewport">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={mobileSrc} alt={`Contoh tampilan website toko ${name || "Anda"} di HP`} width={620} height={1342} />
+              <img
+                src={mobileSrc}
+                alt={`${hero.mobileAltPrefix} ${name || hero.desktopAltFallback}`}
+                width={620}
+                height={1342}
+              />
               {logo}
             </div>
             <span className="rsl-home-indicator" aria-hidden />
@@ -272,9 +320,11 @@ export function HeroPreview({ desktopSrc, mobileSrc }: { desktopSrc: string; mob
             <MessageCircle size={18} />
           </div>
           <div>
-            <b>Chat WhatsApp masuk</b>
-            <span>&quot;Halo kak, promo bundling laptop minggu ini masih ada?&quot;</span>
-            <small>Baru saja · dari {slug}.rigspace.id</small>
+            <b>{hero.toastTitle}</b>
+            <span>&quot;{hero.toastMessage}&quot;</span>
+            <small>
+              {hero.toastMetaPrefix} {slug}.rigspace.id
+            </small>
           </div>
         </div>
       </div>
@@ -283,7 +333,8 @@ export function HeroPreview({ desktopSrc, mobileSrc }: { desktopSrc: string; mob
 }
 
 /** Form "Minta Demo": nama toko terisi otomatis dari hero; kirim ke /api/platform/demo-request. */
-export function DemoForm({ waUrl }: { waUrl: string | null }) {
+export function DemoForm({ waUrl, locale = "id" }: { waUrl: string | null; locale?: Locale }) {
+  const copy = getLandingContent(locale).form;
   const [form, setForm] = React.useState({ storeName: "", city: "", whatsapp: "", storeLink: "", website: "" });
   const [touchedName, setTouchedName] = React.useState(false);
   const [status, setStatus] = React.useState<"idle" | "sending" | "done">("idle");
@@ -313,18 +364,18 @@ export function DemoForm({ waUrl }: { waUrl: string | null }) {
       const res = await fetch("/api/platform/demo-request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, locale }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         trackEvent(LANDING_EVENTS.formError, { form: "demo", status: String(res.status) });
-        throw new Error(data.error || "Gagal mengirim permintaan.");
+        throw new Error(data.error || copy.genericError);
       }
       // Lead utama — tandai "generate_lead" sebagai Key event di GA4. Tanpa data pribadi.
       trackEvent(LANDING_EVENTS.generateLead, { method: "form", form: "demo", ...(lastPlan ? { plan: lastPlan } : {}) });
       setStatus("done");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Gagal mengirim permintaan.");
+      setError(err instanceof Error ? err.message : copy.genericError);
       setStatus("idle");
     }
   }
@@ -334,8 +385,11 @@ export function DemoForm({ waUrl }: { waUrl: string | null }) {
       <div className="form" role="status">
         <div className="ok-box">
           <i>✓</i>
-          <b>Permintaan demo terkirim</b>
-          <p>Terima kasih{form.storeName ? `, ${form.storeName}` : ""}. Tim kami akan menghubungi Anda lewat WhatsApp untuk menyiapkan demonya.</p>
+          <b>{copy.doneTitle}</b>
+          <p>
+            {copy.doneThankYou}
+            {form.storeName ? `, ${form.storeName}` : ""}. {copy.doneBody}
+          </p>
         </div>
       </div>
     );
@@ -345,14 +399,14 @@ export function DemoForm({ waUrl }: { waUrl: string | null }) {
 
   return (
     <form className="form" onSubmit={submit} onFocus={onFormFocus} noValidate>
-      <b>Minta Demo Gratis</b>
+      <b>{copy.title}</b>
       {error && (
         <div className="err" role="alert">
           {error}
         </div>
       )}
       <div className="field">
-        <label htmlFor="d-store">Nama toko *</label>
+        <label htmlFor="d-store">{copy.storeLabel}</label>
         <input
           id="d-store"
           required
@@ -362,21 +416,45 @@ export function DemoForm({ waUrl }: { waUrl: string | null }) {
             setTouchedName(true);
             set("storeName")(e);
           }}
-          placeholder="Mis. Rig Computer"
+          placeholder={copy.storePlaceholder}
           autoComplete="organization"
         />
       </div>
       <div className="field">
-        <label htmlFor="d-city">Kota *</label>
-        <input id="d-city" required maxLength={100} value={form.city} onChange={set("city")} placeholder="Mis. Jember" autoComplete="address-level2" />
+        <label htmlFor="d-city">{copy.cityLabel}</label>
+        <input
+          id="d-city"
+          required
+          maxLength={100}
+          value={form.city}
+          onChange={set("city")}
+          placeholder={copy.cityPlaceholder}
+          autoComplete="address-level2"
+        />
       </div>
       <div className="field">
-        <label htmlFor="d-wa">Nomor WhatsApp *</label>
-        <input id="d-wa" required inputMode="tel" maxLength={20} value={form.whatsapp} onChange={set("whatsapp")} placeholder="08xxxxxxxxxx" autoComplete="tel" />
+        <label htmlFor="d-wa">{copy.whatsappLabel}</label>
+        <input
+          id="d-wa"
+          required
+          inputMode="tel"
+          maxLength={20}
+          value={form.whatsapp}
+          onChange={set("whatsapp")}
+          placeholder={copy.whatsappPlaceholder}
+          autoComplete="tel"
+        />
       </div>
       <div className="field">
-        <label htmlFor="d-link">Link toko / marketplace (opsional)</label>
-        <input id="d-link" maxLength={300} value={form.storeLink} onChange={set("storeLink")} placeholder="tokopedia.com/namatoko" inputMode="url" />
+        <label htmlFor="d-link">{copy.linkLabel}</label>
+        <input
+          id="d-link"
+          maxLength={300}
+          value={form.storeLink}
+          onChange={set("storeLink")}
+          placeholder={copy.linkPlaceholder}
+          inputMode="url"
+        />
       </div>
       {/* Honeypot anti-bot: disembunyikan dari pengguna */}
       <div className="hp" aria-hidden>
@@ -384,14 +462,14 @@ export function DemoForm({ waUrl }: { waUrl: string | null }) {
         <input id="d-website" tabIndex={-1} autoComplete="off" value={form.website} onChange={set("website")} />
       </div>
       <button type="submit" className="btn btn-dark" disabled={status === "sending"}>
-        {status === "sending" ? "Mengirim..." : "Kirim Permintaan Demo"}
+        {status === "sending" ? copy.sending : copy.submit}
       </button>
       <small>
-        Tim kami menghubungi Anda lewat WhatsApp.
+        {copy.helperText}
         {waUrl && (
           <>
             {" "}
-            Atau{" "}
+            {copy.orDirectPrefix}{" "}
             <a
               href={waUrl}
               target="_blank"
@@ -401,7 +479,7 @@ export function DemoForm({ waUrl }: { waUrl: string | null }) {
               data-track-method="whatsapp"
               data-track-location="form"
             >
-              chat langsung
+              {copy.directChatLink}
             </a>
             .
           </>

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { brandCssVars } from "@/lib/brand-color";
 import { PlatformHostPage } from "@/components/platform/platform-host-page";
 import { LandingPage } from "@/components/platform/landing/landing-page";
+import { getLandingContent } from "@/components/platform/landing/content";
+import { getRequestLocale } from "@/lib/i18n/server";
 import { getSalesContact } from "@/lib/platform-tenant";
 import "@fontsource-variable/plus-jakarta-sans";
 import "./tailwind.css";
@@ -17,6 +19,7 @@ import { resolveStorefrontTenant } from "@/lib/tenant-resolver";
 import { StoreProvider } from "@/components/store-context";
 import { getLiveCategories, getLiveMenuData } from "@/lib/live-repository";
 import { getStorefrontSeo } from "@/lib/tenant-seo";
+import { jsonLdString } from "@/lib/json-ld";
 import { StorefrontAnalytics } from "@/components/storefront-analytics";
 
 export const dynamic = "force-dynamic";
@@ -47,26 +50,33 @@ export async function generateMetadata(): Promise<Metadata> {
   const seo = await getStorefrontSeo();
   // rigspace.id (sementara) & alamat toko yang tidak terdaftar: tanpa metadata toko mana pun
   if (seo.tenant.resolution === "platform-root") {
-    const title = "Rigspace.id — Website Toko Komputer, Siap Jualan";
-    const description =
-      "Platform website khusus toko komputer: katalog dengan spesifikasi, chat WhatsApp langsung, tanpa potongan marketplace. Minta demo gratis dengan produk toko Anda sendiri.";
+    const locale = await getRequestLocale();
+    const { meta } = getLandingContent(locale);
     return {
       metadataBase: new URL(seo.origin),
-      title: { absolute: title },
-      description,
-      alternates: { canonical: "/" },
+      title: { absolute: meta.title },
+      description: meta.description,
+      alternates: {
+        canonical: "/",
+        languages: {
+          id: "/?lang=id",
+          en: "/?lang=en",
+          "x-default": "/",
+        },
+      },
       robots: { index: true, follow: true },
       icons: RIGSPACE_ICONS,
       openGraph: {
         type: "website",
-        locale: "id_ID",
+        locale: meta.ogLocale,
+        alternateLocale: locale === "en" ? ["id_ID"] : ["en_US"],
         url: "/",
         siteName: "Rigspace.id",
-        title,
-        description,
-        images: [{ url: "/platform/landing/hero-desktop.webp", width: 1600, height: 1000, alt: "Contoh website toko komputer di Rigspace.id" }],
+        title: meta.title,
+        description: meta.description,
+        images: [{ url: "/platform/landing/hero-desktop.webp", width: 1600, height: 1000, alt: meta.ogAlt }],
       },
-      twitter: { card: "summary_large_image", title, description, images: ["/platform/landing/hero-desktop.webp"] },
+      twitter: { card: "summary_large_image", title: meta.title, description: meta.description, images: ["/platform/landing/hero-desktop.webp"] },
     };
   }
   if (seo.tenant.resolution && seo.tenant.resolution !== "tenant") {
@@ -151,14 +161,14 @@ export default async function RootLayout({
   const seo = await getStorefrontSeo();
   const tenant = seo.tenant;
   if (tenant.resolution === "platform-root") {
-    // Landing page platform rigspace.id; kontak sales = CMO aktif
-    const sales = await getSalesContact();
+    // Landing page platform rigspace.id (bilingual ID / EN); kontak sales = CMO aktif
+    const [sales, locale] = await Promise.all([getSalesContact(), getRequestLocale()]);
     return (
-      <html lang="id" data-scroll-behavior="smooth">
+      <html lang={locale} data-scroll-behavior="smooth">
         <body data-area="platform" style={{ margin: 0, background: "#fff" }}>
           {/* GA4 platform: tenant = "platform" agar landing terpisah dari etalase toko di laporan */}
           <StorefrontAnalytics platformGaId={seo.analytics.platformGaId} tenantGaId={null} gtmId={null} tenantSlug="platform" />
-          <LandingPage salesPhone={sales?.phone ?? null} />
+          <LandingPage salesPhone={sales?.phone ?? null} locale={locale} />
         </body>
       </html>
     );
@@ -191,7 +201,7 @@ export default async function RootLayout({
     ...(store.hours ? { openingHours: store.hours } : {}),
   };
   // Escape "<" agar teks milik toko (nama/alamat) tidak bisa menutup tag <script> (XSS)
-  const storeSchemaJson = JSON.stringify(storeSchema).replace(/</g, "\\u003c");
+  const storeSchemaJson = jsonLdString(storeSchema);
 
   return (
     <html
