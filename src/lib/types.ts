@@ -139,6 +139,9 @@ export type StoreSettings = {
   /** Tampilan stok di etalase (diisi layout dari pengaturan toko) */
   stockDisplay?: "hidden" | "exact" | "limited";
   lowStockThreshold?: number;
+  /** Bahasa & mata uang etalase toko (bilingual / pasar internasional) */
+  locale?: "id" | "en";
+  currency?: "IDR" | "USD" | "SGD" | "MYR" | "EUR";
 };
 
 export type Testimonial = {

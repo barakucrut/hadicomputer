@@ -1,18 +1,29 @@
-import type { Product, ProductVariant } from "./types";
+import type { Availability, Product, ProductVariant } from "./types";
+import type { Locale } from "./i18n";
+import { formatMoney, type CurrencyCode } from "./i18n/currency";
+import { getStorefrontCopy } from "./i18n/storefront";
 
-export const rupiah = (value: number) =>
-  new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    maximumFractionDigits: 0,
-  }).format(value);
-export const priceLabel = (value: number | null) =>
-  value === null ? "Hubungi untuk harga" : rupiah(value);
-export const availabilityLabel = {
+export const rupiah = (value: number, currency: CurrencyCode = "IDR", locale?: Locale) =>
+  formatMoney(value, currency, locale);
+
+export const priceLabel = (
+  value: number | null,
+  currency: CurrencyCode = "IDR",
+  locale: Locale = "id",
+) =>
+  value === null
+    ? getStorefrontCopy(locale).contactForPrice
+    : formatMoney(value, currency, locale);
+
+export const availabilityLabel: Record<Availability, string> = {
   tersedia: "Tersedia",
   preorder: "Preorder",
   habis: "Stok habis",
 };
+
+export function getAvailabilityLabel(status: Availability, locale: Locale = "id"): string {
+  return getStorefrontCopy(locale).availability[status];
+}
 export function effectiveOffer(product: Product, variant?: ProductVariant) {
   const selected = variant ?? product.variants[0];
   return selected
@@ -108,13 +119,23 @@ export function productMessage(
   variant: ProductVariant | undefined,
   url: string,
   storeName = "",
+  opts: { currency?: CurrencyCode; locale?: Locale } = {},
 ) {
+  const locale = opts.locale ?? "id";
+  const currency = opts.currency ?? "IDR";
   const offer = effectiveOffer(product, variant);
   const discount = getProductDiscount(product, variant);
+  if (locale === "en") {
+    const discountLine = discount
+      ? `\nPromo: Save ${formatMoney(discount.savings, currency, "en")} (${discount.percent}%)`
+      : "";
+    const bonusLine = product.bonus ? `\nBonus: ${product.bonus}` : "";
+    return `Hi ${storeName || "there"}, I'd like to inquire about:\n\nProduct: ${product.name}\nSKU: ${product.code}${variant ? `\nVariant: ${variant.name}` : ""}\nCatalog price: ${priceLabel(offer.price, currency, "en")}${discountLine}${bonusLine}\nLink: ${url}\n\nIs this item currently available?`;
+  }
   const discountLine = discount
-    ? `\nPromo: Hemat ${rupiah(discount.savings)} (${discount.percent}%)`
+    ? `\nPromo: Hemat ${formatMoney(discount.savings, currency, "id")} (${discount.percent}%)`
     : "";
   const bonusLine = product.bonus ? `\nBonus: ${product.bonus}` : "";
 
-  return `Halo ${storeName || "kak"}, saya ingin bertanya tentang:\n\nProduk: ${product.name}\nKode: ${product.code}${variant ? `\nVarian: ${variant.name}` : ""}\nHarga katalog: ${priceLabel(offer.price)}${discountLine}${bonusLine}\nTautan: ${url}\n\nApakah produk ini masih tersedia?`;
+  return `Halo ${storeName || "kak"}, saya ingin bertanya tentang:\n\nProduk: ${product.name}\nKode: ${product.code}${variant ? `\nVarian: ${variant.name}` : ""}\nHarga katalog: ${priceLabel(offer.price, currency, "id")}${discountLine}${bonusLine}\nTautan: ${url}\n\nApakah produk ini masih tersedia?`;
 }

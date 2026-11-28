@@ -4,13 +4,14 @@ import { CheckCheck, ShieldCheck, MessageCircle, ZoomIn } from "lucide-react";
 import type { Product } from "@/lib/types";
 import { useStoreSettings } from "@/components/store-context";
 import {
-  availabilityLabel,
   effectiveOffer,
+  getAvailabilityLabel,
   getProductDiscount,
   priceLabel,
   productMessage,
   rupiah,
 } from "@/lib/catalog";
+import { getStorefrontCopy } from "@/lib/i18n/storefront";
 import { SafeImage } from "./safe-image";
 import { WhatsAppButton } from "./whatsapp-button";
 import { ShareButton } from "./share-button";
@@ -23,6 +24,10 @@ export function ProductDetail({
   whatsappPhone?: string | null;
 }) {
   const storeSettings = useStoreSettings();
+  const locale = storeSettings?.locale ?? "id";
+  const currency = storeSettings?.currency ?? "IDR";
+  const copy = getStorefrontCopy(locale);
+  const en = locale === "en";
   const [image, setImage] = useState(0),
     [variantId, setVariantId] = useState(product.variants[0]?.id);
   const [isZoomed, setIsZoomed] = useState(false);
@@ -51,11 +56,16 @@ export function ProductDetail({
     variant,
     `{origin}/produk/${product.slug}`,
     storeSettings?.name,
+    { currency, locale },
   );
   const label =
     offer.availability === "habis"
-      ? "Tanya Ketersediaan"
-      : "Tanya Produk via WhatsApp";
+      ? en
+        ? "Ask Availability"
+        : "Tanya Ketersediaan"
+      : en
+        ? "Inquire via WhatsApp"
+        : "Tanya Produk via WhatsApp";
   const trackingData = {
     inquiryType: "PRODUCT" as const,
     productId: product.id,
@@ -148,30 +158,36 @@ export function ProductDetail({
           <div className="detail-price-block" aria-live="polite">
             {discount && (
               <div className="price-strike-row">
-                <span className="price-normal">Normal {rupiah(discount.originalPrice)}</span>
+                <span className="price-normal">
+                  {copy.normalPricePrefix} {rupiah(discount.originalPrice, currency, locale)}
+                </span>
                 <span className="discount-badge">-{discount.percent}%</span>
               </div>
             )}
             <strong className={`detail-price ${discount ? "promo-price" : ""}`}>
-              {priceLabel(offer.price)}
+              {priceLabel(offer.price, currency, locale)}
             </strong>
             {discount && (
               <div className="savings-callout">
                 <span>
-                  💡 <strong>Penawaran Terbaik:</strong> Anda berhemat{" "}
-                  <strong>{rupiah(discount.savings)}</strong> ({discount.percent}% lebih hemat)
+                  💡 <strong>{en ? "Best Deal:" : "Penawaran Terbaik:"}</strong>{" "}
+                  {en ? "You save" : "Anda berhemat"}{" "}
+                  <strong>{rupiah(discount.savings, currency, locale)}</strong> ({discount.percent}% {copy.offSuffix})
                 </span>
               </div>
             )}
             {product.bonus && (
               <div className="detail-bonus-card">
-                <strong>🎁 Paket Bonus Spesial:</strong>
-                <p>{product.bonus} + Setup Siap Pakai & Garansi Toko</p>
+                <strong>🎁 {en ? "Special Bonus Package:" : "Paket Bonus Spesial:"}</strong>
+                <p>
+                  {product.bonus}
+                  {en ? " + Ready-to-Use Setup & Store Warranty" : " + Setup Siap Pakai & Garansi Toko"}
+                </p>
               </div>
             )}
             <span className={`stock stock-${offer.availability}`}>
               <i />
-              {availabilityLabel[offer.availability]}
+              {getAvailabilityLabel(offer.availability, locale)}
               {product.stockLabel && (
                 <strong style={{ color: "var(--red)", fontWeight: 700 }}>{" · "}{product.stockLabel}</strong>
               )}
@@ -179,7 +195,7 @@ export function ProductDetail({
           </div>
           {product.variants.length > 0 && (
             <fieldset className="variant-options">
-              <legend>Pilih konfigurasi</legend>
+              <legend>{copy.product.variants}</legend>
               {product.variants.map((v) => (
                 <label
                   key={v.id}
@@ -245,13 +261,15 @@ export function ProductDetail({
             ))}
             {variant && (
               <div>
-                <dt>Varian terpilih</dt>
+                <dt>{en ? "Selected variant" : "Varian terpilih"}</dt>
                 <dd>{variant.name}</dd>
               </div>
             )}
           </dl>
           <p className="small-note">
-            Spesifikasi dapat disesuaikan dengan ketersediaan opsi varian unit.
+            {en
+              ? "Specifications may vary depending on available unit configuration."
+              : "Spesifikasi dapat disesuaikan dengan ketersediaan opsi varian unit."}
           </p>
         </section>
       </div>
@@ -259,11 +277,11 @@ export function ProductDetail({
         <div>
           {discount && (
             <span className="mobile-strike">
-              Normal {rupiah(discount.originalPrice)} (-{discount.percent}%)
+              {copy.normalPricePrefix} {rupiah(discount.originalPrice, currency, locale)} (-{discount.percent}%)
             </span>
           )}
-          <small>{availabilityLabel[offer.availability]}</small>
-          <strong className={discount ? "promo-price" : ""}>{priceLabel(offer.price)}</strong>
+          <small>{getAvailabilityLabel(offer.availability, locale)}</small>
+          <strong className={discount ? "promo-price" : ""}>{priceLabel(offer.price, currency, locale)}</strong>
         </div>
         <WhatsAppButton
           label={offer.availability === "habis" ? "Tanya Stok" : `Tanya ${storeSettings?.name || "Toko"}`}

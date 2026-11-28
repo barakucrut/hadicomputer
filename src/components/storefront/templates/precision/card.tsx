@@ -1,6 +1,9 @@
+"use client";
 import Link from "next/link";
 import type { Product } from "@/lib/types";
-import { availabilityLabel, rupiah } from "@/lib/catalog";
+import { getAvailabilityLabel, priceLabel, rupiah } from "@/lib/catalog";
+import { getStorefrontCopy } from "@/lib/i18n/storefront";
+import { useStoreSettings } from "@/components/store-context";
 import { DISPLAY, MONO, discountOf } from "./model";
 
 const STOCK_DOT: Record<Product["availability"], string> = {
@@ -29,6 +32,10 @@ export function PriceStack({
   size?: "sm" | "md" | "lg";
   tone?: "light" | "dark";
 }) {
+  const store = useStoreSettings();
+  const locale = store?.locale ?? "id";
+  const currency = store?.currency ?? "IDR";
+  const copy = getStorefrontCopy(locale);
   const hasDiscount = Boolean(price && originalPrice && originalPrice > price);
   const savings = hasDiscount ? originalPrice! - price! : 0;
   const percent = hasDiscount ? Math.round((savings / originalPrice!) * 100) : 0;
@@ -40,13 +47,13 @@ export function PriceStack({
         {hasDiscount && (
           <div className="flex flex-wrap items-center gap-2">
             <span className={`${MONO} text-[16px] line-through decoration-brand decoration-2 ${dark ? "text-white/55" : "text-[#8b8e8a]"}`}>
-              {rupiah(originalPrice!)}
+              {rupiah(originalPrice!, currency, locale)}
             </span>
             <span className="rounded-full bg-brand px-2.5 py-0.5 text-[12px] font-bold text-brand-ink">−{percent}%</span>
           </div>
         )}
         <span className={`${MONO} text-[28px] font-semibold leading-none md:text-[32px] ${dark ? "text-white" : "text-[#0b0d0c]"}`}>
-          {price === null ? "Hubungi untuk harga" : rupiah(price)}
+          {priceLabel(price, currency, locale)}
         </span>
         {hasDiscount && (
           <span
@@ -54,7 +61,7 @@ export function PriceStack({
               dark ? "border-white/15 bg-white/10 text-white" : "border-[#bbf7d0] bg-[#f0fdf4] text-[#15803d]"
             }`}
           >
-            <i className="h-1.5 w-1.5 rounded-full bg-[#22c55e]" /> Kamu hemat {rupiah(savings)}
+            <i className="h-1.5 w-1.5 rounded-full bg-[#22c55e]" /> {copy.youSavePrefix} {rupiah(savings, currency, locale)}
           </span>
         )}
       </div>
@@ -66,20 +73,26 @@ export function PriceStack({
     <div className="flex flex-col gap-0.5">
       {hasDiscount && (
         <span className={`${MONO} text-[11.5px] line-through ${dark ? "text-[#8b8e8a]" : "text-[#9a9d99]"}`}>
-          {rupiah(originalPrice!)}
+          {rupiah(originalPrice!, currency, locale)}
           <b className="ml-1.5 font-semibold text-brand no-underline">−{percent}%</b>
         </span>
       )}
       <span className={`${MONO} ${priceCls} font-semibold ${dark ? "text-white" : "text-[#0b0d0c]"}`}>
-        {price === null ? "Hubungi untuk harga" : rupiah(price)}
+        {priceLabel(price, currency, locale)}
       </span>
-      {hasDiscount && <span className={`text-[11px] font-semibold ${dark ? "text-[#86efac]" : "text-[#15803d]"}`}>Hemat {rupiah(savings)}</span>}
+      {hasDiscount && (
+        <span className={`text-[11px] font-semibold ${dark ? "text-[#86efac]" : "text-[#15803d]"}`}>
+          {copy.savePrefix} {rupiah(savings, currency, locale)}
+        </span>
+      )}
     </div>
   );
 }
 
 /** Kartu produk "spec row": garis rambut, chip spek mono, harga tabular. */
 export function SpecCard({ product, layout = "grid" }: { product: Product; layout?: "grid" | "list" }) {
+  const store = useStoreSettings();
+  const locale = store?.locale ?? "id";
   const d = discountOf(product);
   const chips = product.specs.slice(0, 3).map((s) => s.value);
   const image = product.images[0];
@@ -158,7 +171,7 @@ export function SpecCard({ product, layout = "grid" }: { product: Product; layou
           <PriceStack price={product.price} originalPrice={d?.originalPrice} />
           <span className={`flex shrink-0 items-center gap-1.5 text-[11.5px] ${STOCK_TEXT[product.availability]}`}>
             <i className={`h-1.5 w-1.5 rounded-full ${STOCK_DOT[product.availability]}`} />
-            {product.stockLabel || availabilityLabel[product.availability]}
+            {product.stockLabel || getAvailabilityLabel(product.availability, locale)}
           </span>
         </div>
       </div>

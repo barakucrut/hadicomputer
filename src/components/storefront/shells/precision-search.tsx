@@ -4,6 +4,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, ArrowUpRight, Loader2, Search, TrendingUp, X } from "lucide-react";
 import { rupiah } from "@/lib/catalog";
+import { useStoreSettings } from "@/components/store-context";
 import { CategoryIcon } from "@/components/storefront/templates/precision/category-icon";
 import { prettyCategoryName } from "@/components/storefront/templates/precision/model";
 
@@ -51,6 +52,7 @@ export function PrecisionSearchBox({
   variant?: "header" | "sheet";
 }) {
   const router = useRouter();
+  const store = useStoreSettings();
   const inputRef = React.useRef<HTMLInputElement>(null);
   const boxRef = React.useRef<HTMLDivElement>(null);
   const [q, setQ] = React.useState("");
@@ -332,11 +334,17 @@ export function PrecisionSearchBox({
                           <span className="block truncate text-[13.5px] font-medium text-[#0b0d0c]">{it.product.name}</span>
                           <span className="mt-0.5 flex flex-wrap items-baseline gap-x-2">
                             <span className={`${MONO} text-[12.5px] font-semibold text-[#0b0d0c]`}>
-                              {it.product.price !== null ? rupiah(it.product.price) : "Hubungi"}
+                              {it.product.price !== null
+                                ? rupiah(it.product.price, store?.currency ?? "IDR", store?.locale ?? "id")
+                                : store?.locale === "en"
+                                  ? "Inquire"
+                                  : "Hubungi"}
                             </span>
                             {it.product.originalPrice && (
                               <>
-                                <span className={`${MONO} text-[11px] text-[#9a9d99] line-through`}>{rupiah(it.product.originalPrice)}</span>
+                                <span className={`${MONO} text-[11px] text-[#9a9d99] line-through`}>
+                                  {rupiah(it.product.originalPrice, store?.currency ?? "IDR", store?.locale ?? "id")}
+                                </span>
                                 <span className="text-[11px] font-semibold text-brand">
                                   −{Math.round(((it.product.originalPrice - (it.product.price || 0)) / it.product.originalPrice) * 100)}%
                                 </span>

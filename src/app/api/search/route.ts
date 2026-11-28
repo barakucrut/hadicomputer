@@ -25,6 +25,8 @@ export async function GET(request: Request) {
     }
     if (storeParam && !/^[a-z0-9-]{1,100}$/i.test(storeParam)) storeParam = undefined;
     const tenant = await resolveStorefrontTenant(undefined, { previewSlug: storeParam });
+    const locale = tenant.settings.locale ?? "id";
+    const currency = tenant.settings.currency ?? "IDR";
     const allProducts = await getLiveProducts(tenant.id);
     // Query up to 100 items to accurately determine matching count
     const result = queryCatalog(allProducts, { q }, 100);
@@ -38,7 +40,7 @@ export async function GET(request: Request) {
       price: p.price,
       // Harga coret hanya bila nyata lebih tinggi dari harga jual
       originalPrice: p.originalPrice && p.price && p.originalPrice > p.price ? p.originalPrice : null,
-      priceFormatted: p.price !== null ? rupiah(p.price) : "Hubungi Kami",
+      priceFormatted: p.price !== null ? rupiah(p.price, currency, locale) : locale === "en" ? "Contact Us" : "Hubungi Kami",
       image: p.images[0] || "/images/banners/promo-bundle.png",
       category: p.category,
     }));

@@ -31,7 +31,9 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/admin/ui/card";
+import { CURRENCY_OPTIONS } from "@/lib/i18n/currency";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/admin/ui/toast";
 import { SeoAnalyticsPanel, CatalogStockPanel } from "@/components/admin/settings/advanced-settings-panels";
@@ -140,6 +142,8 @@ export default function AdminSettingsPage() {
     socialFacebook: "",
     announcementText: "",
     isAnnouncementActive: false,
+    locale: "id",
+    currency: "IDR",
     homepageConfig: {
       templateId: "classic-retail",
       featuredTitle: "",
@@ -1187,6 +1191,53 @@ export default function AdminSettingsPage() {
                   className="shadcn-input text-xs h-auto py-2.5 mt-1"
                   placeholder="e.g. Jl. PB Sudirman No. 12, Jember"
                 />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="set-locale" className="text-xs font-bold text-[#111413]">
+                    Bahasa Etalase Toko
+                  </Label>
+                  <Select
+                    id="set-locale"
+                    value={settings.locale || "id"}
+                    onChange={(e) => {
+                      const next = e.target.value;
+                      setSettings({
+                        ...settings,
+                        locale: next,
+                        currency: next === "en" && settings.currency === "IDR" ? "USD" : settings.currency || "IDR",
+                      });
+                    }}
+                    className="text-xs h-10 mt-1"
+                  >
+                    <option value="id">Indonesia (ID)</option>
+                    <option value="en">English (EN)</option>
+                  </Select>
+                  <span className="admin-form-hint">
+                    Mengubah teks bawaan etalase (tombol WA, stok, ketersediaan, &amp; SEO).
+                  </span>
+                </div>
+                <div>
+                  <Label htmlFor="set-currency" className="text-xs font-bold text-[#111413]">
+                    Mata Uang Etalase
+                  </Label>
+                  <Select
+                    id="set-currency"
+                    value={settings.currency || "IDR"}
+                    onChange={(e) => setSettings({ ...settings, currency: e.target.value })}
+                    className="text-xs h-10 mt-1"
+                  >
+                    {CURRENCY_OPTIONS.map((c) => (
+                      <option key={c.code} value={c.code}>
+                        {c.label}
+                      </option>
+                    ))}
+                  </Select>
+                  <span className="admin-form-hint">
+                    Format harga di seluruh katalog &amp; pesan WhatsApp produk.
+                  </span>
+                </div>
               </div>
 
               <div>

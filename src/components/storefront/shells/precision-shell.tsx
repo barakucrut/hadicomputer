@@ -6,6 +6,8 @@ import { ArrowUpRight, ChevronDown, Clock, LayoutGrid, Menu, Phone, Search, X } 
 import type { StoreSettings } from "@/lib/types";
 import type { StorefrontMenuData } from "@/lib/live-repository";
 import { rupiah } from "@/lib/catalog";
+import { getStorefrontCopy } from "@/lib/i18n/storefront";
+import { useStoreSettings } from "@/components/store-context";
 import { CategoryIcon } from "@/components/storefront/templates/precision/category-icon";
 import { prettyCategoryName } from "@/components/storefront/templates/precision/model";
 import { PrecisionSearchBox } from "./precision-search";
@@ -51,14 +53,24 @@ function PrecisionLogo({ store }: { store: StoreSettings }) {
 const NAV_MEGA: Record<string, "katalog" | "layanan"> = { "/katalog": "katalog", "/layanan": "layanan" };
 
 function MegaPrice({ price, originalPrice, dark }: { price: number | null; originalPrice: number | null; dark: boolean }) {
+  const store = useStoreSettings();
+  const locale = store?.locale ?? "id";
+  const currency = store?.currency ?? "IDR";
+  const copy = getStorefrontCopy(locale);
   const discount = price && originalPrice && originalPrice > price ? originalPrice - price : 0;
   return (
     <div className="mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-      <span className={`${MONO} text-[16px] font-semibold ${dark ? "text-white" : "text-[#0b0d0c]"}`}>{price ? rupiah(price) : "Hubungi"}</span>
+      <span className={`${MONO} text-[16px] font-semibold ${dark ? "text-white" : "text-[#0b0d0c]"}`}>
+        {price ? rupiah(price, currency, locale) : copy.contactShort}
+      </span>
       {discount > 0 && (
         <>
-          <span className={`${MONO} text-[12px] line-through ${dark ? "text-white/45" : "text-[#9a9d99]"}`}>{rupiah(originalPrice!)}</span>
-          <span className="rounded-full bg-brand px-2 py-0.5 text-[10.5px] font-semibold text-brand-ink">Hemat {rupiah(discount)}</span>
+          <span className={`${MONO} text-[12px] line-through ${dark ? "text-white/45" : "text-[#9a9d99]"}`}>
+            {rupiah(originalPrice!, currency, locale)}
+          </span>
+          <span className="rounded-full bg-brand px-2 py-0.5 text-[10.5px] font-semibold text-brand-ink">
+            {copy.savePrefix} {rupiah(discount, currency, locale)}
+          </span>
         </>
       )}
     </div>

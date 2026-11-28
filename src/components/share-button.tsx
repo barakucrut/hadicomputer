@@ -17,7 +17,8 @@ export function ShareButton({
   savings?: number | null;
   className?: string;
 }) {
-  const storeName = useStoreSettings()?.name || "toko kami";
+  const store = useStoreSettings();
+  const storeName = store?.name || (store?.locale === "en" ? "our store" : "toko kami");
   const [copied, setCopied] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -37,9 +38,16 @@ export function ShareButton({
 
   async function handleShare() {
     const currentUrl = typeof window !== "undefined" ? window.location.href : "";
-    const savingsText = savings ? ` (Hemat ${rupiah(savings)})` : "";
+    const locale = store?.locale ?? "id";
+    const currency = store?.currency ?? "IDR";
+    const savingsText = savings
+      ? ` (${locale === "en" ? "Save" : "Hemat"} ${rupiah(savings, currency, locale)})`
+      : "";
     const title = `${product.name} | ${storeName}`;
-    const text = `Cek ${product.name} di ${storeName}: ${priceLabel(offerPrice)}${savingsText}`;
+    const text =
+      locale === "en"
+        ? `Check out ${product.name} at ${storeName}: ${priceLabel(offerPrice, currency, locale)}${savingsText}`
+        : `Cek ${product.name} di ${storeName}: ${priceLabel(offerPrice, currency, locale)}${savingsText}`;
 
     // 1. Native Web Share API (Primary for smartphones / modern browsers)
     if (
@@ -74,9 +82,15 @@ export function ShareButton({
   }
 
   const currentUrl = typeof window !== "undefined" ? window.location.href : "";
-  const savingsText = savings ? ` (Hemat ${rupiah(savings)})` : "";
+  const shareLocale = store?.locale ?? "id";
+  const shareCurrency = store?.currency ?? "IDR";
+  const savingsText = savings
+    ? ` (${shareLocale === "en" ? "Save" : "Hemat"} ${rupiah(savings, shareCurrency, shareLocale)})`
+    : "";
   const waShareUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(
-    `Cek ${product.name} di ${storeName}: ${priceLabel(offerPrice)}${savingsText}\n${currentUrl}`,
+    shareLocale === "en"
+      ? `Check out ${product.name} at ${storeName}: ${priceLabel(offerPrice, shareCurrency, shareLocale)}${savingsText}\n${currentUrl}`
+      : `Cek ${product.name} di ${storeName}: ${priceLabel(offerPrice, shareCurrency, shareLocale)}${savingsText}\n${currentUrl}`,
   )}`;
 
   return (

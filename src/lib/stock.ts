@@ -22,13 +22,16 @@ export function applyStockRule(stock: number | null, availability: AvailabilityS
   return availability;
 }
 
-/** Label stok untuk etalase sesuai mode tampilan toko (null = tidak menampilkan apa pun). */
+import type { Locale } from "./i18n";
+
+/** Label stok untuk etalase sesuai mode tampilan toko & bahasa (null = tidak menampilkan apa pun). */
 export function stockLabel(
   stock: number | null | undefined,
   mode: "hidden" | "exact" | "limited" | undefined,
-  lowThreshold = 3
+  lowThreshold = 3,
+  locale: Locale = "id"
 ): string | null {
   if (stock === null || stock === undefined || stock <= 0 || !mode || mode === "hidden") return null;
-  if (mode === "exact") return `Sisa ${stock} unit`;
-  return stock <= lowThreshold ? "Stok terbatas" : null;
+  if (mode === "exact") return locale === "en" ? `${stock} left in stock` : `Sisa ${stock} unit`;
+  return stock <= lowThreshold ? (locale === "en" ? "Low stock" : "Stok terbatas") : null;
 }

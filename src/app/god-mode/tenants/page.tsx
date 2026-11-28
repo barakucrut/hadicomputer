@@ -70,6 +70,8 @@ import { AssignMarketingDialog } from "@/components/god-mode/assign-marketing-di
 import { SiteStatusDialog, SiteStatusBadge, demoViewsLabel } from "@/components/god-mode/site-status-dialog";
 import { useToast, ToastProvider } from "@/components/admin/ui/toast";
 import { GodRoleBadge, GodSidebar, useGodSession } from "@/components/god-mode/god-shell";
+import { CURRENCY_OPTIONS, type CurrencyCode } from "@/lib/i18n/currency";
+import type { Locale } from "@/lib/i18n";
 import "@/app/admin.css";
 
 interface TenantData {
@@ -175,6 +177,8 @@ function TenantsManagementContent() {
   const [newPlan, setNewPlan] = React.useState<"STARTER" | "PRO" | "ENTERPRISE">("PRO");
   const [newPhone, setNewPhone] = React.useState("628");
   const [newColor, setNewColor] = React.useState("#cc252b");
+  const [newLocale, setNewLocale] = React.useState<Locale>("id");
+  const [newCurrency, setNewCurrency] = React.useState<CurrencyCode>("IDR");
   const [withStarterPack, setWithStarterPack] = React.useState(true);
   const [newFeatures, setNewFeatures] = React.useState({
     pcBuilder: true,
@@ -338,6 +342,8 @@ function TenantsManagementContent() {
           slug: newSlug.trim().toLowerCase(),
           primaryColor: newColor,
           whatsappNumber: newPhone.trim(),
+          locale: newLocale,
+          currency: newCurrency,
           withStarterPack,
           ...(isSuper
             ? { customDomain: newDomain.trim() || null, plan: newPlan, features: newFeatures, acquiredById: newAcquiredById || null }
@@ -1047,6 +1053,39 @@ function TenantsManagementContent() {
                     placeholder="#cc252b"
                   />
                 </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="t-locale">Bahasa Etalase</Label>
+                <Select
+                  id="t-locale"
+                  value={newLocale}
+                  onChange={(e) => {
+                    const next = e.target.value as Locale;
+                    setNewLocale(next);
+                    if (next === "en" && newCurrency === "IDR") setNewCurrency("USD");
+                    if (next === "id" && newCurrency === "USD") setNewCurrency("IDR");
+                  }}
+                >
+                  <option value="id">Indonesia (ID)</option>
+                  <option value="en">English (EN)</option>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="t-currency">Mata Uang Etalase</Label>
+                <Select
+                  id="t-currency"
+                  value={newCurrency}
+                  onChange={(e) => setNewCurrency(e.target.value as CurrencyCode)}
+                >
+                  {CURRENCY_OPTIONS.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.label}
+                    </option>
+                  ))}
+                </Select>
               </div>
             </div>
 

@@ -1,13 +1,16 @@
+"use client";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import type { Product } from "@/lib/types";
 import {
-  availabilityLabel,
   effectiveOffer,
+  getAvailabilityLabel,
   getProductDiscount,
   priceLabel,
   rupiah,
 } from "@/lib/catalog";
+import { getStorefrontCopy } from "@/lib/i18n/storefront";
+import { useStoreSettings } from "./store-context";
 import { SafeImage } from "./safe-image";
 
 export function ProductCard({
@@ -19,6 +22,10 @@ export function ProductCard({
   priority?: boolean;
   className?: string;
 }) {
+  const store = useStoreSettings();
+  const locale = store?.locale ?? "id";
+  const currency = store?.currency ?? "IDR";
+  const copy = getStorefrontCopy(locale);
   const offer = effectiveOffer(product);
   const discount = getProductDiscount(product);
 
@@ -37,15 +44,19 @@ export function ProductCard({
           <span
             className={`badge ${product.condition === "bekas" ? "badge-sage" : "badge-neutral"}`}
           >
-            {product.condition === "bekas" ? "Bekas pilihan" : "Baru"}
+            {product.condition === "bekas"
+              ? locale === "en"
+                ? "Refurbished"
+                : "Bekas pilihan"
+              : copy.condition.baru}
           </span>
           {discount && (
             <span className="badge badge-discount">
-              Hemat {rupiah(discount.savings)}
+              {copy.savePrefix} {rupiah(discount.savings, currency, locale)}
             </span>
           )}
           {product.labels.includes("Pilihan Toko") && !discount && (
-            <span className="badge badge-red">Pilihan Toko</span>
+            <span className="badge badge-red">{locale === "en" ? "Featured" : "Pilihan Toko"}</span>
           )}
         </div>
         <span className="product-open" aria-hidden="true">
@@ -60,7 +71,7 @@ export function ProductCard({
           {discount && (
             <div className="price-strike-row">
               <span className="price-normal">
-                Normal {rupiah(discount.originalPrice)}
+                {copy.normalPricePrefix} {rupiah(discount.originalPrice, currency, locale)}
               </span>
               <span className="discount-badge">-{discount.percent}%</span>
             </div>
@@ -74,7 +85,7 @@ export function ProductCard({
                   : "product-price"
             }
           >
-            {priceLabel(offer.price)}
+            {priceLabel(offer.price, currency, locale)}
           </strong>
         </div>
         {product.bonus && (
@@ -84,7 +95,7 @@ export function ProductCard({
         )}
         <span className={`stock stock-${offer.availability}`}>
           <i />
-          {availabilityLabel[offer.availability]}
+          {getAvailabilityLabel(offer.availability, locale)}
           {product.stockLabel && (
             <strong className="stock-label-urgent" style={{ color: "var(--red)", fontWeight: 700 }}>
               {" · "}{product.stockLabel}
@@ -92,7 +103,7 @@ export function ProductCard({
           )}
           {product.variants.length > 0 && (
             <span className="variant-count">
-              · {product.variants.length} varian
+              · {product.variants.length} {locale === "en" ? "variants" : "varian"}
             </span>
           )}
         </span>

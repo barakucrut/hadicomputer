@@ -6,6 +6,9 @@ import { STORE_PREVIEW_HEADER } from "./storefront-template";
 import { classifyHost, pickPreviewSlug } from "./platform-domain";
 import { GOD_COOKIE_NAME, verifyGodToken } from "./god-auth";
 import { demoCookieName, isDemoLinkActive, verifyDemoCookie } from "./demo-access";
+import { parseLocale, type Locale } from "./i18n";
+import { parseCurrency, type CurrencyCode } from "./i18n/currency";
+import { getStorefrontCopy } from "./i18n/storefront";
 
 export interface StorefrontTenant {
   id: string;
@@ -245,19 +248,33 @@ export async function resolveStorefrontTenant(
   }
 
   const storeName = tenant.name;
+  const storeLocale: Locale = parseLocale(s?.locale) ?? "id";
+  const storeCurrency: CurrencyCode = parseCurrency(s?.currency) ?? "IDR";
+  const sf = getStorefrontCopy(storeLocale);
+  const en = storeLocale === "en";
   const mergedHomepageConfig: HomepageConfig = {
     templateId: rawConfig?.templateId || "classic-retail",
-    featuredTitle: rawConfig?.featuredTitle || `Pilihan ${storeName}, untuk harimu.`,
-    featuredEyebrow: rawConfig?.featuredEyebrow || "DIPILIH UNTUKMU",
-    featuredDescription: rawConfig?.featuredDescription || "Kenali perangkat yang bisa jadi teman aktivitasmu berikutnya.",
-    bestSellerTitle: rawConfig?.bestSellerTitle || `Favorit di ${storeName}`,
-    bestSellerEyebrow: rawConfig?.bestSellerEyebrow || "KURASI OWNER",
-    bestSellerDescription: rawConfig?.bestSellerDescription || "Koleksi produk paling diminati yang siap menemani produktivitas harianmu.",
-    waConsultLabel: rawConfig?.waConsultLabel || `Tanya ${storeName}`,
-    waFloatingLabel: rawConfig?.waFloatingLabel || `Tanya ${storeName} via WhatsApp`,
-    storeSectionTitle: rawConfig?.storeSectionTitle || "Lihat langsung. Ngobrol lebih nyaman.",
-    storeSectionEyebrow: rawConfig?.storeSectionEyebrow || "SAMPAI KETEMU DI TOKO",
-    storeSectionDescription: rawConfig?.storeSectionDescription || `Kenali pilihan perangkatmu dan diskusikan kebutuhan langsung dengan ${storeName}.`,
+    featuredTitle:
+      rawConfig?.featuredTitle ||
+      (en ? `${storeName} picks for your setup.` : `Pilihan ${storeName}, untuk harimu.`),
+    featuredEyebrow: rawConfig?.featuredEyebrow || sf.defaultHomepage.featuredEyebrow,
+    featuredDescription: rawConfig?.featuredDescription || sf.defaultHomepage.featuredDescription,
+    bestSellerTitle:
+      rawConfig?.bestSellerTitle ||
+      (en ? `Favorites at ${storeName}` : `Favorit di ${storeName}`),
+    bestSellerEyebrow: rawConfig?.bestSellerEyebrow || sf.defaultHomepage.bestSellerEyebrow,
+    bestSellerDescription: rawConfig?.bestSellerDescription || sf.defaultHomepage.bestSellerDescription,
+    waConsultLabel: rawConfig?.waConsultLabel || (en ? `Chat ${storeName}` : `Tanya ${storeName}`),
+    waFloatingLabel:
+      rawConfig?.waFloatingLabel ||
+      (en ? `Chat ${storeName} on WhatsApp` : `Tanya ${storeName} via WhatsApp`),
+    storeSectionTitle: rawConfig?.storeSectionTitle || sf.defaultHomepage.storeSectionTitle,
+    storeSectionEyebrow: rawConfig?.storeSectionEyebrow || sf.defaultHomepage.storeSectionEyebrow,
+    storeSectionDescription:
+      rawConfig?.storeSectionDescription ||
+      (en
+        ? `Explore our devices firsthand and discuss your needs directly with ${storeName}.`
+        : `Kenali pilihan perangkatmu dan diskusikan kebutuhan langsung dengan ${storeName}.`),
     sections: {
       heroSlider: rawConfig?.sections?.heroSlider !== false,
       valueStrip: rawConfig?.sections?.valueStrip !== false,
@@ -292,15 +309,15 @@ export async function resolveStorefrontTenant(
       id: tenant.id,
       slug: tenant.slug,
       name: tenant.name,
-      tagline: s?.tagline || "Teknologi untuk keseharianmu.",
+      tagline: s?.tagline || (en ? "Technology built for your everyday." : "Teknologi untuk keseharianmu."),
       logoUrl: s?.logoUrl || null,
       faviconUrl: s?.faviconUrl || null,
       primaryColor: s?.primaryColor || "#dd2028",
       secondaryColor: s?.secondaryColor || "#111413",
       fontFamily: s?.fontFamily || "Plus Jakarta Sans",
       whatsapp: formattedWa,
-      address: s?.address || "Tempurejo, Kabupaten Jember",
-      hours: s?.openHours || "Buka setiap hari: 08.00 – 22.00 WIB",
+      address: s?.address || null,
+      hours: s?.openHours || sf.defaultOpenHours,
       email: null,
       instagram: s?.socialInstagram || null,
       tiktok: s?.socialTiktok || null,
@@ -308,6 +325,8 @@ export async function resolveStorefrontTenant(
       mapsUrl: s?.mapsEmbedUrl || null,
       googleReviewUrl: s?.googleReviewUrl || null,
       homepageConfig: mergedHomepageConfig,
+      locale: storeLocale,
+      currency: storeCurrency,
     },
   };
 }

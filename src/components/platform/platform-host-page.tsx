@@ -1,4 +1,6 @@
 import { platformRootDomain } from "@/lib/platform-domain";
+import type { Locale } from "@/lib/i18n";
+import { getStorefrontCopy } from "@/lib/i18n/storefront";
 
 /**
  * Halaman untuk host yang bukan etalase toko:
@@ -8,9 +10,16 @@ import { platformRootDomain } from "@/lib/platform-domain";
  *   Sengaja TIDAK menyebut nama/brand toko (demo memakai brand calon klien, belum boleh publik).
  * Server component tanpa data toko apa pun.
  */
-export function PlatformHostPage({ resolution }: { resolution: "platform-root" | "not-found" | "demo-locked" }) {
+export function PlatformHostPage({
+  resolution,
+  locale = "id",
+}: {
+  resolution: "platform-root" | "not-found" | "demo-locked";
+  locale?: Locale;
+}) {
   const root = platformRootDomain();
   const isRoot = resolution === "platform-root";
+  const host = getStorefrontCopy(locale).hostPage;
 
   return (
     <main
@@ -65,25 +74,20 @@ export function PlatformHostPage({ resolution }: { resolution: "platform-root" |
           </>
         ) : resolution === "demo-locked" ? (
           <>
-            <p style={{ margin: "20px 0 0", fontSize: 12, fontWeight: 800, letterSpacing: "0.12em", color: "#818779" }}>SEGERA HADIR</p>
-            <h1 style={{ margin: "8px 0 8px", fontSize: 28, fontWeight: 800, letterSpacing: "-0.02em" }}>Website ini sedang disiapkan</h1>
-            <p style={{ margin: 0, fontSize: 15, color: "#525854" }}>
-              Halaman ini belum dibuka untuk umum. Jika Anda menerima link demo, link tersebut mungkin sudah kedaluwarsa — minta
-              link baru ke tim yang mengirimkannya.
-            </p>
+            <p style={{ margin: "20px 0 0", fontSize: 12, fontWeight: 800, letterSpacing: "0.12em", color: "#818779" }}>{host.demoEyebrow}</p>
+            <h1 style={{ margin: "8px 0 8px", fontSize: 28, fontWeight: 800, letterSpacing: "-0.02em" }}>{host.demoTitle}</h1>
+            <p style={{ margin: 0, fontSize: 15, color: "#525854" }}>{host.demoBody}</p>
           </>
         ) : (
           <>
             <p style={{ margin: "20px 0 0", fontSize: 12, fontWeight: 800, letterSpacing: "0.12em", color: "#818779" }}>404</p>
-            <h1 style={{ margin: "8px 0 8px", fontSize: 28, fontWeight: 800, letterSpacing: "-0.02em" }}>Toko tidak ditemukan</h1>
-            <p style={{ margin: 0, fontSize: 15, color: "#525854" }}>
-              Alamat ini belum terdaftar sebagai toko di Rigspace.id. Periksa kembali ejaan alamatnya.
-            </p>
+            <h1 style={{ margin: "8px 0 8px", fontSize: 28, fontWeight: 800, letterSpacing: "-0.02em" }}>{host.notFoundTitle}</h1>
+            <p style={{ margin: 0, fontSize: 15, color: "#525854" }}>{host.notFoundBody}</p>
             <a
               href={`https://${root}`}
               style={{ display: "inline-block", marginTop: 28, padding: "11px 18px", borderRadius: 8, background: "#111413", color: "#fff", fontSize: 14, fontWeight: 700, textDecoration: "none" }}
             >
-              Ke {root}
+              {host.backToRoot} {root}
             </a>
           </>
         )}

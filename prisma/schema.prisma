@@ -228,6 +228,10 @@ model TenantSetting {
 
   // Tampilan stok di etalase: hidden | exact | limited
   stockDisplay            String   @default("hidden") @db.VarChar(10)
+
+  // Bahasa & mata uang etalase toko (bilingual / pasar internasional)
+  locale                  String   @default("id") @db.VarChar(10)
+  currency                String   @default("IDR") @db.VarChar(10)
   lowStockThreshold       Int      @default(3)
 
   // Kode SKU produk, mis. "HC" -> HC-0001 (null = otomatis dari nama toko)

@@ -3,6 +3,8 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { authorizeAdmin } from "@/lib/auth";
 import { DEFAULT_PRIMARY, DEFAULT_SECONDARY, safeHex } from "@/lib/brand-color";
+import { parseLocale } from "@/lib/i18n";
+import { parseCurrency } from "@/lib/i18n/currency";
 
 export async function GET() {
   const auth = await authorizeAdmin();
@@ -93,6 +95,9 @@ export async function PUT(request: Request) {
     homepageConfig,
   } = data;
 
+  const parsedLocale = data.locale !== undefined ? parseLocale(data.locale) ?? "id" : undefined;
+  const parsedCurrency = data.currency !== undefined ? parseCurrency(data.currency) ?? "IDR" : undefined;
+
   // Favicon masuk ke <head>: hanya file hasil upload CMS (atau kosong = ikon Rigspace).
   if (typeof faviconUrl === "string" && faviconUrl.trim() && (!faviconUrl.startsWith("/uploads/") || faviconUrl.includes(".."))) {
     return NextResponse.json({ error: "Favicon harus diunggah lewat CMS." }, { status: 400 });
@@ -127,7 +132,7 @@ export async function PUT(request: Request) {
         primaryColor: safeHex(primaryColor, DEFAULT_PRIMARY),
         secondaryColor: safeHex(secondaryColor, DEFAULT_SECONDARY),
         fontFamily: fontFamily || "Plus Jakarta Sans",
-        whatsappNumber: whatsappNumber || "6285769000007",
+        whatsappNumber: whatsappNumber || "",
         whatsappDefaultTemplate,
         address,
         mapsEmbedUrl,
@@ -138,6 +143,8 @@ export async function PUT(request: Request) {
         socialFacebook,
         announcementText,
         isAnnouncementActive,
+        ...(parsedLocale ? { locale: parsedLocale } : {}),
+        ...(parsedCurrency ? { currency: parsedCurrency } : {}),
         homepageConfig: homepageConfig || undefined,
       },
       create: {
@@ -159,6 +166,8 @@ export async function PUT(request: Request) {
         socialFacebook,
         announcementText,
         isAnnouncementActive,
+        locale: parsedLocale ?? "id",
+        currency: parsedCurrency ?? "IDR",
         homepageConfig: homepageConfig || undefined,
       },
     });
@@ -197,8 +206,8 @@ export async function PUT(request: Request) {
     },
     create: {
       id: "default",
-      storeName: storeName || "Hadi Computer",
-      tagline: tagline || "Pusat Laptop & Komputer Terpercaya",
+      storeName: storeName || "Toko",
+      tagline: tagline || "",
       whatsappNumber: whatsappNumber || "6285769000007",
       whatsappDefaultTemplate: whatsappDefaultTemplate || "",
       address: address || "",

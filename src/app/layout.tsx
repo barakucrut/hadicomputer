@@ -4,6 +4,7 @@ import { PlatformHostPage } from "@/components/platform/platform-host-page";
 import { LandingPage } from "@/components/platform/landing/landing-page";
 import { getLandingContent } from "@/components/platform/landing/content";
 import { getRequestLocale } from "@/lib/i18n/server";
+import { getStorefrontCopy } from "@/lib/i18n/storefront";
 import { getSalesContact } from "@/lib/platform-tenant";
 import "@fontsource-variable/plus-jakarta-sans";
 import "./tailwind.css";
@@ -80,9 +81,11 @@ export async function generateMetadata(): Promise<Metadata> {
     };
   }
   if (seo.tenant.resolution && seo.tenant.resolution !== "tenant") {
+    const reqLocale = await getRequestLocale();
+    const hostCopy = getStorefrontCopy(reqLocale).hostPage;
     return {
       title: {
-        absolute: seo.tenant.resolution === "demo-locked" ? "Segera hadir" : "Toko tidak ditemukan — Rigspace.id",
+        absolute: seo.tenant.resolution === "demo-locked" ? hostCopy.demoMetaTitle : hostCopy.notFoundMetaTitle,
       },
       robots: { index: false, follow: false },
       icons: RIGSPACE_ICONS,
@@ -117,7 +120,7 @@ export async function generateMetadata(): Promise<Metadata> {
     icons: storeIcons(seo.tenant.settings.faviconUrl),
     openGraph: {
       type: "website",
-      locale: "id_ID",
+      locale: seo.tenant.settings.locale === "en" ? "en_US" : "id_ID",
       url: "/",
       siteName: seo.name,
       title: seo.title,
@@ -174,15 +177,17 @@ export default async function RootLayout({
     );
   }
   if (tenant.resolution && tenant.resolution !== "tenant") {
+    const reqLocale = await getRequestLocale();
     return (
-      <html lang="id">
+      <html lang={reqLocale}>
         <body data-area="platform">
-          <PlatformHostPage resolution={tenant.resolution} />
+          <PlatformHostPage resolution={tenant.resolution} locale={reqLocale} />
         </body>
       </html>
     );
   }
   const store = { ...tenant.settings, stockDisplay: seo.stock.display, lowStockThreshold: seo.stock.lowThreshold };
+  const storeLocale = store.locale || "id";
   const liveCategories = await getLiveCategories(tenant.id);
   const templateId = resolveTemplateId(store.homepageConfig, headerStore.get(TEMPLATE_PREVIEW_HEADER));
   // Mega menu (Precision & Classic) & dropdown pencarian Precision
@@ -205,7 +210,7 @@ export default async function RootLayout({
 
   return (
     <html
-      lang="id"
+      lang={storeLocale}
       data-scroll-behavior="smooth"
       style={
         {

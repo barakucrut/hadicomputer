@@ -3,6 +3,7 @@ import type { Banner, Product, Service, ServiceCaseItem, StoreSettings, Testimon
 import { selectHomeTestimonials } from "./testimonials";
 import { resolveStorefrontTenant } from "./tenant-resolver";
 import { stockLabel } from "./stock";
+import { parseLocale } from "./i18n";
 
 /**
  * Tenant aktif untuk query storefront. Bila pemanggil tidak memberi tenantId,
@@ -31,13 +32,14 @@ export async function getLiveProducts(tenantId?: string): Promise<Product[]> {
     const whereClause: any = { publicationStatus: "PUBLISHED", deletedAt: null };
     whereClause.tenantId = await activeTenantId(tenantId);
 
-    // Mode tampilan stok toko (hidden / exact / limited)
+    // Mode tampilan stok & bahasa toko (hidden / exact / limited)
     const stockSetting = await prisma.tenantSetting.findUnique({
       where: { tenantId: whereClause.tenantId },
-      select: { stockDisplay: true, lowStockThreshold: true },
+      select: { stockDisplay: true, lowStockThreshold: true, locale: true },
     });
     const stockMode = (stockSetting?.stockDisplay || "hidden") as "hidden" | "exact" | "limited";
     const lowThreshold = stockSetting?.lowStockThreshold ?? 3;
+    const storeLocale = parseLocale(stockSetting?.locale) ?? "id";
 
     const dbProducts = await withTimeout(
       prisma.product.findMany({
@@ -83,7 +85,7 @@ export async function getLiveProducts(tenantId?: string): Promise<Product[]> {
           bonus: p.bonus,
           availability: (p.availability.toLowerCase() as any) || "tersedia",
           stock: p.stock,
-          stockLabel: p.availability === "HABIS" ? null : stockLabel(p.stock, stockMode, lowThreshold),
+          stockLabel: p.availability === "HABIS" ? null : stockLabel(p.stock, stockMode, lowThreshold, storeLocale),
           images:
             sortedImages.length > 0
               ? sortedImages.map((img) => img.url)

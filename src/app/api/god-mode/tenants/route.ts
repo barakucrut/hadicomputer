@@ -5,6 +5,8 @@ import { getAllTenants, createTenant } from "@/lib/tenant-service";
 import { seedStarterPack } from "@/lib/starter-pack";
 import { normalizeWhatsapp } from "@/lib/platform-access";
 import { tenantSlugError } from "@/lib/platform-domain";
+import { parseLocale } from "@/lib/i18n";
+import { parseCurrency } from "@/lib/i18n/currency";
 import { isAssignablePlatformUser, tenantConflictResponse } from "@/lib/platform-tenant";
 
 export async function GET() {
@@ -48,6 +50,8 @@ export async function POST(request: Request) {
     const primaryColor = typeof body.primaryColor === "string" && /^#[0-9a-f]{6}$/i.test(body.primaryColor) ? body.primaryColor : undefined;
     const address = typeof body.address === "string" ? body.address.trim().slice(0, 500) : undefined;
     const openHours = typeof body.openHours === "string" ? body.openHours.trim().slice(0, 150) : undefined;
+    const locale = parseLocale(typeof body.locale === "string" ? body.locale : null) ?? "id";
+    const currency = parseCurrency(typeof body.currency === "string" ? body.currency : null) ?? (locale === "en" ? "USD" : "IDR");
 
     // Paket, fitur, domain & status hanya ditentukan superadmin. Tenant bawaan marketing = TRIAL atas namanya.
     let acquiredById: string | null = session.userId;
@@ -68,6 +72,8 @@ export async function POST(request: Request) {
       whatsappNumber,
       address,
       openHours,
+      locale,
+      currency,
       features: isSuper && body.features && typeof body.features === "object" ? body.features : undefined,
       status: isSuper ? undefined : "TRIAL",
       acquiredById,

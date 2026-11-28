@@ -103,6 +103,8 @@ export async function getAllTenants(where: { acquiredById?: string | { in: strin
           socialInstagram: t.settings.socialInstagram,
           socialTiktok: t.settings.socialTiktok,
           socialFacebook: t.settings.socialFacebook,
+          locale: t.settings.locale || "id",
+          currency: t.settings.currency || "IDR",
         }
       : null,
     _count: t._count,
@@ -131,6 +133,8 @@ export async function createTenant(data: {
   whatsappNumber?: string;
   address?: string;
   openHours?: string;
+  locale?: "id" | "en";
+  currency?: "IDR" | "USD" | "SGD" | "MYR" | "EUR";
   features?: {
     pcBuilder?: boolean;
     tradeIn?: boolean;
@@ -143,6 +147,9 @@ export async function createTenant(data: {
 }) {
   const id = generateTenantId(data.slug);
   const plan = data.plan || "PRO";
+  const locale = data.locale === "en" ? "en" : "id";
+  const currency = data.currency || (locale === "en" ? "USD" : "IDR");
+  const en = locale === "en";
   const features = data.features || {
     pcBuilder: plan === "PRO" || plan === "ENTERPRISE",
     tradeIn: plan === "PRO" || plan === "ENTERPRISE",
@@ -165,9 +172,13 @@ export async function createTenant(data: {
           primaryColor: data.primaryColor || "#cc252b",
           secondaryColor: "#111413",
           whatsappNumber: data.whatsappNumber || "6285769000007",
-          address: data.address || "Indonesia",
-          openHours: data.openHours || "Buka setiap hari: 08.00 – 22.00 WIB",
-          whatsappDefaultTemplate: `Halo ${data.name}, saya ingin konsultasi perangkat komputer/laptop.`,
+          address: data.address || (en ? "" : "Indonesia"),
+          openHours: data.openHours || (en ? "Open daily: 09:00 – 21:00" : "Buka setiap hari: 08.00 – 22.00 WIB"),
+          whatsappDefaultTemplate: en
+            ? `Hi ${data.name}, I'd like to inquire about computers & laptops.`
+            : `Halo ${data.name}, saya ingin konsultasi perangkat komputer/laptop.`,
+          locale,
+          currency,
           // Toko baru memakai template Precision (bisa diganti di Pengaturan → Tampilan)
           homepageConfig: { templateId: "precision" },
         },
