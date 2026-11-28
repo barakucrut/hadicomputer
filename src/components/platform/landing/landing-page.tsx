@@ -37,9 +37,9 @@ export function LandingPage({ salesPhone, locale = "id" }: { salesPhone: string 
 
   return (
     <div className="rsl">
-      <RevealOnScroll />
+      <RevealOnScroll locale={locale} />
       <LandingTracker />
-      <NavHoverLine />
+      <NavHoverLine locale={locale} />
 
       <header className="nav">
         <div className="wrap">
@@ -98,7 +98,7 @@ export function LandingPage({ salesPhone, locale = "id" }: { salesPhone: string 
             </div>
             <div className="grid3">
               {copy.problems.items.map((p, i) => (
-                <article key={p.title} className="card" data-reveal style={{ ["--d" as string]: `${i * 90}ms` }}>
+                <article key={i} className="card" data-reveal style={{ ["--d" as string]: `${i * 90}ms` }}>
                   <div className="num">0{i + 1}</div>
                   <h3>{p.title}</h3>
                   <p>{p.body}</p>
@@ -166,7 +166,7 @@ export function LandingPage({ salesPhone, locale = "id" }: { salesPhone: string 
             </div>
             <ol className="steps" data-reveal>
               {copy.steps.items.map((s, i) => (
-                <li key={s.title} className="step">
+                <li key={i} className="step">
                   <div className="dot">{i + 1}</div>
                   <h3>{s.title}</h3>
                   <p>{s.body}</p>
@@ -291,7 +291,7 @@ export function LandingPage({ salesPhone, locale = "id" }: { salesPhone: string 
             </div>
             <div className="faqs">
               {copy.faq.items.map((f, i) => (
-                <details key={f.q} className="faq" data-reveal style={{ ["--d" as string]: `${(i % 2) * 80}ms` }}>
+                <details key={i} className="faq" data-reveal style={{ ["--d" as string]: `${(i % 2) * 80}ms` }}>
                   <summary>{f.q}</summary>
                   <p>{f.a}</p>
                 </details>

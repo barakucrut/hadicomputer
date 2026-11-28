@@ -13,27 +13,59 @@ let lastStoreName = "";
 /** Paket terakhir yang diklik di bagian Harga, ikut dikirim saat lead masuk. */
 let lastPlan = "";
 
-/** Switcher bahasa ID | EN di navbar landing page. */
+function FlagID() {
+  return (
+    <svg className="rsl-flag" viewBox="0 0 16 12" aria-hidden="true">
+      <rect width="16" height="6" fill="#CE1126" />
+      <rect y="6" width="16" height="6" fill="#FFFFFF" />
+    </svg>
+  );
+}
+
+function FlagEN() {
+  return (
+    <svg className="rsl-flag" viewBox="0 0 16 12" aria-hidden="true">
+      <rect width="16" height="12" fill="#012169" />
+      <path d="M0 0L16 12M16 0L0 12" stroke="#FFFFFF" strokeWidth="2.4" />
+      <path d="M0 0L16 12M16 0L0 12" stroke="#C8102E" strokeWidth="1.2" />
+      <path d="M8 0V12M0 6H16" stroke="#FFFFFF" strokeWidth="3.6" />
+      <path d="M8 0V12M0 6H16" stroke="#C8102E" strokeWidth="2" />
+    </svg>
+  );
+}
+
+/** Switcher bahasa ID | EN dengan ikon bendera di navbar landing page. */
 export function LanguageSwitcher({ locale, ariaLabel }: { locale: Locale; ariaLabel: string }) {
   const router = useRouter();
+  const [active, setActive] = React.useState<Locale>(locale);
+  const [, startTransition] = React.useTransition();
+
+  React.useEffect(() => {
+    setActive(locale);
+  }, [locale]);
 
   const select = (next: Locale) => {
-    if (next === locale) return;
+    if (next === active) return;
+    setActive(next);
     document.cookie = `${LOCALE_COOKIE}=${next}; path=/; max-age=31536000; SameSite=Lax`;
     trackEvent(LANDING_EVENTS.langSwitch, { locale: next });
     const url = new URL(window.location.href);
     url.searchParams.set("lang", next);
     window.history.replaceState(null, "", url.pathname + url.search + url.hash);
-    router.refresh();
+    startTransition(() => {
+      router.refresh();
+    });
   };
 
   return (
     <div className="rsl-lang" role="group" aria-label={ariaLabel}>
-      <button type="button" aria-pressed={locale === "id"} onClick={() => select("id")}>
-        ID
+      <button type="button" aria-pressed={active === "id"} onClick={() => select("id")}>
+        <FlagID />
+        <span>ID</span>
       </button>
-      <button type="button" aria-pressed={locale === "en"} onClick={() => select("en")}>
-        EN
+      <button type="button" aria-pressed={active === "en"} onClick={() => select("en")}>
+        <FlagEN />
+        <span>EN</span>
       </button>
     </div>
   );
@@ -95,22 +127,27 @@ export function LandingTracker() {
   return null;
 }
 
-/** Animasi muncul saat di-scroll: menandai root .rsl-js lalu mengamati [data-reveal]. */
-export function RevealOnScroll() {
+/** Animasi muncul saat di-scroll: pakai data-attribute agar aman saat React refresh (ganti bahasa). */
+export function RevealOnScroll({ locale }: { locale: Locale }) {
   React.useEffect(() => {
-    const root = document.querySelector(".rsl");
+    const root = document.querySelector<HTMLElement>(".rsl");
     if (!root) return;
-    root.classList.add("rsl-js");
-    const els = Array.from(root.querySelectorAll<HTMLElement>("[data-reveal]"));
+    root.dataset.rslReady = "1";
+    const els = Array.from(root.querySelectorAll<HTMLElement>("[data-reveal]")).filter(
+      (el) => el.dataset.revealed !== "1"
+    );
+    if (!els.length) return;
     if (!("IntersectionObserver" in window)) {
-      els.forEach((el) => el.classList.add("is-in"));
+      els.forEach((el) => {
+        el.dataset.revealed = "1";
+      });
       return;
     }
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
           if (e.isIntersecting) {
-            e.target.classList.add("is-in");
+            (e.target as HTMLElement).dataset.revealed = "1";
             io.unobserve(e.target);
           }
         }
@@ -119,15 +156,16 @@ export function RevealOnScroll() {
     );
     els.forEach((el) => io.observe(el));
     return () => io.disconnect();
-  }, []);
+  }, [locale]);
   return null;
 }
 
 /** Nav: garis emas yang berpindah ke menu yang sedang di-hover. */
-export function NavHoverLine() {
+export function NavHoverLine({ locale }: { locale: Locale }) {
   React.useEffect(() => {
     const nav = document.querySelector<HTMLElement>(".rsl .nav-links");
     if (!nav) return;
+    nav.classList.remove("is-hovering");
     const links = Array.from(nav.querySelectorAll<HTMLAnchorElement>("a"));
     const show = (a: HTMLAnchorElement) => {
       nav.style.setProperty("--rsl-line-x", `${a.offsetLeft}px`);
@@ -151,7 +189,7 @@ export function NavHoverLine() {
       }
       nav.removeEventListener("mouseleave", hide);
     };
-  }, []);
+  }, [locale]);
   return null;
 }
 

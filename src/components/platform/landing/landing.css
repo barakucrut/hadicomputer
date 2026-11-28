@@ -54,12 +54,13 @@
 @media (min-width: 1024px) { .rsl .nav-links { display: flex; } }
 @media (prefers-reduced-motion: reduce) { .rsl .nav-links::after { transition: opacity 0.2s ease; } }
 .rsl .nav-cta { display: flex; align-items: center; gap: 8px; }
-.rsl .nav-cta .btn { min-height: 40px; padding: 0 16px; font-size: 14px; border-radius: 10px; }
-.rsl .rsl-lang { display: inline-flex; align-items: center; padding: 3px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); gap: 2px; }
-.rsl .rsl-lang button { border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 12px; font-weight: 800; letter-spacing: 0.04em; padding: 6px 9px; border-radius: 7px; cursor: pointer; transition: background 0.15s ease, color 0.15s ease; line-height: 1; }
+.rsl .nav-cta .btn { min-height: 40px; height: 40px; padding: 0 16px; font-size: 14px; border-radius: 10px; }
+.rsl .rsl-lang { display: inline-flex; align-items: center; height: 40px; box-sizing: border-box; padding: 3px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); gap: 2px; }
+.rsl .rsl-lang button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 100%; border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 12.5px; font-weight: 800; letter-spacing: 0.03em; padding: 0 10px; border-radius: 7px; cursor: pointer; transition: background 0.18s ease, color 0.18s ease; line-height: 1; white-space: nowrap; }
 .rsl .rsl-lang button:hover { color: var(--ink); }
 .rsl .rsl-lang button[aria-pressed="true"] { background: var(--ink); color: #fff; }
-@media (max-width: 479px) { .rsl .nav-cta .btn-ghost { display: none; } }
+.rsl .rsl-flag { width: 16px; height: 12px; border-radius: 2px; flex: none; display: block; box-shadow: 0 0 0 0.5px rgba(17, 20, 19, 0.18); }
+@media (max-width: 479px) { .rsl .nav-cta .btn-ghost { display: none; } .rsl .rsl-lang button { padding: 0 8px; gap: 4px; font-size: 12px; } }
 
 /* HERO */
 .rsl .rsl-hero { position: relative; padding: 40px 0 56px; background: radial-gradient(700px 380px at 78% 18%, rgba(217, 178, 76, 0.2), transparent 62%), #fff; overflow: hidden; }
@@ -267,12 +268,12 @@
 .rsl footer a:hover { color: var(--ink); }
 
 /* ---------- Animasi (hanya setelah JS aktif; konten tetap tampil tanpa JS) ---------- */
-.rsl.rsl-js [data-reveal] { opacity: 0; transform: translateY(22px); transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1); transition-delay: var(--d, 0ms); }
-.rsl.rsl-js [data-reveal].is-in { opacity: 1; transform: none; }
-.rsl.rsl-js .steps[data-reveal]::before { transform: scaleX(0); transition: transform 1.2s ease 0.3s; }
-.rsl.rsl-js .steps[data-reveal].is-in::before { transform: scaleX(1); }
-.rsl.rsl-js .dash[data-reveal] .track i { transform: scaleX(0); transition: transform 1s ease; }
-.rsl.rsl-js .dash[data-reveal].is-in .track i { transform: scaleX(1); }
+.rsl[data-rsl-ready="1"] [data-reveal] { opacity: 0; transform: translateY(22px); transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1); transition-delay: var(--d, 0ms); }
+.rsl[data-rsl-ready="1"] [data-reveal][data-revealed="1"] { opacity: 1; transform: none; }
+.rsl[data-rsl-ready="1"] .steps[data-reveal]::before { transform: scaleX(0); transition: transform 1.2s ease 0.3s; }
+.rsl[data-rsl-ready="1"] .steps[data-reveal][data-revealed="1"]::before { transform: scaleX(1); }
+.rsl[data-rsl-ready="1"] .dash[data-reveal] .track i { transform: scaleX(0); transition: transform 1s ease; }
+.rsl[data-rsl-ready="1"] .dash[data-reveal][data-revealed="1"] .track i { transform: scaleX(1); }
 
 .rsl .anim-desk { animation: rsl-up 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
 .rsl .anim-phone { animation: rsl-slide 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) 0.45s both, rsl-float 6s ease-in-out 1.6s infinite; }
@@ -287,6 +288,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .rsl *, .rsl *::before, .rsl *::after { animation: none !important; transition: none !important; }
-  .rsl.rsl-js [data-reveal] { opacity: 1; transform: none; }
+  .rsl[data-rsl-ready="1"] [data-reveal] { opacity: 1; transform: none; }
   .rsl .marquee-track { transform: none; }
 }
